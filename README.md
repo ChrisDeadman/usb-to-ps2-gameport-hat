@@ -1,4 +1,4 @@
-Usb => PS/2 & Gameport HAT v1.0
+Usb => PS/2 & Gameport HAT v1.2
 ===============================
 
 Author: ChrisDeadman
@@ -24,7 +24,6 @@ Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gamepor
 ## PS/2 Notes
 * Provides IntelliMouse support (5 buttons + scrollwheel)
 * Connect the PS/2 cable for the mouse to J_PS/2_1
-* Keyboard support is not implemented in the software
 * Check [avrfreaks](https://www.avrfreaks.net/sites/default/files/PS2%20Keyboard.pdf) for instruction on how to hook up a connector to it
 
 ## Gameport Notes
@@ -48,6 +47,12 @@ Low-level documentation about the PS/2 protocol can be found at [avrfreaks](http
 
 Release notes
 =======================
+
+### Usb => PS/2 & Gameport HAT v1.2
+* Add a second PS/2 port to support keyboards in the future
+
+### Usb => PS/2 & Gameport HAT v1.1
+* Fix incorrect PS/2 pin connections
 
 ### Usb => PS/2 & Gameport HAT v1.0
 * Initial version
