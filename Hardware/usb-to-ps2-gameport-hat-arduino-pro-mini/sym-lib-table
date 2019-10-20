@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name SymacSys_Parts)(type Legacy)(uri ${KIPRJMOD}/SamacSys_Parts.lib)(options "")(descr ""))
+  (lib (name usb-to-ps2-gameport-hat-arduino-pro-mini-rescue)(type Legacy)(uri ${KIPRJMOD}/usb-to-ps2-gameport-hat-arduino-pro-mini-rescue.lib)(options "")(descr ""))
+)

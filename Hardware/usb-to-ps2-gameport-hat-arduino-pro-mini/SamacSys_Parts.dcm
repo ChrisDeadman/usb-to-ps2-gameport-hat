@@ -1,0 +1,23 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP AD8403ARUZ100
+D AD8403ARUZ100, Digital Potentiometer 100k 256-Position Linear 4-channel Serial-3 Wire, Serial-SPI 24-Pin TSSOP
+F https://componentsearchengine.com/Datasheets/1/AD8403ARUZ100.pdf
+$ENDCMP
+#
+$CMP KMDGX-6S-BS
+D Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED
+F http://www.kycon.com/Pub_Eng_Draw/KMDGX-XS-BS%20SERIES.pdf
+$ENDCMP
+#
+$CMP NCP5501DT50RKG
+F https://componentsearchengine.com/Datasheets/1/NCP5501DT50RKG.pdf
+$ENDCMP
+#
+$CMP PI4ULS5V108
+D 8-Bit Bi-directional Level Shifter for Open-Drain and Push-Pull Application
+K level shifter bidirectional
+F https://www.diodes.com/assets/Datasheets/PI4ULS5V108.pdf
+$ENDCMP
+#
+#End Doc Library
