@@ -164,12 +164,14 @@ inline void PS2Mouse::handleActiveCommand(uint8_t dataByte) {
                 sampleRateHistory.get(1) == 100 &&
                 sampleRateHistory.get(2) == 80) {
               deviceId = DEVICE_ID_MOUSE_WHEEL;
+              sampleRateHistory.clear();
             }
             // Intellimouse wheel + 5 button mode
             else if (sampleRateHistory.get(0) == 200 &&
                      sampleRateHistory.get(1) == 200 &&
                      sampleRateHistory.get(2) == 80) {
               deviceId = DEVICE_ID_MOUSE_WHEEL_5BUTTONS;
+              sampleRateHistory.clear();
             }
           }
           sendToHost(&ACK_CODE, 1);
@@ -187,11 +189,6 @@ inline void PS2Mouse::handleActiveCommand(uint8_t dataByte) {
 inline void PS2Mouse::handleNewCommand(uint8_t dataByte) {
   uint8_t packet[5];  // prepare packet buffer
   uint8_t packetLen;
-
-  // clear sample-rate history (used for mode-setting)
-  if (dataByte != 0xF3) {  // Set sample rate
-    sampleRateHistory.clear();
-  }
 
   switch (dataByte) {
     // Reset
@@ -321,6 +318,7 @@ uint8_t PS2Mouse::buildMovementPacket(boolean use2x1Scaling, uint8_t* packet) {
 
   // include button 4+5 state
   if (deviceId >= DEVICE_ID_MOUSE_WHEEL_5BUTTONS) {
+    packet[3] &= 0x0F; // clear top 4 bits
     if (state.button4) packet[3] |= (1 << 4);
     if (state.button5) packet[3] |= (1 << 5);
   }
