@@ -5,9 +5,11 @@ Author: ChrisDeadman
 
 Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gameport joystick with the power of arduino :-)
 
-![3D render](3DRender.png)
+![Schematic](Schematic.png)
 
 ![Layout](Layout.png)
+
+![3D render](3DRender.png)
 
 ## General Notes
 * Watchdog timer is enabled and configured to 4sec
