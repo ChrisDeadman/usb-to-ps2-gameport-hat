@@ -1,4 +1,4 @@
-Usb => PS/2 & Gameport HAT v1.2
+Usb => PS/2 & Gameport HAT v1.3
 ===============================
 
 Author: ChrisDeadman
@@ -25,8 +25,7 @@ Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gamepor
 
 ## PS/2 Notes
 * Provides IntelliMouse support (5 buttons + scrollwheel)
-* Connect the PS/2 cable for the mouse to J_PS/2_1
-* Check [avrfreaks](https://www.avrfreaks.net/sites/default/files/PS2%20Keyboard.pdf) for instruction on how to hook up a connector to it
+* Connect a male-to-male PS/2 cable to either the Mouse or the combined Keyboard/Mouse port depending on the port of your machine
 
 ## Gameport Notes
 * Supports generic HID joysticks
@@ -43,12 +42,14 @@ Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gamepor
 
 ## Supported Arduino Boards
 * [SparkFun SAMD21 Mini Breakout](https://www.sparkfun.com/products/13664)
-* Other ATSAMD21G18 boards should also work fine provided they have a compatible Pro-Mini / Pro-Micro pinout 
-
-Low-level documentation about the PS/2 protocol can be found at [avrfreaks](https://www.avrfreaks.net/sites/default/files/PS2%20Keyboard.pdf)
+* Other ATSAMD21G18 boards should also work fine provided they have a compatible Pro-Mini / Pro-Micro pinout
 
 Release notes
 =======================
+
+### Usb => PS/2 & Gameport HAT v1.3
+* @Ulfenknulfen: Make secondary PS/2 connector a combined connector
+* @Ulfenknulfen: PCB layout improvements
 
 ### Usb => PS/2 & Gameport HAT v1.2
 * Add a second PS/2 port to support keyboards in the future

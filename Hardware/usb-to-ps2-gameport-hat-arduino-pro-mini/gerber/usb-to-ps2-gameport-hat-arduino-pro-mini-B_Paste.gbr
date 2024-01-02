@@ -1,14 +1,15 @@
-G04 #@! TF.GenerationSoftware,KiCad,Pcbnew,5.1.4*
-G04 #@! TF.CreationDate,2019-09-04T15:58:37+02:00*
-G04 #@! TF.ProjectId,usb-to-ps2-gameport-hat-arduino-pro-mini,7573622d-746f-42d7-9073-322d67616d65,1.2*
+G04 #@! TF.GenerationSoftware,KiCad,Pcbnew,7.0.5*
+G04 #@! TF.CreationDate,2023-12-31T10:49:34+01:00*
+G04 #@! TF.ProjectId,usb-to-ps2-gameport-hat-arduino-pro-mini,7573622d-746f-42d7-9073-322d67616d65,1.3*
 G04 #@! TF.SameCoordinates,Original*
 G04 #@! TF.FileFunction,Paste,Bot*
 G04 #@! TF.FilePolarity,Positive*
 %FSLAX46Y46*%
 G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
-G04 Created by KiCad (PCBNEW 5.1.4) date 2019-09-04 15:58:37*
+G04 Created by KiCad (PCBNEW 7.0.5) date 2023-12-31 10:49:34*
 %MOMM*%
 %LPD*%
+G01*
 G04 APERTURE LIST*
 G04 APERTURE END LIST*
 M02*

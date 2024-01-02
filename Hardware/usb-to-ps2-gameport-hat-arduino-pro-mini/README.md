@@ -1,4 +1,4 @@
-Usb => PS/2 & Gameport HAT v1.2
+Usb => PS/2 & Gameport HAT v1.3
 ===============================
 
 ## Where to order which parts?
