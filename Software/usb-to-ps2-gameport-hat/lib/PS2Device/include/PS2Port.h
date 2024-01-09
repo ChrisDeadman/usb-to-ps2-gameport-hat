@@ -2,41 +2,41 @@
 #define _PS2_PORT_H_
 
 #include <Arduino.h>
+
 #include "PS2PortObserver.h"
 
 class PS2Port {
+ private:
+  PS2PortObserver * observer;
+
  public:
-  PS2Port(uint8_t clockPin, uint8_t dataPin, uint8_t statusPin);
+  PS2Port(uint8_t clock_pin, uint8_t data_pin, uint8_t status_pin);
+
+  const uint8_t clock_pin;
+  const uint8_t data_pin;
+  const uint8_t status_pin;
 
   /**
-   * Initializes the PS/2 port interface.
+   *  ISR vars
    */
-  void init();
-
-  /**
-   * Initializes the PS/2 port interface.
-   */
-  void registerObserver(PS2PortObserver* const observer);
+  volatile int8_t sub_clock = 0;
+  volatile bool clock_enabled = false;
+  volatile bool clock_inhibited = false;
 
   /**
    * Enable clock generation.
    */
-  void enableClock();
+  void enable_clock();
 
   /**
    * Disable clock generation.
    */
-  void disableClock();
+  void disable_clock();
 
   /**
-   * Enable clock interrup request.
+   * Read one bit from the data bus.
    */
-  void enableClockIrq();
-
-  /**
-   * Disable clock interrup request.
-   */
-  void disableClockIrq();
+  bool read();
 
   /**
    * Write one bit to the data bus.
@@ -44,9 +44,39 @@ class PS2Port {
   void write(bool bit);
 
   /**
-   * Read one bit from the data bus.
+   * Called by PS/2 devices to set callbacks.
    */
-  bool read();
+  void set_observer(PS2PortObserver *const observer);
+
+  /**
+   * Called upon each clock cycle. This is the time to send or receive data.
+   */
+  void on_clock();
+
+  /**
+   * Called when the host inhibits communication.
+   */
+  void on_inhibit();
+
+  /**
+   * Called when the host requests to send.
+   */
+  void on_host_rts();
+
+  /**
+   * Initializes the PS/2 port interface.
+   */
+  static void init();
+
+  /**
+   * Enable clock interrup request.
+   */
+  static void enable_clock_irq();
+
+  /**
+   * Disable clock interrup request.
+   */
+  static void disable_clock_irq();
 };
 
 #endif  //_PS2_PORT_H_

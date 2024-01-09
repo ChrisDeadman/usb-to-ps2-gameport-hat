@@ -5,7 +5,7 @@ HIDJoystickControllerMapper::HIDJoystickControllerMapper(
     : driver(driver) {}
 
 uint8_t HIDJoystickControllerMapper::getNumConnectedDevices() {
-  return driver->isConnected() ? 1 : 0;
+  return driver->is_connected() ? 1 : 0;
 }
 
 JoystickState HIDJoystickControllerMapper::getControllerState(
@@ -13,10 +13,10 @@ JoystickState HIDJoystickControllerMapper::getControllerState(
   static const uint8_t NUM_AXES = HIDJoystickControllerState::NUM_AXES;
   static const uint8_t NUM_BUTTONS = HIDJoystickControllerState::NUM_BUTTONS;
 
-  HIDJoystickControllerState driverState = driver->getState();
+  HIDJoystickControllerState driverState = driver->get_state();
 
-  if (driverState.versionCounter != state.versionCounter) {
-    state.versionCounter = driverState.versionCounter;
+  if (driverState.version_counter != state.version_counter) {
+    state.version_counter = driverState.version_counter;
 
     // Analog axes
     state.axes[0] = driverState.axes[0 % NUM_AXES];

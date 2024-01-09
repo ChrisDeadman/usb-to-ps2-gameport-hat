@@ -6,36 +6,58 @@
 #include "PS2Receiver.h"
 #include "PS2Sender.h"
 
+const uint8_t ACK_CODE = 0xFA;
+const uint8_t RESEND_CODE = 0xFE;
+const uint8_t BAT_OK = 0xAA;
+
 class PS2Device : PS2PortObserver {
  private:
-  unsigned long timeLastInhibit;
-  unsigned long timeLastHostRts;
+  unsigned long time_last_inhibit;
+  unsigned long time_last_host_rts;
 
  protected:
   PS2Sender sender;
   PS2Receiver receiver;
 
  public:
-  PS2Device(PS2Port* port);
+  PS2Device(PS2Port* const port);
+
+  PS2Port* const port;
+
+  /**
+   * Initialize this device.
+   */
+  void init();
 
   /**
    * Returns whether this device is busy sending or receiving data.
    */
-  bool isBusy();
+  bool is_busy();
 
   /**
    * Returns when this device was last inhibited by the host.
    */
-  unsigned long getTimeLastInhibit();
+  unsigned long get_time_last_inhibit();
 
   /**
    * Returns when this device received the last RTS by the host.
    */
-  unsigned long getTimeLastHostRts();
+  unsigned long get_time_last_host_rts();
 
-  void onClock() override;
-  void onInhibit() override;
-  void onHostRts() override;
+  /**
+   * Called upon each clock cycle. This is the time to send or receive data.
+   */
+  void on_clock() override;
+
+  /**
+   * Called when the host inhibits communication.
+   */
+  void on_inhibit() override;
+
+  /**
+   * Called when the host requests to send.
+   */
+  void on_host_rts() override;
 };
 
 #endif  //_PS2_DEVICE_H_

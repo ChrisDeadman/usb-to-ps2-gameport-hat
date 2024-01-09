@@ -38,7 +38,7 @@ class CircularBuffer {
    *
    * Overwrites the oldest value if it's full.
    */
-  void put(T value);
+  void push(T value);
 
   /**
    * Returns the value at the given index starting with the oldest value.
@@ -67,7 +67,7 @@ bool CircularBuffer<T, SIZE>::isFilled() {
 }
 
 template <typename T, uint16_t SIZE>
-void CircularBuffer<T, SIZE>::put(T value) {
+void CircularBuffer<T, SIZE>::push(T value) {
   if (++headIdx >= SIZE) {
     headIdx = 0;
     tailIdx = 1;

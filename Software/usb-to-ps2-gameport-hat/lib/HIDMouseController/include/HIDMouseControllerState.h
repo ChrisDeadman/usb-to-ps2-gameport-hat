@@ -4,11 +4,11 @@
 #include <Arduino.h>
 
 struct HIDMouseControllerState {
-  uint8_t versionCounter = -1;  // overflow is expected, should just be checked
-                                // for equality.
-  int8_t dX = 0;
-  int8_t dY = 0;
-  int8_t dWheel = 0;
+  uint8_t version_counter = -1;  // overflow is expected, should just be checked
+                                 // for equality.
+  int8_t d_x = 0;
+  int8_t d_y = 0;
+  int8_t d_wheel = 0;
   bool button1 = false;
   bool button2 = false;
   bool button3 = false;

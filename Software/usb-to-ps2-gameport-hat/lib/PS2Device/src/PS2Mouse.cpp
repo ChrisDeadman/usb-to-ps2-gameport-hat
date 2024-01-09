@@ -1,332 +1,332 @@
 #include "PS2Mouse.h"
 
-PS2Mouse::PS2Mouse(PS2Port* port) : PS2Device(port) { setDefaults(); }
+PS2Mouse::PS2Mouse(PS2Port* port) : PS2Device(port) { set_defaults(); }
 
-uint8_t PS2Mouse::getDeviceId() { return deviceId; }
+uint8_t PS2Mouse::get_device_id() { return device_id; }
 
-void PS2Mouse::setDefaults() {
-  deviceId = DEVICE_ID_MOUSE_STD;
-  streamingMode = true;
-  activeCommand = 0;
-  dataReporting = false;
-  sampleRate = DEFAULT_SAMPLE_RATE;
+void PS2Mouse::set_defaults() {
+  device_id = DEVICE_ID_MOUSE_STD;
+  streaming_mode = true;
+  active_command = 0;
+  data_reporting = false;
+  sample_rate = DEFAULT_SAMPLE_RATE;
   resolution = DEFAULT_RESOLUTION;
-  scaling2x1 = DEFAULT_SCALING_2X1;
-  mouseStateChanged = false;
-  sampleRateHistory.clear();
+  scaling_2x1 = DEFAULT_SCALING_2X1;
+  state_changed = false;
+  sample_rate_history.clear();
 }
 
-void PS2Mouse::reset(bool sendAck) {
-  setDefaults();
+void PS2Mouse::reset(bool send_ack) {
+  set_defaults();
   uint8_t packet[3];
   uint8_t idx = 0;
-  if (sendAck) {
+  if (send_ack) {
     packet[idx++] = ACK_CODE;
   }
   packet[idx++] = BAT_OK;
-  packet[idx++] = deviceId;
-  sendToHost(packet, idx);
+  packet[idx++] = device_id;
+  send_toHost(packet, idx);
 }
 
-void PS2Mouse::updateState(PS2MouseState const* const newState) {
-  uint8_t dXScaled = abs(newState->dX);
-  uint8_t dYScaled = abs(newState->dY);
+void PS2Mouse::update_state(PS2MouseState const* const new_state) {
+  uint8_t d_x_scaled = abs(new_state->d_x);
+  uint8_t d_y_scaled = abs(new_state->d_y);
 
   // assume input is max.resolution
   uint8_t res = resolution;
   while (res < MAX_RESOLUTION) {
-    dXScaled = (dXScaled >> 1) | ((dXScaled & 1) ? 1 : 0);
-    dYScaled = (dYScaled >> 1) | ((dYScaled & 1) ? 1 : 0);
+    d_x_scaled = (d_x_scaled >> 1) | ((d_x_scaled & 1) ? 1 : 0);
+    d_y_scaled = (d_y_scaled >> 1) | ((d_y_scaled & 1) ? 1 : 0);
     res <<= 1;
   }
 
-  this->state.dX = (newState->dX < 0) ? -dXScaled : dXScaled;
-  this->state.dY = (newState->dY < 0) ? -dYScaled : dYScaled;
-  this->state.dWheel = newState->dWheel;
-  this->state.button1 = newState->button1;
-  this->state.button2 = newState->button2;
-  this->state.button3 = newState->button3;
-  this->state.button4 = newState->button4;
-  this->state.button5 = newState->button5;
-  this->mouseStateChanged = true;
+  this->state.d_x = (new_state->d_x < 0) ? -d_x_scaled : d_x_scaled;
+  this->state.d_y = (new_state->d_y < 0) ? -d_y_scaled : d_y_scaled;
+  this->state.d_wheel = new_state->d_wheel;
+  this->state.button1 = new_state->button1;
+  this->state.button2 = new_state->button2;
+  this->state.button3 = new_state->button3;
+  this->state.button4 = new_state->button4;
+  this->state.button5 = new_state->button5;
+  this->state_changed = true;
 }
 
 void PS2Mouse::task() {
   // wait until transmission is finished
-  if (receiver.isReceiving() || sender.isSending()) {
+  if (receiver.is_receiving() || sender.is_sending()) {
     return;
   }
 
   // data received
-  if (receiver.hasData()) {
+  if (receiver.has_data()) {
     // stop sending in case we currently are
-    sendBufferIdx = sendBufferLen;
+    send_buffer_idx = send_buffer_len;
     // invoke command handlers
-    if (receiver.isDataValid()) {
-      if (activeCommand) {
-        handleActiveCommand(receiver.popData());
+    if (receiver.is_data_valid()) {
+      if (active_command) {
+        handle_active_command(receiver.pop_data());
       } else {
-        handleNewCommand(receiver.popData());
+        handle_new_command(receiver.pop_data());
       }
     }
     return;
   }
 
   // check if we have anything to send
-  if (sendBufferIdx < sendBufferLen) {
-    uint8_t dataByte = sendBuffer[sendBufferIdx++];
-    sender.beginSend(dataByte);
+  if (send_buffer_idx < send_buffer_len) {
+    uint8_t dataByte = send_buffer[send_buffer_idx++];
+    sender.begin_send(dataByte);
     return;
   }
 
   // don't send movement data if
-  if (!mouseStateChanged ||  // there is no change
-      !streamingMode ||      // or streaming mode is disabled
-      !dataReporting ||      // or data reporting is disabled
-      (activeCommand != 0))  // or an active command is being processed
+  if (!state_changed ||  // there is no change
+      !streaming_mode ||      // or streaming mode is disabled
+      !data_reporting ||      // or data reporting is disabled
+      (active_command != 0))  // or an active command is being processed
   {
     return;
   }
 
   // wait until sample time has passed
-  sampleTimer.tick();
-  if (sampleTimer.getElapsedMillis() < (1000 / sampleRate)) {
+  sample_timer.tick();
+  if (sample_timer.getElapsedMillis() < (1000 / sample_rate)) {
     return;
   }
 
   // send movement data
   uint8_t packet[4];
-  uint8_t packetLen = buildMovementPacket(scaling2x1 ? true : false, packet);
-  sendToHost(packet, packetLen);
-  mouseStateChanged = false;
-  sampleTimer.reset();
+  uint8_t packet_len = build_movement_packet(scaling_2x1 ? true : false, packet);
+  send_toHost(packet, packet_len);
+  state_changed = false;
+  sample_timer.reset();
 }
 
-inline void PS2Mouse::sendToHost(const uint8_t* data, uint8_t len) {
+inline void PS2Mouse::send_toHost(const uint8_t* data, uint8_t len) {
   for (uint8_t idx = 0; idx < len; idx++) {
-    sendBuffer[idx] = data[idx];
+    send_buffer[idx] = data[idx];
   }
-  sendBufferIdx = 0;
-  sendBufferLen = len;
+  send_buffer_idx = 0;
+  send_buffer_len = len;
 }
 
-inline void PS2Mouse::handleActiveCommand(uint8_t dataByte) {
-  switch (activeCommand) {
+inline void PS2Mouse::handle_active_command(uint8_t data_byte) {
+  switch (active_command) {
     // Wrap Mode
     case (0xEE):
-      switch (dataByte) {
+      switch (data_byte) {
         // Reset
         case 0xFF:
           reset(true);
-          activeCommand = 0;
+          active_command = 0;
           break;
         // Reset Wrap Mode
         case 0xEC:
-          sendToHost(&ACK_CODE, 1);
-          activeCommand = 0;
+          send_toHost(&ACK_CODE, 1);
+          active_command = 0;
           break;
         // echo every other byte in wrap mode
         default:
-          sendToHost(&dataByte, 1);
+          send_toHost(&data_byte, 1);
           break;
       }
       break;
     // Set resolution
     case (0xE8):
-      switch (dataByte) {
+      switch (data_byte) {
         // Reset
         case 0xFF:
           reset(true);
-          activeCommand = 0;
+          active_command = 0;
           break;
         default:
-          resolution = 1 << dataByte;
+          resolution = 1 << data_byte;
           if (resolution > MAX_RESOLUTION) resolution = MAX_RESOLUTION;
-          sendToHost(&ACK_CODE, 1);
-          activeCommand = 0;
+          send_toHost(&ACK_CODE, 1);
+          active_command = 0;
           break;
       }
       break;
     // Set sample rate
     case (0xF3):
-      switch (dataByte) {
+      switch (data_byte) {
         // Reset
         case 0xFF:
           reset(true);
-          activeCommand = 0;
+          active_command = 0;
           break;
         default:
-          sampleRate = dataByte;
-          sampleRateHistory.put(sampleRate);
-          if (sampleRateHistory.isFilled()) {
+          sample_rate = data_byte;
+          sample_rate_history.push(sample_rate);
+          if (sample_rate_history.isFilled()) {
             // Intellimouse wheel mode
-            if (sampleRateHistory.get(0) == 200 &&
-                sampleRateHistory.get(1) == 100 &&
-                sampleRateHistory.get(2) == 80) {
-              deviceId = DEVICE_ID_MOUSE_WHEEL;
-              sampleRateHistory.clear();
+            if (sample_rate_history.get(0) == 200 &&
+                sample_rate_history.get(1) == 100 &&
+                sample_rate_history.get(2) == 80) {
+              device_id = DEVICE_ID_MOUSE_WHEEL;
+              sample_rate_history.clear();
             }
             // Intellimouse wheel + 5 button mode
-            else if (sampleRateHistory.get(0) == 200 &&
-                     sampleRateHistory.get(1) == 200 &&
-                     sampleRateHistory.get(2) == 80) {
-              deviceId = DEVICE_ID_MOUSE_WHEEL_5BUTTONS;
-              sampleRateHistory.clear();
+            else if (sample_rate_history.get(0) == 200 &&
+                     sample_rate_history.get(1) == 200 &&
+                     sample_rate_history.get(2) == 80) {
+              device_id = DEVICE_ID_MOUSE_WHEEL_5BUTTONS;
+              sample_rate_history.clear();
             }
           }
-          sendToHost(&ACK_CODE, 1);
-          activeCommand = 0;
+          send_toHost(&ACK_CODE, 1);
+          active_command = 0;
           break;
       }
       break;
     // Unknown active command
     default:
-      activeCommand = 0;
+      active_command = 0;
       break;
   }
 }
 
-inline void PS2Mouse::handleNewCommand(uint8_t dataByte) {
+inline void PS2Mouse::handle_new_command(uint8_t data_byte) {
   uint8_t packet[5];  // prepare packet buffer
-  uint8_t packetLen;
+  uint8_t packet_len;
 
-  switch (dataByte) {
+  switch (data_byte) {
     // Reset
     case 0xFF:
       reset(true);
       break;
-    // Set defaults
-    case 0xF6:
-      setDefaults();
-      sendToHost(&ACK_CODE, 1);
-      break;
     // Resend
     case 0xFE:
-      sendBufferIdx = 0;
+      send_buffer_idx = 0;
+      break;
+    // Set defaults
+    case 0xF6:
+      set_defaults();
+      send_toHost(&ACK_CODE, 1);
       break;
     // Get Device ID
     case 0xF2:
       packet[0] = ACK_CODE;
-      packet[1] = deviceId;
-      sendToHost(packet, 2);
+      packet[1] = device_id;
+      send_toHost(packet, 2);
       break;
     // Set Stream Mode
     case 0xEA:
-      streamingMode = true;
-      sendToHost(&ACK_CODE, 1);
+      streaming_mode = true;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Set Remote Mode
     case 0xF0:
-      streamingMode = false;
-      sendToHost(&ACK_CODE, 1);
+      streaming_mode = false;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Set Wrap Mode
     case 0xEE:
-      activeCommand = dataByte;
-      sendToHost(&ACK_CODE, 1);
+      active_command = data_byte;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Set scaling 1:1
     case 0xE6:
-      scaling2x1 = false;
-      sendToHost(&ACK_CODE, 1);
+      scaling_2x1 = false;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Set scaling 2:1
     case 0xE7:
-      scaling2x1 = true;
-      sendToHost(&ACK_CODE, 1);
+      scaling_2x1 = true;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Set resolution
     case 0xE8:
-      activeCommand = dataByte;
-      sendToHost(&ACK_CODE, 1);
+      active_command = data_byte;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Set sample rate
     case 0xF3:
-      activeCommand = dataByte;
-      sendToHost(&ACK_CODE, 1);
+      active_command = data_byte;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Enable Data Reporting
     case 0xF4:
-      dataReporting = true;
-      sendToHost(&ACK_CODE, 1);
+      data_reporting = true;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Disable Data Reporting
     case 0xF5:
-      dataReporting = false;
-      sendToHost(&ACK_CODE, 1);
+      data_reporting = false;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Status request
     case 0xE9:
       packet[0] = ACK_CODE;
-      packetLen = buildStatusPacket(&packet[1]);
-      sendToHost(packet, packetLen + 1);
+      packet_len = build_status_packet(&packet[1]);
+      send_toHost(packet, packet_len + 1);
       break;
     // Read Data
     case 0xEB:
       packet[0] = ACK_CODE;
-      packetLen = buildMovementPacket(false, &packet[1]);
-      sendToHost(packet, packetLen + 1);
+      packet_len = build_movement_packet(false, &packet[1]);
+      send_toHost(packet, packet_len + 1);
       break;
-    // Unknown command -> just ACK
+    // Unknown command -> request resend
     default:
-      sendToHost(&ACK_CODE, 1);
+      send_toHost(&RESEND_CODE, 1);
       break;
   }
 }
 
-uint8_t PS2Mouse::buildStatusPacket(uint8_t* packet) {
+uint8_t PS2Mouse::build_status_packet(uint8_t* packet) {
   packet[0] = 0;
   packet[1] = resolution;
-  packet[2] = sampleRate;
+  packet[2] = sample_rate;
 
-  if (!streamingMode) packet[0] |= (1 << 6);
-  if (dataReporting) packet[0] |= (1 << 5);
-  if (scaling2x1) packet[0] |= (1 << 4);
+  if (!streaming_mode) packet[0] |= (1 << 6);
+  if (data_reporting) packet[0] |= (1 << 5);
+  if (scaling_2x1) packet[0] |= (1 << 4);
   if (state.button1) packet[0] |= (1 << 2);
   if (state.button3) packet[0] |= (1 << 1);
   if (state.button2) packet[0] |= (1 << 0);
 
-  return 3;  // return packet lenght
+  return 3;  // return packet length
 }
 
-uint8_t PS2Mouse::buildMovementPacket(boolean use2x1Scaling, uint8_t* packet) {
-  uint8_t absX = abs(state.dX);
-  uint8_t absY = abs(state.dY);
+uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet) {
+  uint8_t abs_x = abs(state.d_x);
+  uint8_t abs_y = abs(state.d_y);
 
-  if (use2x1Scaling) {
-    absX = apply2x1Scaling(absX);
-    absY = apply2x1Scaling(absY);
+  if (use_2x1_scaling) {
+    abs_x = apply_2x1_scaling(abs_x);
+    abs_y = apply_2x1_scaling(abs_y);
   }
 
   packet[0] = 1 << 3;                                // bit3 is always 1
-  packet[1] = (state.dX >= 0) ? absX : (~absX + 1);  // two's complement
-  packet[2] = (state.dY >= 0) ? absY : (~absY + 1);  // two's complement
+  packet[1] = (state.d_x >= 0) ? abs_x : (~abs_x + 1);  // two's complement
+  packet[2] = (state.d_y >= 0) ? abs_y : (~abs_y + 1);  // two's complement
 
-  if (absY > 128) packet[0] |= (1 << 7);
-  if (absX > 128) packet[0] |= (1 << 6);
-  if (state.dY < 0) packet[0] |= (1 << 5);
-  if (state.dX < 0) packet[0] |= (1 << 4);
+  if (abs_y > 128) packet[0] |= (1 << 7);
+  if (abs_x > 128) packet[0] |= (1 << 6);
+  if (state.d_y < 0) packet[0] |= (1 << 5);
+  if (state.d_x < 0) packet[0] |= (1 << 4);
   if (state.button3) packet[0] |= (1 << 2);
   if (state.button2) packet[0] |= (1 << 1);
   if (state.button1) packet[0] |= (1 << 0);
 
   // include scroll wheel state
-  if (deviceId >= DEVICE_ID_MOUSE_WHEEL) {
-    uint8_t absW = min(abs(state.dWheel), 7);
-    packet[3] = (state.dWheel >= 0) ? absW : (~absW + 1);  // two's complement
+  if (device_id >= DEVICE_ID_MOUSE_WHEEL) {
+    uint8_t absW = min(abs(state.d_wheel), 7);
+    packet[3] = (state.d_wheel >= 0) ? absW : (~absW + 1);  // two's complement
   }
 
   // include button 4+5 state
-  if (deviceId >= DEVICE_ID_MOUSE_WHEEL_5BUTTONS) {
-    packet[3] &= 0x0F; // clear top 4 bits
+  if (device_id >= DEVICE_ID_MOUSE_WHEEL_5BUTTONS) {
+    packet[3] &= 0x0F;  // clear top 4 bits
     if (state.button4) packet[3] |= (1 << 4);
     if (state.button5) packet[3] |= (1 << 5);
   }
 
-  return deviceId >= DEVICE_ID_MOUSE_WHEEL ? 4 : 3;  // return packet lenght
+  return device_id >= DEVICE_ID_MOUSE_WHEEL ? 4 : 3;  // return packet length
 }
 
-uint8_t PS2Mouse::apply2x1Scaling(uint8_t movement) {
+uint8_t PS2Mouse::apply_2x1_scaling(uint8_t movement) {
   // scaling=2:1 table
   switch (movement) {
     case 0:

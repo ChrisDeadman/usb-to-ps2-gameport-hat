@@ -1,33 +1,34 @@
 #include "PS2Sender.h"
 
 extern "C" {
-void __ps2DataSentEmptyCallback(uint8_t dataByte) {}
+void __ps2_data_sent_dummy_callback(uint8_t data_byte) {}
 }
 /**
  * implement in your code if you want to capture packages.
  */
-void ps2DataSent(uint8_t dataByte)
-    __attribute__((weak, alias("__ps2DataSentEmptyCallback")));
+void ps2_data_sent(uint8_t data_byte) __attribute__((weak, alias("__ps2_data_sent_dummy_callback")));
 
-bool PS2Sender::isSending() { return sending; }
+PS2Sender::PS2Sender(PS2Port* const port) : port(port) {}
 
-void PS2Sender::beginSend(uint8_t dataByte) {
-  this->dataByte = dataByte;
-  bitIdx = 0;
+bool PS2Sender::is_sending() { return sending; }
+
+void PS2Sender::begin_send(uint8_t data_byte) {
+  this->data_byte = data_byte;
+  bit_idx = 0;
   if (!sending) {
     sending = true;
-    port->enableClock();
+    port->enable_clock();
   }
 }
 
-void PS2Sender::endSend() {
+void PS2Sender::end_send() {
   if (!sending) {
     return;
   }
   sending = false;
-  port->disableClock();
-  if (bitIdx >= 11) {
-    ps2DataSent(dataByte);
+  port->disable_clock();
+  if (bit_idx >= 11) {
+    ps2_data_sent(data_byte);
   }
 }
 
@@ -36,34 +37,34 @@ void PS2Sender::resend() {
     return;
   }
   // all bits sent, stop sending
-  if (bitIdx >= 11) {
-    endSend();
+  if (bit_idx >= 11) {
+    end_send();
   }
   // resend on next clock
   else {
-    bitIdx = 0;
+    bit_idx = 0;
   }
 }
 
-void PS2Sender::onClock() {
+void PS2Sender::on_clock() {
   if (!sending) {
     return;
   }
 
   // all bits sent, stop sending
-  if (bitIdx >= 11) {
-    endSend();
+  if (bit_idx >= 11) {
+    end_send();
     return;
   }
 
   uint8_t bit;
-  switch (bitIdx) {
+  switch (bit_idx) {
     case 0:  // start bit
       bit = 0;
       parity = 1;  // ODD parity
       break;
     default:  // data bits
-      bit = (dataByte >> (bitIdx - 1)) & 1;
+      bit = (data_byte >> (bit_idx - 1)) & 1;
       parity ^= bit;
       break;
     case 9:  // parity bit
@@ -73,7 +74,7 @@ void PS2Sender::onClock() {
       bit = 1;
       break;
   }
-  bitIdx++;
+  bit_idx++;
 
   port->write(bit);
 }

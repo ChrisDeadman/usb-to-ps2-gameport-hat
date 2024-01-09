@@ -3,16 +3,16 @@
 XBOXRECVMapper::XBOXRECVMapper(XBOXRECV* driver) : driver(driver) {}
 
 uint8_t XBOXRECVMapper::getNumConnectedDevices() {
-  uint8_t numConnected = 0;
+  uint8_t num_connected = 0;
   for (uint8_t controller = 0; controller < 4; controller++) {
     if (driver->Xbox360Connected[controller]) {
-      ++numConnected;
+      ++num_connected;
     }
   }
-  return numConnected;
+  return num_connected;
 }
 
-uint8_t convertAxisValue(int16_t value) {
+uint8_t convert_axis_value(int16_t value) {
   if (value < 0) {
     return 0x80 + max((value / (-INT16_MIN / 0x80)), -0x80);
   } else {
@@ -22,13 +22,13 @@ uint8_t convertAxisValue(int16_t value) {
 
 JoystickState XBOXRECVMapper::getControllerState(uint8_t idx) {
   JoystickState newState;
-  newState.versionCounter = state[idx].versionCounter + 1;
+  newState.version_counter = state[idx].version_counter + 1;
 
   // Analog axes
-  newState.axes[0] = convertAxisValue(driver->getAnalogHat(LeftHatX, idx));
-  newState.axes[1] = convertAxisValue(-driver->getAnalogHat(LeftHatY, idx));
-  newState.axes[2] = convertAxisValue(driver->getAnalogHat(RightHatX, idx));
-  newState.axes[3] = convertAxisValue(-driver->getAnalogHat(RightHatY, idx));
+  newState.axes[0] = convert_axis_value(driver->getAnalogHat(LeftHatX, idx));
+  newState.axes[1] = convert_axis_value(-driver->getAnalogHat(LeftHatY, idx));
+  newState.axes[2] = convert_axis_value(driver->getAnalogHat(RightHatX, idx));
+  newState.axes[3] = convert_axis_value(-driver->getAnalogHat(RightHatY, idx));
 
   // Digital axes
   if (driver->getButtonPress(LEFT, idx)) newState.axes[0] = 0;
@@ -37,8 +37,10 @@ JoystickState XBOXRECVMapper::getControllerState(uint8_t idx) {
   if (driver->getButtonPress(DOWN, idx)) newState.axes[1] = UINT8_MAX;
 
   // Buttons
-  newState.buttons[0] = driver->getButtonPress(A, idx) | driver->getButtonPress(R2, idx);
-  newState.buttons[1] = driver->getButtonPress(B, idx) | driver->getButtonPress(L2, idx);
+  newState.buttons[0] =
+      driver->getButtonPress(A, idx) | driver->getButtonPress(R2, idx);
+  newState.buttons[1] =
+      driver->getButtonPress(B, idx) | driver->getButtonPress(L2, idx);
   newState.buttons[2] = driver->getButtonPress(X, idx);
   newState.buttons[3] = driver->getButtonPress(Y, idx);
   newState.buttons[4] = driver->getButtonPress(R1, idx);

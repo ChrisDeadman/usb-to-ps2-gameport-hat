@@ -4,9 +4,9 @@
 #include <Arduino.h>
 
 struct PS2MouseState {
-  int8_t dX;
-  int8_t dY;
-  int8_t dWheel;
+  int8_t d_x;
+  int8_t d_y;
+  int8_t d_wheel;
   bool button1;
   bool button2;
   bool button3;
