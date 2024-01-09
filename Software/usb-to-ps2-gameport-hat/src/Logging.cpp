@@ -1,12 +1,13 @@
 #include "Logging.h"
+
 #include "Config.h"
 #include "GlobalStringBuffer.h"
 
-GlobalStringBuffer* logBuffer = GlobalStringBuffer::alloc(2048);
+GlobalStringBuffer* log_buffer = GlobalStringBuffer::alloc(2048);
 
-volatile unsigned long tCurrent;
-volatile unsigned long tLastReceived;
-volatile unsigned long tLastSent;
+volatile unsigned long t_current;
+volatile unsigned long t_last_received;
+volatile unsigned long t_last_sent;
 
 extern "C" char* sbrk(int incr);
 int getFreeMemory() {
@@ -17,39 +18,33 @@ int getFreeMemory() {
 /**
  * Callback, captures packets from PS2Receiver.
  */
-void ps2DataReceived(uint8_t dataByte, bool dataValid) {
-  tLastReceived = tCurrent;
-  logBuffer->concat("<= ")
-      ->concat("%02X", dataByte)
-      ->concatln(dataValid ? "" : "!!");
+void ps2_data_received(uint8_t data_byte, bool data_valid) {
+  t_last_received = t_current;
+  log_buffer->concat("<= ")->concat("%02X", data_byte)->concatln(data_valid ? "" : "!!");
 }
 
 /**
  * Callback, captures packets from PS2Sender.
  */
-void ps2DataSent(uint8_t dataByte) {
-  tLastSent = tCurrent;
-  logBuffer->concat("=> ")->concatln("%02X", dataByte);
+void ps2_data_sent(uint8_t data_byte) {
+  t_last_sent = t_current;
+  log_buffer->concat("=> ")->concatln("%02X", data_byte);
 }
 
 void printAndFlushBuffer() {
-  if (!logBuffer->isEmpty()) {
-    Serial.println(logBuffer->get());
-    logBuffer->clear();
+  if (!log_buffer->isEmpty()) {
+    Serial.println(log_buffer->get());
+    log_buffer->clear();
   }
 }
 
-Logging::Logging(PS2Mouse* const ps2Mouse,
-                 JoystickManager* const joystickManager,
-                 Deadzone* const deadzone)
-    : ps2Mouse(ps2Mouse),
-      joystickManager(joystickManager),
-      deadzone(deadzone) {}
+Logging::Logging(PS2Mouse* const ps2_mouse, JoystickManager* const joystick_manager, SetupMode* const setup_mode)
+    : ps2_mouse(ps2_mouse), joystick_manager(joystick_manager), setup_mode(setup_mode) {}
 
 void Logging::init() { Serial.begin(SERIAL_SPEED); }
 
 void Logging::task() {
-  tCurrent = millis();
+  t_current = millis();
 
   // print log if someone writes to our serial input
   if (Serial.available() && Serial.read()) {
@@ -60,57 +55,60 @@ void Logging::task() {
 }
 
 void Logging::logStatus() {
-  unsigned long tLastInhibit = ps2Mouse->getTimeLastInhibit();
-  unsigned long tLastHostRts = ps2Mouse->getTimeLastHostRts();
+  uint8_t numConnectedDevices = joystick_manager->getNumConnectedDevices();
+  JoystickState joy1State = joystick_manager->getControllerState(0);
+  JoystickState joy2State = joystick_manager->getControllerState(1);
 
-  uint8_t numConnectedDevices = joystickManager->getNumConnectedDevices();
-  JoystickState joy1State = joystickManager->getControllerState(0);
-  JoystickState joy2State = joystickManager->getControllerState(1);
-
-  logBuffer->concatln("-------------------------------");
-  logBuffer->concatln("USB => PS/2 & Gameport HAT V1.0");
-  logBuffer->concatln("-------------------------------");
-  logBuffer->concatln("General status");
-  logBuffer->concatln("--------------");
-  logBuffer->concat("free memory: ")->concatln("%d", getFreeMemory());
-  logBuffer->concat("time: ")->concatln("%lu", tCurrent);
-  logBuffer->concat("ext led1: ")->concatln("%u", digitalRead(EXT_LED1_PIN));
-  logBuffer->concat("ext led2: ")->concatln("%u", digitalRead(EXT_LED2_PIN));
-  logBuffer->concatln("-----------------");
-  logBuffer->concatln("PS/2 mouse status");
-  logBuffer->concatln("-----------------");
-  logBuffer->concat("device id: ")->concatln("%d", ps2Mouse->getDeviceId());
-  logBuffer->concat("clock: ")->concatln("%u", digitalRead(PS2_CLOCK_PIN));
-  logBuffer->concat("data: ")->concatln("%u", digitalRead(PS2_DATA_PIN));
-  logBuffer->concat("last received time: ")->concatln("%lu", tLastReceived);
-  logBuffer->concat("last sent time: ")->concatln("%lu", tLastSent);
-  logBuffer->concat("last inhibit time: ")->concatln("%lu", tLastInhibit);
-  logBuffer->concat("last host RTS time: ")->concatln("%lu", tLastHostRts);
-  logBuffer->concatln("---------------");
-  logBuffer->concatln("Joystick status");
-  logBuffer->concatln("---------------");
-  logBuffer->concat("connected devices: ")->concatln("%u", numConnectedDevices);
-  logBuffer->concat("deadzone: ");
-  logBuffer->concatln("%u%%", (uint8_t)(deadzone->getValue() * 100));
-  logBuffer->concat("Joy1 buttons: ");
+  log_buffer->concatln("-------------------------------");
+  log_buffer->concatln("USB => PS/2 & Gameport HAT V1.4");
+  log_buffer->concatln("-------------------------------");
+  log_buffer->concatln("General status");
+  log_buffer->concatln("--------------");
+  log_buffer->concat("free memory: ")->concatln("%d", getFreeMemory());
+  log_buffer->concat("time: ")->concatln("%lu", t_current);
+  log_buffer->concat("ext led1: ")->concatln("%u", digitalRead(EXT_LED1_PIN));
+  log_buffer->concat("ext led2: ")->concatln("%u", digitalRead(EXT_LED2_PIN));
+  log_buffer->concatln("-----------------");
+  log_buffer->concatln("Settings");
+  log_buffer->concatln("-----------------");
+  log_buffer->concat("swap_joy_axis_3_and_4: ");
+  log_buffer->concatln("%u", (uint8_t)setup_mode->swap_joy_axis_3_and_4);
+  log_buffer->concatln("-----------------");
+  log_buffer->concatln("PS/2 status");
+  log_buffer->concatln("-----------------");
+  log_buffer->concat("last received time: ")->concatln("%lu", t_last_received);
+  log_buffer->concat("last sent time: ")->concatln("%lu", t_last_sent);
+  log_buffer->concatln("-----------------");
+  log_buffer->concatln("PS/2 mouse status");
+  log_buffer->concatln("-----------------");
+  log_buffer->concat("device id: ")->concatln("%d", ps2_mouse->get_device_id());
+  log_buffer->concat("clock: ")->concatln("%u", digitalRead(ps2_mouse->port->clock_pin));
+  log_buffer->concat("data: ")->concatln("%u", digitalRead(ps2_mouse->port->data_pin));
+  log_buffer->concat("last inhibit time: ")->concatln("%lu", ps2_mouse->get_time_last_inhibit());
+  log_buffer->concat("last host RTS time: ")->concatln("%lu", ps2_mouse->get_time_last_host_rts());
+  log_buffer->concatln("---------------");
+  log_buffer->concatln("Joystick status");
+  log_buffer->concatln("---------------");
+  log_buffer->concat("connected devices: ")->concatln("%u", numConnectedDevices);
+  log_buffer->concat("Joy1 buttons: ");
   for (uint8_t button = 0; button < 6; button++) {
-    logBuffer->concat("%u ", joy1State.buttons[button]);
+    log_buffer->concat("%u ", joy1State.buttons[button]);
   }
-  logBuffer->concatln("");
-  logBuffer->concat("Joy2 buttons: ");
+  log_buffer->concatln("");
+  log_buffer->concat("Joy2 buttons: ");
   for (uint8_t button = 0; button < 6; button++) {
-    logBuffer->concat("%u ", joy2State.buttons[button]);
+    log_buffer->concat("%u ", joy2State.buttons[button]);
   }
-  logBuffer->concatln("");
-  logBuffer->concat("Joy1 axes: ");
+  log_buffer->concatln("");
+  log_buffer->concat("Joy1 axes: ");
   for (uint8_t axis = 0; axis < 4; axis++) {
-    logBuffer->concat("%02X ", joy1State.axes[axis]);
+    log_buffer->concat("%02X ", joy1State.axes[axis]);
   }
-  logBuffer->concatln("");
-  logBuffer->concat("Joy2 axes: ");
+  log_buffer->concatln("");
+  log_buffer->concat("Joy2 axes: ");
   for (uint8_t axis = 0; axis < 4; axis++) {
-    logBuffer->concat("%02X ", joy2State.axes[axis]);
+    log_buffer->concat("%02X ", joy2State.axes[axis]);
   }
-  logBuffer->concatln("");
-  logBuffer->concatln("-------------------------------");
+  log_buffer->concatln("");
+  log_buffer->concatln("-------------------------------");
 }

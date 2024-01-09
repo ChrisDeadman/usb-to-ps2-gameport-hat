@@ -1,26 +1,15 @@
 #include <Arduino.h>
-#include "Config.h"
 
+#include "Config.h"
 #include "SoftPWM.h"
 SoftPWM softPwm;
-
-#include "SoftTimer.h"
-SoftTimer setupTimer;
-SoftTimer blinkTimer;
-SoftTimer inputDelayTimer;
-
-#define BLINK_DURATION 1000
-#define SETUP_DELAY 1000
-#define INPUT_DELAY 100
 
 #include "Watchdog.h"
 Watchdog watchdog;
 
-#include "Deadzone.h"
-Deadzone deadzone;
-
 #include <Usb.h>
 #include <usbhub.h>
+
 #include "HIDMouseController.h"
 #include "JoystickManager.h"
 USBHost usb;
@@ -41,16 +30,12 @@ Gameport gameport(POT1_CS_PIN, JOY_BUTTON1_PIN, JOY_BUTTON2_PIN,
                   JOY_BUTTON3_PIN, JOY_BUTTON4_PIN);
 JoystickState gameportState;
 
-#include "Logging.h"
-Logging logging(&ps2Mouse, &joystickManager, &deadzone);
 
-inline float axisToFloat(uint8_t value);
-inline uint8_t floatToAxis(float value);
-inline void applyDeadzone(uint8_t* const x, uint8_t* const y);
-inline bool updateJoystickStates(uint8_t* const numJoyDevices);
-inline void updateGameportState(uint8_t numJoyDevices);
-inline bool updateUsbMouseState();
-inline void updatePS2MouseState();
+#include "SetupMode.h"
+SetupMode setupMode(&gameportState);
+
+#include "Logging.h"
+Logging logging(&ps2Mouse, &joystickManager, &setupMode);
 
 bool inSetupMode = false;
 
@@ -66,9 +51,6 @@ void setup() {
   gameport.init();
   logging.init();
   watchdog.init();
-  setupTimer.reset();
-  blinkTimer.reset();
-  inputDelayTimer.reset();
 }
 
 void loop() {
@@ -91,18 +73,6 @@ void loop() {
   usb.Task();
   ps2Port.enableClockIrq();
 
-  logging.task();
-
-  setupTimer.tick();
-  blinkTimer.tick();
-  inputDelayTimer.tick();
-
-  // For everything that needs blinking
-  if (blinkTimer.getElapsedMillis() > BLINK_DURATION) {
-    blinkTimer.reset();
-  }
-  bool blinkState = blinkTimer.getElapsedMillis() < (BLINK_DURATION / 2);
-
   // update PS/2 mouse state
   if (updateUsbMouseState()) {
     updatePS2MouseState();
@@ -114,34 +84,14 @@ void loop() {
     updateGameportState(numJoyDevices);
   }
 
-  // setup mode is triggered by holding down Button5 + Button6 for a second
-  if (!gameportState.buttons[4] || !gameportState.buttons[5]) {
-    setupTimer.reset();
-  }
-  if (setupTimer.getElapsedMillis() > SETUP_DELAY) {
-    setupTimer.reset();
-    inSetupMode = !inSetupMode;
-    digitalWrite(EXT_LED1_PIN, HIGH);
-    digitalWrite(EXT_LED2_PIN, HIGH);
-  }
+  // handle logging task
+  logging.task();
 
-  // setup mode
-  if (inSetupMode) {
-    if (inputDelayTimer.getElapsedMillis() > INPUT_DELAY) {
-      if (gameportState.buttons[4] && gameportState.buttons[5]) {
-        // do nothing, seems like user wants to exit setup mode
-      } else if (gameportState.buttons[4]) {
-        deadzone.increase();
-      } else if (gameportState.buttons[5]) {
-        deadzone.decrease();
-      }
-      inputDelayTimer.reset();
-    }
-    digitalWrite(EXT_LED1_PIN, blinkState);
-    digitalWrite(EXT_LED2_PIN, !softPwm.pwm(deadzone.getValue() * 0xFF));
-  }
+  // handle setup task
+  setupMode.task();
+
   // EXT_LED2 indicates button press or highest axis value
-  else {
+  if (!setupMode.in_setup_mode) {
     bool buttonPressed = false;
     uint8_t highestAxisValue = 0;
     for (uint8_t button = 0; button < 6; button++) {
@@ -159,22 +109,6 @@ void loop() {
     } else {
       digitalWrite(EXT_LED2_PIN, !softPwm.pwm(highestAxisValue));
     }
-  }
-}
-
-inline float axisToFloat(uint8_t value) { return -1.0f + (value / 127.5f); }
-
-inline uint8_t floatToAxis(float value) {
-  return min((value + 1.0f) * 128.0f, 0xFF);
-}
-
-inline void applyDeadzone(uint8_t* const x, uint8_t* const y) {
-  if (deadzone.isEnabled()) {
-    float xFloat = axisToFloat(*x);
-    float yFloat = axisToFloat(*y);
-    deadzone.apply(&xFloat, &yFloat);
-    *x = floatToAxis(xFloat);
-    *y = floatToAxis(yFloat);
   }
 }
 
@@ -196,26 +130,21 @@ inline void updateGameportState(uint8_t numJoyDevices) {
   gameportState.buttons[5] = joystickStates[0].buttons[5];
   gameportState.axes[0] = joystickStates[0].axes[0];
   gameportState.axes[1] = joystickStates[0].axes[1];
-  applyDeadzone(&gameportState.axes[0], &gameportState.axes[1]);
   if (numJoyDevices < 2) {
     gameportState.buttons[2] = joystickStates[0].buttons[2];
     gameportState.buttons[3] = joystickStates[0].buttons[3];
-#if SWAP_JOY_AXIS_3_AND_4
+    if (setupMode.swap_joy_axis_3_and_4) {
     gameportState.axes[2] = joystickStates[0].axes[3];
     gameportState.axes[3] = joystickStates[0].axes[2];
-#else
+    } else {
     gameportState.axes[2] = joystickStates[0].axes[2];
     gameportState.axes[3] = joystickStates[0].axes[3];
-#endif
-#if APPLY_DEADZONE_TO_AXIS_3_AND_4
-    applyDeadzone(&gameportState.axes[2], &gameportState.axes[3]);
-#endif
+    }
   } else {
     gameportState.buttons[2] = joystickStates[1].buttons[0];
     gameportState.buttons[3] = joystickStates[1].buttons[1];
     gameportState.axes[2] = joystickStates[1].axes[0];
     gameportState.axes[3] = joystickStates[1].axes[1];
-    applyDeadzone(&gameportState.axes[2], &gameportState.axes[3]);
   }
   gameport.setAxes(gameportState.axes[0], gameportState.axes[1],
                    gameportState.axes[2], gameportState.axes[3]);

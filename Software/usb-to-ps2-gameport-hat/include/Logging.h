@@ -1,19 +1,18 @@
 #ifndef _LOGGING_H_
 #define _LOGGING_H_
 
-#include "Deadzone.h"
 #include "JoystickManager.h"
 #include "PS2Mouse.h"
+#include "SetupMode.h"
 
 class Logging {
  private:
-  PS2Mouse* const ps2Mouse;
-  JoystickManager* const joystickManager;
-  Deadzone* const deadzone;
+  PS2Mouse* const ps2_mouse;
+  JoystickManager* const joystick_manager;
+  SetupMode* const setup_mode;
 
  public:
-  Logging(PS2Mouse* const ps2Mouse, JoystickManager* const joystickManager,
-          Deadzone* const deadzone);
+  Logging(PS2Mouse* const ps2_mouse, JoystickManager* const joystick_manager, SetupMode* const setup_mode);
 
   /**
    * Initializes the serial interface.
