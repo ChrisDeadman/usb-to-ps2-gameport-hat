@@ -157,8 +157,8 @@ inline void PS2Mouse::handle_active_command(uint8_t data_byte) {
           break;
         default:
           sample_rate = data_byte;
-          sample_rate_history.push(sample_rate);
-          if (sample_rate_history.isFilled()) {
+          sample_rate_history.enq(sample_rate);
+          if (sample_rate_history.is_filled()) {
             // Intellimouse wheel mode
             if (sample_rate_history.get(0) == 200 &&
                 sample_rate_history.get(1) == 100 &&
