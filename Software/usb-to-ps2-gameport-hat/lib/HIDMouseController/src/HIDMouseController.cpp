@@ -13,11 +13,14 @@ inline int8_t add_delta(int8_t value, int8_t delta) {
 
 HIDMouseController::HIDMouseController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
+  connected = false;
   reset_state();
 };
 
-HIDMouseControllerState HIDMouseController::pop_state() {
-  HIDMouseControllerState stateCopy;
+bool HIDMouseController::is_connected() { return connected; }
+
+HIDMouseState HIDMouseController::pop_state() {
+  HIDMouseState stateCopy;
   stateCopy.version_counter = state.version_counter;
   stateCopy.d_x = state.d_x;
   stateCopy.d_y = state.d_y;
@@ -33,6 +36,8 @@ HIDMouseControllerState HIDMouseController::pop_state() {
 
 void HIDMouseController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
                                uint32_t len, uint8_t *buf) {
+  connected = true;
+
   if (len > 0) {
     state.version_counter += 1;
     state.button1 = (buf[0] & 0x01) > 0;

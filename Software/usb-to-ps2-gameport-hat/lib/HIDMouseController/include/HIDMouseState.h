@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-struct HIDMouseControllerState {
+struct HIDMouseState {
   uint8_t version_counter = -1;  // overflow is expected, should just be checked
                                  // for equality.
   int8_t d_x = 0;

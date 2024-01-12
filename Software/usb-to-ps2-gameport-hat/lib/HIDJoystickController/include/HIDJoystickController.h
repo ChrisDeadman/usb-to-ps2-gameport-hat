@@ -16,7 +16,7 @@ class HIDJoystickController : HIDUniversal, public HIDReportParser {
   HIDJoystickController(USBHost *usb);
 
   /**
-   * Returns whether a USB HID joystick is connected.
+   * Returns whether a supported device is connected.
    */
   bool is_connected();
 

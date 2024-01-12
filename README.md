@@ -13,6 +13,8 @@ Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gamepor
 
 ## Supported input devices
 * HID Mouse
+* HID Keyboard
+* HID Mouse/Keyboard Combo
 * HID Joystick/Gamepad *(descriptor parsing is work in progress, may not work for all devices)*
 * Xbox Wireless receiver
 
@@ -35,6 +37,7 @@ Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gamepor
 ### Setup Mode
 
 LED1 brightness indicates current setting.  
+LED1 blinks when in edit mode.  
 LED2 brightness indicates value of current setting.
 
 #### Bindings
@@ -69,6 +72,7 @@ Release notes
 
 ### Usb => PS/2 & Gameport HAT v1.4 DRAFT
 * Rework and document setup mode
+* Add keyboard support
 
 ### Usb => PS/2 & Gameport HAT v1.3
 * @Ulfenknulfen: Make secondary PS/2 connector a combined connector

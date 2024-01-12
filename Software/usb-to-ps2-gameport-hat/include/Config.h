@@ -4,8 +4,11 @@
 #define Serial Serial1  // use pins D0/D1
 #define SERIAL_SPEED 115200
 
-#define PS2_DATA_PIN 2
-#define PS2_CLOCK_PIN 3
+#define PS2_1_DATA_PIN 2
+#define PS2_1_CLOCK_PIN 3
+
+#define PS2_2_DATA_PIN 17
+#define PS2_2_CLOCK_PIN 16
 
 #define JOY_BUTTON1_PIN 4
 #define JOY_BUTTON2_PIN 5
