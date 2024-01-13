@@ -3,7 +3,7 @@
 #include "Config.h"
 #include "GlobalStringBuffer.h"
 
-GlobalStringBuffer* log_buffer = GlobalStringBuffer::alloc(2048);
+GlobalStringBuffer* log_buffer = GlobalStringBuffer::alloc(2047);
 
 volatile unsigned long t_current;
 volatile unsigned long t_last_received;
@@ -34,7 +34,7 @@ void ps2_data_sent(uint8_t data_byte) {
 }
 
 void print_and_flush_buffer() {
-  if (!log_buffer->isEmpty()) {
+  if (log_buffer->length() > 0) {
     Serial.println(log_buffer->get());
     log_buffer->clear();
   }

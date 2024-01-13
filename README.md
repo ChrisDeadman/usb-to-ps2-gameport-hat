@@ -42,7 +42,7 @@ LED2 brightness indicates value of current setting.
 
 #### Bindings
 
-| Keyboard          | Joystick/Gamepad      | Function                                   |
+| Keyboard        | Joystick/Gamepad      | Function                                   |
 |:----------------|:----------------------|:-------------------------------------------|
 | CTRL+SHIFT+WIN  | Joy5 (R1) + Joy6 (L1) | hold for 1s to enter/exit setup mode       |
 | Return          | Joy1 (A)              | edit setting / exit edit mode              |

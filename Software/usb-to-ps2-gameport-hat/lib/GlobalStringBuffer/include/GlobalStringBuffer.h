@@ -7,8 +7,9 @@ class GlobalStringBuffer {
  private:
   static constexpr char const* CR_LF = "\r\n";
 
-  const uint16_t maxSize;
+  const uint16_t max_size;
   char* const buffer;
+  uint16_t buffer_length;
 
   // forbid copying, stack allocation and destruction
   GlobalStringBuffer() = delete;
@@ -22,7 +23,7 @@ class GlobalStringBuffer {
   /**
    * Allocates a global string with a given maximum size.
    */
-  static GlobalStringBuffer* const alloc(uint16_t maxSize);
+  static GlobalStringBuffer* const alloc(uint16_t max_size);
 
   /**
    * Returns a pointer to the string buffer.
@@ -33,11 +34,6 @@ class GlobalStringBuffer {
    * Returns the length of the string.
    */
   uint16_t length();
-
-  /**
-   * Returns whether the buffer is empty.
-   */
-  bool isEmpty();
 
   /**
    * Clears all data from the buffer.
@@ -78,8 +74,11 @@ class GlobalStringBuffer {
 template <typename T>
 GlobalStringBuffer* const GlobalStringBuffer::concat(char const* const format,
                                                      T value) {
-  uint16_t offset = length();
-  snprintf(&buffer[offset], maxSize - offset, format, value);
+  uint16_t remaining = max_size + 1 - buffer_length;
+  int written = snprintf(&buffer[buffer_length], remaining, format, value);
+  if (written > 0 && written < remaining) {
+    buffer_length += written;
+  }
   return this;
 }
 
