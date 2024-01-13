@@ -235,6 +235,16 @@ static const KeyboardCodes keycode_table[] = {
     KeyboardCodes::RightGUI,
 };
 
+extern "C" {
+void __usb_kbd_dummy_received_callback(uint8_t const *const data,
+                                       uint8_t length) {}
+}
+/**
+ * implement in your code if you want to capture packages.
+ */
+void usb_data_received(uint8_t const *const data, uint8_t length)
+    __attribute__((weak, alias("__usb_kbd_dummy_received_callback")));
+
 HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
   connected = false;
@@ -278,6 +288,7 @@ void HIDKeyboardController::set_led_state(KeyboardLeds state) {
 
 void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
                                   uint32_t len, uint8_t *buf) {
+  usb_data_received(buf, (uint8_t)len);
   connected = true;
 
   // handle modifier keys

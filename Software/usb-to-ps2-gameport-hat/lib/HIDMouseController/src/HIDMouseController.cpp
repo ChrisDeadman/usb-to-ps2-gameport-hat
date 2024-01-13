@@ -1,5 +1,15 @@
 #include "HIDMouseController.h"
 
+extern "C" {
+void __usb_mouse_dummy_received_callback(uint8_t const *const data,
+                                         uint8_t length) {}
+}
+/**
+ * implement in your code if you want to capture packages.
+ */
+void usb_data_received(uint8_t const *const data, uint8_t length)
+    __attribute__((weak, alias("__usb_mouse_dummy_received_callback")));
+
 static int8_t add_delta(int8_t value, int8_t delta);
 
 HIDMouseController::HIDMouseController(HID *driver) : driver(driver) {
@@ -27,6 +37,7 @@ HIDMouseState HIDMouseController::pop_state() {
 
 void HIDMouseController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
                                uint32_t len, uint8_t *buf) {
+  usb_data_received(buf, (uint8_t)len);
   connected = true;
 
   if (len > 0) {

@@ -1,13 +1,14 @@
 #include "PS2Receiver.h"
 
 extern "C" {
-void __ps2_data_received_dummy_callback(uint8_t dataByte, bool dataValid) {}
+void __ps2_dummy_received_callback(uint8_t pin, uint8_t data, bool valid) {
+}
 }
 /**
  * implement in your code if you want to capture packages.
  */
-void ps2_data_received(uint8_t data_byte, bool data_valid)
-    __attribute__((weak, alias("__ps2_data_received_dummy_callback")));
+void ps2_data_received(uint8_t pin, uint8_t data, bool valid)
+    __attribute__((weak, alias("__ps2_dummy_received_callback")));
 
 PS2Receiver::PS2Receiver(PS2Port* const port) : port(port) {}
 
@@ -40,7 +41,7 @@ void PS2Receiver::end_receive() {
   receiving = false;
   port->disable_clock();
   if (bit_idx >= 11) {
-    ps2_data_received(data_byte, data_valid);
+    ps2_data_received(port->data_pin, data_byte, data_valid);
   }
 }
 

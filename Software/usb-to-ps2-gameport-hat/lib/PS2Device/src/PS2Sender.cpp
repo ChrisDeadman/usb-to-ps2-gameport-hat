@@ -1,12 +1,13 @@
 #include "PS2Sender.h"
 
 extern "C" {
-void __ps2_data_sent_dummy_callback(uint8_t data_byte) {}
+void __ps2_data_sent_dummy_callback(uint8_t pin, uint8_t data) {}
 }
 /**
  * implement in your code if you want to capture packages.
  */
-void ps2_data_sent(uint8_t data_byte) __attribute__((weak, alias("__ps2_data_sent_dummy_callback")));
+void ps2_data_sent(uint8_t pin, uint8_t data)
+    __attribute__((weak, alias("__ps2_data_sent_dummy_callback")));
 
 PS2Sender::PS2Sender(PS2Port* const port) : port(port) {}
 
@@ -28,7 +29,7 @@ void PS2Sender::end_send() {
   sending = false;
   port->disable_clock();
   if (bit_idx >= 11) {
-    ps2_data_sent(data_byte);
+    ps2_data_sent(port->data_pin, data_byte);
   }
 }
 

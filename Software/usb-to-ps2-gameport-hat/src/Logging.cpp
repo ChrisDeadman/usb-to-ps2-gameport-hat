@@ -6,8 +6,9 @@
 GlobalStringBuffer* log_buffer = GlobalStringBuffer::alloc(2047);
 
 volatile unsigned long t_current;
-volatile unsigned long t_last_received;
-volatile unsigned long t_last_sent;
+volatile unsigned long t_usb_last_received;
+volatile unsigned long t_ps2_last_received;
+volatile unsigned long t_ps2_last_sent;
 
 extern "C" char* sbrk(int incr);
 int get_free_memory() {
@@ -16,21 +17,39 @@ int get_free_memory() {
 }
 
 /**
+ * Callback, captures packets from USB.
+ */
+void usb_data_received(uint8_t const* const data, uint8_t length) {
+  t_usb_last_received = t_current;
+#ifdef DEBUG
+  log_buffer->concat("U<");
+  for (uint8_t i = 0; i < length; i++) {
+    log_buffer->concat("%02X", data[i]);
+  }
+  log_buffer->concatln("");
+#endif
+}
+
+/**
  * Callback, captures packets from PS2Receiver.
  */
-void ps2_data_received(uint8_t data_byte, bool data_valid) {
-  t_last_received = t_current;
-  log_buffer->concat("< ")
-      ->concat("%02X", data_byte)
-      ->concatln(data_valid ? "" : "!!");
+void ps2_data_received(uint8_t pin, uint8_t data, bool valid) {
+  t_ps2_last_received = t_current;
+#ifdef DEBUG
+  log_buffer->concat("P%u< ", pin)
+      ->concat("%02X", data)
+      ->concatln(valid ? "" : "!!");
+#endif
 }
 
 /**
  * Callback, captures packets from PS2Sender.
  */
-void ps2_data_sent(uint8_t data_byte) {
-  t_last_sent = t_current;
-  log_buffer->concat("> ")->concatln("%02X", data_byte);
+void ps2_data_sent(uint8_t pin, uint8_t data) {
+  t_ps2_last_sent = t_current;
+#ifdef DEBUG
+  log_buffer->concat("P%u> ", pin)->concatln("%02X", data);
+#endif
 }
 
 void print_and_flush_buffer() {
@@ -70,7 +89,7 @@ void Logging::task() {
 }
 
 void Logging::log_status() {
-  uint8_t num_connected_devices = joystick_manager->getNumConnectedDevices();
+  uint8_t num_joys = joystick_manager->getNumConnectedDevices();
   JoystickState joy1_state = joystick_manager->getControllerState(0);
   JoystickState joy2_state = joystick_manager->getControllerState(1);
 
@@ -88,16 +107,25 @@ void Logging::log_status() {
   log_buffer->concatln("╠══════════╝");
   log_buffer->concat("║swap_joy_axis_3_and_4: ");
   log_buffer->concatln("%u", (uint8_t)setup_mode->swap_joy_axis_3_and_4);
+  log_buffer->concatln("╠════════════╗");
+  log_buffer->concatln("║ USB status ║");
+  log_buffer->concatln("╠════════════╝");
+  log_buffer->concat("║last received time: ")
+      ->concatln("%lu", t_usb_last_received);
+  log_buffer->concat("║kbd connected:   ")
+      ->concatln("%u", usb_keyboard->is_connected());
+  log_buffer->concat("║mouse connected: ")
+      ->concatln("%u", usb_mouse->is_connected());
+  log_buffer->concat("║#joys/gamepads:  ")->concatln("%u", num_joys);
   log_buffer->concatln("╠═════════════╗");
   log_buffer->concatln("║ PS/2 status ║");
   log_buffer->concatln("╠═════════════╝");
-  log_buffer->concat("║last received time: ")->concatln("%lu", t_last_received);
-  log_buffer->concat("║last sent time:     ")->concatln("%lu", t_last_sent);
+  log_buffer->concat("║last received time: ")
+      ->concatln("%lu", t_ps2_last_received);
+  log_buffer->concat("║last sent time:     ")->concatln("%lu", t_ps2_last_sent);
   log_buffer->concatln("╠══════════════════════╗");
   log_buffer->concatln("║ PS/2 keyboard status ║");
   log_buffer->concatln("╠══════════════════════╝");
-  log_buffer->concat("║connected: ")
-      ->concatln("%u", usb_keyboard->is_connected());
   log_buffer->concat("║clock: ")
       ->concatln("%u", digitalRead(ps2_keyboard->port->clock_pin));
   log_buffer->concat("║data:  ")
@@ -109,7 +137,6 @@ void Logging::log_status() {
   log_buffer->concatln("╠═══════════════════╗");
   log_buffer->concatln("║ PS/2 mouse status ║");
   log_buffer->concatln("╠═══════════════════╝");
-  log_buffer->concat("║connected: ")->concatln("%u", usb_mouse->is_connected());
   log_buffer->concat("║device id: ")
       ->concatln("%d", ps2_mouse->get_device_id());
   log_buffer->concat("║clock: ")
@@ -123,7 +150,6 @@ void Logging::log_status() {
   log_buffer->concatln("╠═════════════════╗");
   log_buffer->concatln("║ Joystick status ║");
   log_buffer->concatln("╠═════════════════╝");
-  log_buffer->concat("║connected: ")->concatln("%u", num_connected_devices);
   log_buffer->concat("║Joy1 buttons: ");
   for (uint8_t button = 0; button < 6; button++) {
     log_buffer->concat("%u ", joy1_state.buttons[button]);
