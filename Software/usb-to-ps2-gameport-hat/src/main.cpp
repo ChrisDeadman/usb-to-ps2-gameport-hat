@@ -10,6 +10,8 @@ Watchdog watchdog;
 #include <Usb.h>
 #include <usbhub.h>
 
+#include "HIDKeyboardCombiner.h"
+#include "HIDMouseCombiner.h"
 #include "HIDMouseKeyboardController.h"
 #include "JoystickManager.h"
 USBHost usb;
@@ -19,11 +21,13 @@ HIDBoot<HID_PROTOCOL_MOUSE | HID_PROTOCOL_KEYBOARD> hid_mouse_keyboard_driver(
 HIDMouseKeyboardController usb_mouse_keyboard(&hid_mouse_keyboard_driver);
 HIDBoot<HID_PROTOCOL_MOUSE> hid_mouse_driver(&usb);
 HIDMouseController usb_mouse(&hid_mouse_driver);
-HIDMouseState usb_mouse_state[2];
 JoystickManager joystick_manager(&usb);
 JoystickState joystick_states[2];
 HIDBoot<HID_PROTOCOL_KEYBOARD> hid_keyboard_driver(&usb);
 HIDKeyboardController usb_keyboard(&hid_keyboard_driver);
+HIDKeyboardCombiner combined_keyboard(&usb_mouse_keyboard, &usb_keyboard);
+HIDMouseCombiner combined_mouse(&usb_mouse_keyboard, &usb_mouse);
+HIDMouseState mouse_state;
 
 #include "PS2Keyboard.h"
 #include "PS2Mouse.h"
@@ -40,11 +44,11 @@ Gameport gameport(POT1_CS_PIN, JOY_BUTTON1_PIN, JOY_BUTTON2_PIN,
 JoystickState gameport_state;
 
 #include "SetupMode.h"
-SetupMode setup_mode(&gameport_state);
+SetupMode setup_mode(&combined_keyboard, &gameport_state);
 
 #include "Logging.h"
-Logging logging(&usb_mouse_keyboard, &usb_keyboard, &usb_mouse,
-                &joystick_manager, &ps2_keyboard, &ps2_mouse, &setup_mode);
+Logging logging(&combined_keyboard, &combined_mouse, &joystick_manager,
+                &ps2_keyboard, &ps2_mouse, &setup_mode);
 
 inline void sync_keyboard_state();
 inline void sync_mouse_state();
@@ -87,24 +91,31 @@ void loop() {
   // otherwise this may take longer than the watchdog timeout.
   PS2Port::disable_clock_irq();
   //
-  usb.Task();             // handle usb task
-  logging.task();         // handle logging task
-  sync_keyboard_state();  // sync states
-  sync_mouse_state();
+  usb.Task();         // handle usb task
+  logging.task();     // handle logging task
+  setup_mode.task();  // handle setup task
   sync_gameport_state();
   //
   PS2Port::enable_clock_irq();
 
-  // handle setup task
-  setup_mode.task();
+  // don't do any more stuff if in setup mode
+  if (setup_mode.in_setup_mode) {
+    return;
+  }
 
-  // EXT_LED2 indicates button press or highest axis value
-  if (!setup_mode.in_setup_mode) {
-    bool button_pressed = false;
-    for (uint8_t button = 0; button < 6; button++) {
-      button_pressed |= gameport_state.buttons[button];
-    }
+  // sync PS/2 states
+  sync_keyboard_state();
+  sync_mouse_state();
 
+  // EXT_LED2 indicates button press
+  bool button_pressed = false;
+  for (uint8_t button = 0; button < 6; button++) {
+    button_pressed |= gameport_state.buttons[button];
+  }
+  if (button_pressed) {
+    digitalWrite(EXT_LED2_PIN, LOW);
+  } else {
+    // or highest axis value
     uint8_t highest_axis_value = 0;
     for (uint8_t axis = 0; axis < 4; axis++) {
       uint8_t axisValue = abs((int16_t)gameport_state.axes[axis] - 0x80);
@@ -112,21 +123,15 @@ void loop() {
         highest_axis_value = axisValue;
       }
     }
-
-    if (button_pressed) {
-      digitalWrite(EXT_LED2_PIN, LOW);
-    } else {
-      digitalWrite(EXT_LED2_PIN, !soft_pwm.pwm(highest_axis_value));
-    }
+    digitalWrite(EXT_LED2_PIN, !soft_pwm.pwm(highest_axis_value));
   }
 }
 
 inline void sync_keyboard_state() {
-  usb_mouse_keyboard.set_led_state(ps2_keyboard.get_led_state());
-  usb_keyboard.set_led_state(ps2_keyboard.get_led_state());
+  combined_keyboard.set_led_state(ps2_keyboard.get_led_state());
 
   while (true) {
-    KeyboardCodes make = usb_mouse_keyboard.deq_make();
+    KeyboardCodes make = combined_keyboard.deq_make();
     if (make == KeyboardCodes::NoKey) {
       break;
     }
@@ -134,23 +139,7 @@ inline void sync_keyboard_state() {
   }
 
   while (true) {
-    KeyboardCodes make = usb_keyboard.deq_make();
-    if (make == KeyboardCodes::NoKey) {
-      break;
-    }
-    ps2_keyboard.enq_make(make);
-  }
-
-  while (true) {
-    KeyboardCodes brk = usb_mouse_keyboard.deq_brk();
-    if (brk == KeyboardCodes::NoKey) {
-      break;
-    }
-    ps2_keyboard.enq_brk(brk);
-  }
-
-  while (true) {
-    KeyboardCodes brk = usb_keyboard.deq_brk();
+    KeyboardCodes brk = combined_keyboard.deq_brk();
     if (brk == KeyboardCodes::NoKey) {
       break;
     }
@@ -159,32 +148,20 @@ inline void sync_keyboard_state() {
 }
 
 inline void sync_mouse_state() {
-  uint8_t prev_version_counter[2];
-  prev_version_counter[0] = usb_mouse_state[0].version_counter;
-  prev_version_counter[1] = usb_mouse_state[1].version_counter;
-  usb_mouse_state[0] = usb_mouse_keyboard.pop_state();
-  usb_mouse_state[1] = usb_mouse.pop_state();
-  if ((usb_mouse_state[0].version_counter == prev_version_counter[0]) &&
-      (usb_mouse_state[1].version_counter == prev_version_counter[1])) {
+  uint8_t prev_version_counter = mouse_state.version_counter;
+  mouse_state = combined_mouse.pop_state();
+  if (mouse_state.version_counter == prev_version_counter) {
     return;
   }
 
-  ps2_mouse_state.d_x = usb_mouse_state[0].d_x + usb_mouse_state[1].d_x;
-  // y is inverted
-  ps2_mouse_state.d_y = -(usb_mouse_state[0].d_y + usb_mouse_state[1].d_y);
-  // wheel is inverted
-  ps2_mouse_state.d_wheel =
-      -(usb_mouse_state[0].d_wheel + usb_mouse_state[1].d_wheel);
-  ps2_mouse_state.button1 =
-      usb_mouse_state[0].button1 | usb_mouse_state[1].button1;
-  ps2_mouse_state.button2 =
-      usb_mouse_state[0].button2 | usb_mouse_state[1].button2;
-  ps2_mouse_state.button3 =
-      usb_mouse_state[0].button3 | usb_mouse_state[1].button3;
-  ps2_mouse_state.button4 =
-      usb_mouse_state[0].button4 | usb_mouse_state[1].button4;
-  ps2_mouse_state.button5 =
-      usb_mouse_state[0].button5 | usb_mouse_state[1].button5;
+  ps2_mouse_state.d_x = mouse_state.d_x;
+  ps2_mouse_state.d_y = -mouse_state.d_y;          // y is inverted
+  ps2_mouse_state.d_wheel = -mouse_state.d_wheel;  // wheel is inverted
+  ps2_mouse_state.button1 = mouse_state.button1;
+  ps2_mouse_state.button2 = mouse_state.button2;
+  ps2_mouse_state.button3 = mouse_state.button3;
+  ps2_mouse_state.button4 = mouse_state.button4;
+  ps2_mouse_state.button5 = mouse_state.button5;
   ps2_mouse.update_state(&ps2_mouse_state);
 }
 

@@ -248,7 +248,7 @@ void PS2Keyboard::task() {
   }
 
   // typematic handling
-  if (!do_make && last_keycode != KeyboardCodes::NoKey) {
+  if (!do_make && last_keycode < KeyboardCodes::Keypad) {
     // wait for typematic delay
     if (typematic_delay_timer.getElapsedMillis() <
         typematic_delay_table[typematic_delay]) {

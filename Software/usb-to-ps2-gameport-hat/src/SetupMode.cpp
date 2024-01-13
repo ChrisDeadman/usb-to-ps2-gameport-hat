@@ -2,8 +2,11 @@
 
 #include "Config.h"
 
-SetupMode::SetupMode(JoystickState* const joystick_state)
-    : joystick_state(joystick_state) {
+#define PRESSED(key) (!(old_key_state & (key)) && (key_state & (key)))
+
+SetupMode::SetupMode(HIDKeyboardCombiner* const keyboard,
+                     JoystickState* const joystick_state)
+    : keyboard(keyboard), joystick_state(joystick_state) {
   key_state = SetupKeys::None;
   item_idx = 0;
   in_setup_mode = false;
@@ -19,12 +22,13 @@ void SetupMode::task() {
   key_state = get_key_state();
 
   // setup mode is triggered by holding down Button5 + Button6 for a second
-  if (!((key_state & SetupKeys::Left) && (key_state & SetupKeys::Right))) {
+  if (!(key_state & SetupKeys::Setup)) {
     setup_timer.reset();
   }
   if (setup_timer.getElapsedMillis() > SETUP_DELAY) {
     in_setup_mode = !in_setup_mode;
     in_edit_mode = false;
+    key_state = SetupKeys::None;
 
     digitalWrite(EXT_LED1_PIN, HIGH);
     digitalWrite(EXT_LED2_PIN, HIGH);
@@ -53,18 +57,15 @@ void SetupMode::task() {
   digitalWrite(EXT_LED2_PIN, !soft_pwm.pwm(get_item_value()));
 
   // toggle edit mode
-  if (!(old_key_state & SetupKeys::Select) && (key_state & SetupKeys::Select)) {
+  if (PRESSED(SetupKeys::Select)) {
     in_edit_mode = !in_edit_mode;
     return;
   }
 
-  int8_t delta =
-      ((!(old_key_state & SetupKeys::Left) && (key_state & SetupKeys::Left))
-           ? -1
-           : 0) +
-      ((!(old_key_state & SetupKeys::Right) && (key_state & SetupKeys::Right))
-           ? 1
-           : 0);
+  // left and right
+  int8_t delta = 0;
+  delta -= PRESSED(SetupKeys::Left) ? 1 : 0;
+  delta += PRESSED(SetupKeys::Right) ? 1 : 0;
 
   // switch through setup items
   if (!in_edit_mode) {
@@ -85,6 +86,33 @@ void SetupMode::task() {
 
 SetupKeys SetupMode::get_key_state() {
   SetupKeys keys = SetupKeys::None;
+
+  if (keyboard->get_modifier_state() ==
+      (ModifierState::ModLeftCtrl | ModifierState::ModLeftShift |
+       ModifierState::ModLeftGUI)) {
+    keys = (SetupKeys)(keys | SetupKeys::Setup);
+  }
+
+  if (joystick_state->buttons[5] && joystick_state->buttons[4]) {
+    keys = (SetupKeys)(keys | SetupKeys::Setup);
+  }
+
+  if (!in_setup_mode) {
+    return keys;
+  }
+
+  KeyboardCodes keycode = keyboard->deq_make();
+  keyboard->deq_brk();
+
+  if (keycode == KeyboardCodes::Return) {
+    keys = (SetupKeys)(keys | SetupKeys::Select);
+  }
+  if (keycode == KeyboardCodes::LeftArrow) {
+    keys = (SetupKeys)(keys | SetupKeys::Left);
+  }
+  if (keycode == KeyboardCodes::RightArrow) {
+    keys = (SetupKeys)(keys | SetupKeys::Right);
+  }
 
   if (joystick_state->buttons[0] || joystick_state->buttons[1]) {
     keys = (SetupKeys)(keys | SetupKeys::Select);

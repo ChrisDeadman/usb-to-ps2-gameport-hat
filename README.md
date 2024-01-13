@@ -42,12 +42,12 @@ LED2 brightness indicates value of current setting.
 
 #### Bindings
 
-| Button                | Function                                   |
-|:----------------------|:-------------------------------------------|
-| Joy5 (R1) + Joy6 (L1) | hold for 1s to enter/exit setup mode       |
-| Joy1 (A)              | edit setting / exit edit mode              |
-| Joy5 (R1)             | next setting / increase value (edit mode)  |
-| Joy6 (L1)             | prev. setting / decrease value (edit mode) |
+| Keyboard          | Joystick/Gamepad      | Function                                   |
+|:----------------|:----------------------|:-------------------------------------------|
+| CTRL+SHIFT+WIN  | Joy5 (R1) + Joy6 (L1) | hold for 1s to enter/exit setup mode       |
+| Return          | Joy1 (A)              | edit setting / exit edit mode              |
+| Right Arrow     | Joy5 (R1)             | next setting / increase value (edit mode)  |
+| Left Arrow      | Joy6 (L1)             | prev. setting / decrease value (edit mode) |
 
 #### Settings
 

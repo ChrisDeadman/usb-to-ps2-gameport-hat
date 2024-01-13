@@ -1,9 +1,8 @@
 #ifndef _LOGGING_H_
 #define _LOGGING_H_
 
-#include "HIDKeyboardController.h"
-#include "HIDMouseController.h"
-#include "HIDMouseKeyboardController.h"
+#include "HIDKeyboardCombiner.h"
+#include "HIDMouseCombiner.h"
 #include "JoystickManager.h"
 #include "PS2Keyboard.h"
 #include "PS2Mouse.h"
@@ -11,18 +10,16 @@
 
 class Logging {
  private:
-  HIDKeyboardController* const usb_mouse_keyboard;
-  HIDKeyboardController* const usb_keyboard;
-  HIDMouseController* const usb_mouse;
+  HIDKeyboardCombiner* const usb_keyboard;
+  HIDMouseCombiner* const usb_mouse;
   JoystickManager* const joystick_manager;
   PS2Keyboard* const ps2_keyboard;
   PS2Mouse* const ps2_mouse;
   SetupMode* const setup_mode;
 
  public:
-  Logging(HIDKeyboardController* const usb_mouse_keyboard,
-          HIDKeyboardController* const usb_keyboard,
-          HIDMouseController* const usb_mouse,
+  Logging(HIDKeyboardCombiner* const usb_keyboard,
+          HIDMouseCombiner* const usb_mouse,
           JoystickManager* const joystick_manager,
           PS2Keyboard* const ps2_keyboard, PS2Mouse* const ps2_mouse,
           SetupMode* const setup_mode);

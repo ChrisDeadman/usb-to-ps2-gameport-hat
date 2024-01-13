@@ -40,14 +40,12 @@ void print_and_flush_buffer() {
   }
 }
 
-Logging::Logging(HIDKeyboardController* const usb_mouse_keyboard,
-                 HIDKeyboardController* const usb_keyboard,
-                 HIDMouseController* const usb_mouse,
+Logging::Logging(HIDKeyboardCombiner* const usb_keyboard,
+                 HIDMouseCombiner* const usb_mouse,
                  JoystickManager* const joystick_manager,
                  PS2Keyboard* const ps2_keyboard, PS2Mouse* const ps2_mouse,
                  SetupMode* const setup_mode)
-    : usb_mouse_keyboard(usb_mouse_keyboard),
-      usb_keyboard(usb_keyboard),
+    : usb_keyboard(usb_keyboard),
       usb_mouse(usb_mouse),
       joystick_manager(joystick_manager),
       ps2_keyboard(ps2_keyboard),
@@ -95,8 +93,7 @@ void Logging::log_status() {
   log_buffer->concatln("PS/2 keyboard status");
   log_buffer->concatln("-----------------");
   log_buffer->concat("connected: ")
-      ->concatln("%u", usb_mouse_keyboard->is_connected() ||
-                           usb_keyboard->is_connected());
+      ->concatln("%u", usb_keyboard->is_connected());
   log_buffer->concat("clock: ")->concatln(
       "%u", digitalRead(ps2_keyboard->port->clock_pin));
   log_buffer->concat("data: ")->concatln(
@@ -108,9 +105,7 @@ void Logging::log_status() {
   log_buffer->concatln("-----------------");
   log_buffer->concatln("PS/2 mouse status");
   log_buffer->concatln("-----------------");
-  log_buffer->concat("connected: ")
-      ->concatln("%u", usb_mouse_keyboard->is_connected() ||
-                           usb_mouse->is_connected());
+  log_buffer->concat("connected: ")->concatln("%u", usb_mouse->is_connected());
   log_buffer->concat("device id: ")->concatln("%d", ps2_mouse->get_device_id());
   log_buffer->concat("clock: ")->concatln(
       "%u", digitalRead(ps2_mouse->port->clock_pin));
