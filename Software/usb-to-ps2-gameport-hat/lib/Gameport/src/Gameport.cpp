@@ -1,11 +1,6 @@
 #include "Gameport.h"
 
-inline void spiTransfer(uint8_t csPin, uint8_t address, uint8_t data) {
-  digitalWrite(csPin, LOW);
-  SPI.transfer(address);
-  SPI.transfer(data);
-  digitalWrite(csPin, HIGH);
-}
+static void spiTransfer(uint8_t csPin, uint8_t address, uint8_t data);
 
 Gameport::Gameport(uint8_t potCsPin, uint8_t button1Pin, uint8_t button2Pin,
                    uint8_t button3Pin, uint8_t button4Pin)
@@ -50,4 +45,11 @@ void Gameport::setAxes(uint8_t axis1, uint8_t axis2, uint8_t axis3,
   spiTransfer(POT_CS_PIN, W3_ADDRESS, AXIS_TO_POT_VALUE(axis3));
   spiTransfer(POT_CS_PIN, W4_ADDRESS, AXIS_TO_POT_VALUE(axis4));
   SPI.endTransaction();
+}
+
+static void spiTransfer(uint8_t csPin, uint8_t address, uint8_t data) {
+  digitalWrite(csPin, LOW);
+  SPI.transfer(address);
+  SPI.transfer(data);
+  digitalWrite(csPin, HIGH);
 }

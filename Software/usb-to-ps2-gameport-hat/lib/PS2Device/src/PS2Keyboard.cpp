@@ -280,13 +280,13 @@ void PS2Keyboard::task() {
   }
 }
 
-inline void PS2Keyboard::send_toHost(const uint8_t* data, uint8_t len) {
+void PS2Keyboard::send_toHost(const uint8_t* data, uint8_t len) {
   memcpy(send_buffer, data, len);
   send_buffer_idx = 0;
   send_buffer_len = len;
 }
 
-inline void PS2Keyboard::handle_active_command(uint8_t data_byte) {
+void PS2Keyboard::handle_active_command(uint8_t data_byte) {
   switch (active_command) {
     // Set Typematic Rate/Delay
     case (0xF3):
@@ -323,7 +323,7 @@ inline void PS2Keyboard::handle_active_command(uint8_t data_byte) {
   }
 }
 
-inline void PS2Keyboard::handle_new_command(uint8_t data_byte) {
+void PS2Keyboard::handle_new_command(uint8_t data_byte) {
   // clear state after every command
   make_buffer.clear();
   brk_buffer.clear();

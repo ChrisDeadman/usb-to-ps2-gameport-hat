@@ -102,7 +102,7 @@ void PS2Mouse::task() {
   sample_timer.reset();
 }
 
-inline void PS2Mouse::send_toHost(const uint8_t* data, uint8_t len) {
+void PS2Mouse::send_toHost(const uint8_t* data, uint8_t len) {
   for (uint8_t idx = 0; idx < len; idx++) {
     send_buffer[idx] = data[idx];
   }
@@ -110,7 +110,7 @@ inline void PS2Mouse::send_toHost(const uint8_t* data, uint8_t len) {
   send_buffer_len = len;
 }
 
-inline void PS2Mouse::handle_active_command(uint8_t data_byte) {
+void PS2Mouse::handle_active_command(uint8_t data_byte) {
   switch (active_command) {
     // Wrap Mode
     case (0xEE):
@@ -186,7 +186,7 @@ inline void PS2Mouse::handle_active_command(uint8_t data_byte) {
   }
 }
 
-inline void PS2Mouse::handle_new_command(uint8_t data_byte) {
+void PS2Mouse::handle_new_command(uint8_t data_byte) {
   uint8_t packet[5];  // prepare packet buffer
   uint8_t packet_len;
 

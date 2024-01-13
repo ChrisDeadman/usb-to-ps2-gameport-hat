@@ -1,15 +1,6 @@
 #include "HIDMouseController.h"
 
-inline int8_t add_delta(int8_t value, int8_t delta) {
-  int16_t result = (int16_t)value + delta;
-  if (result > 128) {
-    return 128;
-  } else if (result < -127) {
-    return -127;
-  } else {
-    return (int8_t)(value + delta);
-  }
-}
+static int8_t add_delta(int8_t value, int8_t delta);
 
 HIDMouseController::HIDMouseController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
@@ -66,4 +57,15 @@ void HIDMouseController::reset_state() {
   state.button3 = 0;
   state.button4 = 0;
   state.button5 = 0;
+}
+
+static int8_t add_delta(int8_t value, int8_t delta) {
+  int16_t result = (int16_t)value + delta;
+  if (result > 128) {
+    return 128;
+  } else if (result < -127) {
+    return -127;
+  } else {
+    return (int8_t)(value + delta);
+  }
 }

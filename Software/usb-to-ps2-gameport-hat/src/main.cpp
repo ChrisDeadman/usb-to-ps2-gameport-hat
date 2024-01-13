@@ -50,9 +50,9 @@ SetupMode setup_mode(&combined_keyboard, &gameport_state);
 Logging logging(&combined_keyboard, &combined_mouse, &joystick_manager,
                 &ps2_keyboard, &ps2_mouse, &setup_mode);
 
-inline void sync_keyboard_state();
-inline void sync_mouse_state();
-inline void sync_gameport_state();
+static void sync_keyboard_state();
+static void sync_mouse_state();
+static void sync_gameport_state();
 
 void setup() {
   digitalWrite(EXT_LED1_PIN, HIGH);
@@ -120,7 +120,7 @@ void loop() {
   }
 }
 
-inline void sync_keyboard_state() {
+static void sync_keyboard_state() {
   combined_keyboard.set_led_state(ps2_keyboard.get_led_state());
 
   while (true) {
@@ -140,7 +140,7 @@ inline void sync_keyboard_state() {
   }
 }
 
-inline void sync_mouse_state() {
+static void sync_mouse_state() {
   uint8_t prev_version_counter = mouse_state.version_counter;
   mouse_state = combined_mouse.pop_state();
   if (mouse_state.version_counter == prev_version_counter) {
@@ -158,7 +158,7 @@ inline void sync_mouse_state() {
   ps2_mouse.update_state(&ps2_mouse_state);
 }
 
-inline void sync_gameport_state() {
+static void sync_gameport_state() {
   bool changed = false;
   uint8_t num_joy_devices = min(joystick_manager.getNumConnectedDevices(), 2);
   for (uint8_t idx = 0; idx < num_joy_devices; idx++) {
