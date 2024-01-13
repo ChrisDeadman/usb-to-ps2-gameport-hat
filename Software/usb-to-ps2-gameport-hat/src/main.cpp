@@ -60,16 +60,16 @@ void setup() {
   pinMode(EXT_LED1_PIN, OUTPUT);
   pinMode(EXT_LED2_PIN, OUTPUT);
   usb.Init();
-  delay(2000);  // wait until USB devices are ready
+  delay(1000);  // wait a second for USB devices to be ready
   usb.Task();
   PS2Port::init();
   ps2_keyboard.init();
-  ps2_keyboard.reset();
   ps2_mouse.init();
-  ps2_mouse.reset();
   gameport.init();
   logging.init();
   watchdog.init();
+  ps2_keyboard.reset();
+  ps2_mouse.reset();
 }
 
 void loop() {
@@ -84,19 +84,12 @@ void loop() {
     return;
   }
 
-  // NOTE1: There seems to be some interrupt nesting issues between timer
-  // interrupts and USB (freeze causes watchdog reset), so IRQs are
-  // disabled here during USB operation.
-  // NOTE2: lower USB_XFER_TIMEOUT (e.g. to 1000) in UsbCore.h,
+  // NOTE: lower USB_XFER_TIMEOUT (e.g. to 1000) in UsbCore.h,
   // otherwise this may take longer than the watchdog timeout.
-  PS2Port::disable_clock_irq();
-  //
   usb.Task();         // handle usb task
   logging.task();     // handle logging task
   setup_mode.task();  // handle setup task
   sync_gameport_state();
-  //
-  PS2Port::enable_clock_irq();
 
   // don't do any more stuff if in setup mode
   if (setup_mode.in_setup_mode) {
@@ -169,10 +162,9 @@ inline void sync_gameport_state() {
   bool changed = false;
   uint8_t num_joy_devices = min(joystick_manager.getNumConnectedDevices(), 2);
   for (uint8_t idx = 0; idx < num_joy_devices; idx++) {
-    JoystickState deviceState = joystick_manager.getControllerState(idx);
-    changed |=
-        deviceState.version_counter != joystick_states[idx].version_counter;
-    joystick_states[idx] = deviceState;
+    JoystickState state = joystick_manager.getControllerState(idx);
+    changed |= state.version_counter != joystick_states[idx].version_counter;
+    joystick_states[idx] = state;
   }
   if (!changed) {
     return;

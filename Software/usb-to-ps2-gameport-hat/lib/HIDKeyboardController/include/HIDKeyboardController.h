@@ -71,9 +71,6 @@ class HIDKeyboardController : virtual public HIDReportParser {
    * Called by the HID driver whenever there are changes.
    */
   virtual void Parse(HID *hid, uint32_t is_rpt_id, uint32_t len, uint8_t *buf);
-
- private:
-  void reset_state();
 };
 
 #endif  // HID_KEYBOARD_CONTROLLER_H
