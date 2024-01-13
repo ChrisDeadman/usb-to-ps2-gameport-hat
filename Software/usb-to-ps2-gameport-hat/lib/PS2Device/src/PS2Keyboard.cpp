@@ -148,6 +148,7 @@ static const uint16_t typematic_rate_table[] = {
     233, 250, 270, 303, 333, 370, 400, 435, 476, 500};
 
 static uint8_t get_keycode_entry_len(const uint8_t* entry, uint8_t size);
+static bool requires_typematic_handling(KeyboardCodes key_code);
 
 PS2Keyboard::PS2Keyboard(PS2Port* port) : PS2Device(port) { set_defaults(); }
 
@@ -229,7 +230,9 @@ void PS2Keyboard::task() {
     // send make packet
     const uint8_t* packet = keycode_table[last_keycode].make;
     uint8_t packet_len = get_keycode_entry_len(packet, MAX_MAKE_PACKET_SIZE);
-    send_toHost(packet, packet_len);
+    if (packet_len > 0) {
+      send_toHost(packet, packet_len);
+    }
   }
   // handle break
   else if (do_brk) {
@@ -244,11 +247,13 @@ void PS2Keyboard::task() {
     // send break packet
     const uint8_t* packet = keycode_table[keycode].brk;
     uint8_t packet_len = get_keycode_entry_len(packet, MAX_BRK_PACKET_SIZE);
-    send_toHost(packet, packet_len);
+    if (packet_len > 0) {
+      send_toHost(packet, packet_len);
+    }
   }
 
   // typematic handling
-  if (!do_make && last_keycode < KeyboardCodes::Keypad) {
+  if (!do_make && requires_typematic_handling(last_keycode)) {
     // wait for typematic delay
     if (typematic_delay_timer.getElapsedMillis() <
         typematic_delay_table[typematic_delay]) {
@@ -263,7 +268,9 @@ void PS2Keyboard::task() {
     // send make packet
     const uint8_t* packet = keycode_table[last_keycode].make;
     uint8_t packet_len = get_keycode_entry_len(packet, MAX_MAKE_PACKET_SIZE);
-    send_toHost(packet, packet_len);
+    if (packet_len > 0) {
+      send_toHost(packet, packet_len);
+    }
 
     // apply typematic rate again on next repeat
     typematic_rate_timer.reset();
@@ -395,4 +402,12 @@ static uint8_t get_keycode_entry_len(const uint8_t* entry, uint8_t size) {
   }
 
   return len;
+}
+
+static bool requires_typematic_handling(KeyboardCodes key_code) {
+  if (key_code > KeyboardCodes::F15) {
+    return false;
+  }
+  return get_keycode_entry_len(keycode_table[key_code].brk,
+                               MAX_BRK_PACKET_SIZE) > 0;
 }
