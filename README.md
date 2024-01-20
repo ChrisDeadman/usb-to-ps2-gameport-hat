@@ -34,6 +34,13 @@ Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gamepor
 * Use an USB OTG cable to connect your USB device to the arduino  
   **Recommended:** Connect an active USB Hub to the arduino if you want to use multiple USB devices
 
+### LEDs
+
+* LED1 is ON if host inhibits any PS/2 port
+* LED1 is FLASHING if data is transferred over any PS/2 port
+* LED2 indicates joy button press or highest axis value
+
+
 ### Setup Mode
 
 LED1 blink count indicates current setting.  
@@ -56,6 +63,7 @@ LED2 indicates value of current setting.
 | 1           | Swap joy axis 3 and 4 | ON       |
 
 ## Developer Notes
+
 * Diagnostic information is available via "Debug Conn." @ 115200 8N1  
   *Sent/Received data + Status is returned by sending any character.*
 * Debugging messages for USB can be enabled by by uncommenting **#define DEBUG_USB_HOST 1** in **USB.h** (part of the used platform library)

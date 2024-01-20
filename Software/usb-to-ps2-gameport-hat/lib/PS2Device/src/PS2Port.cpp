@@ -35,7 +35,7 @@ void TC5_Handler() {
       // Sub-Clock:
       // negative values (used for delay): HIGH
       // 0: HIGH
-      // 1: HIGH -> ps2Clock() is called here
+      // 1: HIGH -> on_clock() is called here
       // 2: LOW
       // 3: LOW
       uint8_t clk = (port->sub_clock < 2) ? HIGH : LOW;
@@ -66,8 +66,8 @@ void TC5_Handler() {
   TC->INTFLAG.bit.MC0 = 1;
 }
 
-PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin, uint8_t status_pin)
-    : observer(NULL), clock_pin(clock_pin), data_pin(data_pin), status_pin(status_pin) {
+PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin)
+    : observer(NULL), clock_pin(clock_pin), data_pin(data_pin) {
   assert(num_ports < MAX_PORTS);
   ports[num_ports] = this;
   ++num_ports;
@@ -75,27 +75,23 @@ PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin, uint8_t status_pin)
 
 void PS2Port::enable_clock() {
   sub_clock = 0;
-  if (!clock_enabled) {
-    clock_enabled = true;
-    digitalWrite(status_pin, LOW);  // status LED
-  }
+  clock_enabled = true;
 }
 
 void PS2Port::disable_clock() {
-  if (clock_enabled) {
-    clock_enabled = false;
-    sub_clock = 0;
-    digitalWrite(clock_pin, HIGH);   // release clock pin
-    digitalWrite(data_pin, HIGH);    // release data pin
-    digitalWrite(status_pin, HIGH);  // status LED
-  }
+  clock_enabled = false;
+  sub_clock = 0;
+  digitalWrite(clock_pin, HIGH);  // release clock pin
+  digitalWrite(data_pin, HIGH);   // release data pin
 }
 
 bool PS2Port::read() { return (digitalRead(data_pin) == HIGH) ? true : false; }
 
 void PS2Port::write(bool bit) { return digitalWrite(data_pin, bit ? HIGH : LOW); }
 
-void PS2Port::set_observer(PS2PortObserver* const observer) { this->observer = observer; }
+void PS2Port::set_observer(PS2PortObserver* const observer) {
+  this->observer = observer;
+}
 
 void PS2Port::on_clock() {
   if (observer != NULL) {
@@ -117,7 +113,8 @@ void PS2Port::on_host_rts() {
 
 void PS2Port::init() {
   // clock the TC with the core cpu clock (48MHz)
-  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5);
+  GCLK->CLKCTRL.reg =
+      GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5);
   while (GCLK->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
 

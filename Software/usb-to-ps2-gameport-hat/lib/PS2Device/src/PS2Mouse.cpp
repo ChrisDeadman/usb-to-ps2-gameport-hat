@@ -80,7 +80,7 @@ void PS2Mouse::task() {
   }
 
   // don't send movement data if
-  if (!state_changed ||  // there is no change
+  if (!state_changed ||       // there is no change
       !streaming_mode ||      // or streaming mode is disabled
       !data_reporting ||      // or data reporting is disabled
       (active_command != 0))  // or an active command is being processed
@@ -298,7 +298,7 @@ uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet
     abs_y = apply_2x1_scaling(abs_y);
   }
 
-  packet[0] = 1 << 3;                                // bit3 is always 1
+  packet[0] = 1 << 3;                                   // bit3 is always 1
   packet[1] = (state.d_x >= 0) ? abs_x : (~abs_x + 1);  // two's complement
   packet[2] = (state.d_y >= 0) ? abs_y : (~abs_y + 1);  // two's complement
 

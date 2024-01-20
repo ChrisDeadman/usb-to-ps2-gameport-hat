@@ -6,11 +6,9 @@ PS2Device::PS2Device(PS2Port* const port)
 void PS2Device::init() {
   digitalWrite(port->clock_pin, HIGH);
   digitalWrite(port->data_pin, HIGH);
-  digitalWrite(port->status_pin, HIGH);
 
   pinMode(port->clock_pin, OUTPUT);
   pinMode(port->data_pin, OUTPUT);
-  pinMode(port->status_pin, OUTPUT);
 
   port->set_observer(this);
 }
@@ -31,10 +29,7 @@ void PS2Device::on_clock() {
 void PS2Device::on_inhibit() {
   receiver.end_receive();
   sender.resend();
-  if (sender.is_sending()) {
-    digitalWrite(port->status_pin, LOW);  // status LED
-    time_last_inhibit = millis();
-  }
+  time_last_inhibit = millis();
 }
 
 void PS2Device::on_host_rts() {

@@ -1,8 +1,7 @@
 #include "PS2Receiver.h"
 
 extern "C" {
-void __ps2_dummy_received_callback(uint8_t pin, uint8_t data, bool valid) {
-}
+void __ps2_dummy_received_callback(uint8_t pin, uint8_t data, bool valid) {}
 }
 /**
  * implement in your code if you want to capture packages.

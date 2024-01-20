@@ -16,8 +16,7 @@ Watchdog watchdog;
 #include "JoystickManager.h"
 USBHost usb;
 USBHub usb_hub(&usb);  // so we can support controllers connected via hubs
-HIDBoot<HID_PROTOCOL_MOUSE | HID_PROTOCOL_KEYBOARD> hid_mouse_keyboard_driver(
-    &usb);
+HIDBoot<HID_PROTOCOL_MOUSE | HID_PROTOCOL_KEYBOARD> hid_mouse_keyboard_driver(&usb);
 HIDMouseKeyboardController usb_mouse_keyboard(&hid_mouse_keyboard_driver);
 HIDBoot<HID_PROTOCOL_MOUSE> hid_mouse_driver(&usb);
 HIDMouseController usb_mouse(&hid_mouse_driver);
@@ -32,15 +31,15 @@ HIDMouseState mouse_state;
 #include "PS2Keyboard.h"
 #include "PS2Mouse.h"
 #include "PS2Port.h"
-PS2Port ps2_keyboard_port(PS2_2_CLOCK_PIN, PS2_2_DATA_PIN, EXT_LED1_PIN);
+PS2Port ps2_keyboard_port(PS2_2_CLOCK_PIN, PS2_2_DATA_PIN);
 PS2Keyboard ps2_keyboard(&ps2_keyboard_port);
-PS2Port ps2_mouse_port(PS2_1_CLOCK_PIN, PS2_1_DATA_PIN, EXT_LED1_PIN);
+PS2Port ps2_mouse_port(PS2_1_CLOCK_PIN, PS2_1_DATA_PIN);
 PS2Mouse ps2_mouse(&ps2_mouse_port);
 PS2MouseState ps2_mouse_state;
 
 #include "Gameport.h"
-Gameport gameport(POT1_CS_PIN, JOY_BUTTON1_PIN, JOY_BUTTON2_PIN,
-                  JOY_BUTTON3_PIN, JOY_BUTTON4_PIN);
+Gameport gameport(POT1_CS_PIN, JOY_BUTTON1_PIN, JOY_BUTTON2_PIN, JOY_BUTTON3_PIN,
+                  JOY_BUTTON4_PIN);
 JoystickState gameport_state;
 
 #include "SetupMode.h"
@@ -53,6 +52,7 @@ Logging logging(&combined_keyboard, &combined_mouse, &joystick_manager,
 static void sync_keyboard_state();
 static void sync_mouse_state();
 static void sync_gameport_state();
+static void update_led_state();
 
 void setup() {
   digitalWrite(EXT_LED1_PIN, HIGH);
@@ -86,38 +86,19 @@ void loop() {
 
   // NOTE: lower USB_XFER_TIMEOUT (e.g. to 1000) in UsbCore.h,
   // otherwise this may take longer than the watchdog timeout.
-  usb.Task();         // handle usb task
-  logging.task();     // handle logging task
-  setup_mode.task();  // handle setup task
-  sync_gameport_state();
+  usb.Task();             // handle usb task
+  logging.task();         // handle logging task
+  setup_mode.task();      // handle setup task
+  sync_gameport_state();  // also needed for setup mode
 
   // don't do any more stuff if in setup mode
   if (setup_mode.in_setup_mode) {
     return;
   }
 
-  // sync PS/2 states
   sync_keyboard_state();
   sync_mouse_state();
-
-  // EXT_LED2 indicates button press
-  bool button_pressed = false;
-  for (uint8_t button = 0; button < 6; button++) {
-    button_pressed |= gameport_state.buttons[button];
-  }
-  if (button_pressed) {
-    digitalWrite(EXT_LED2_PIN, LOW);
-  } else {
-    // or highest axis value
-    uint8_t highest_axis_value = 0;
-    for (uint8_t axis = 0; axis < 4; axis++) {
-      uint8_t axisValue = abs((int16_t)gameport_state.axes[axis] - 0x80);
-      if (axisValue > highest_axis_value) {
-        highest_axis_value = axisValue;
-      }
-    }
-    digitalWrite(EXT_LED2_PIN, !soft_pwm.pwm(highest_axis_value));
-  }
+  update_led_state();
 }
 
 static void sync_keyboard_state() {
@@ -196,4 +177,33 @@ static void sync_gameport_state() {
                    gameport_state.axes[2], gameport_state.axes[3]);
   gameport.setButtons(gameport_state.buttons[0], gameport_state.buttons[1],
                       gameport_state.buttons[2], gameport_state.buttons[3]);
+}
+
+static void update_led_state() {
+  // EXT_LED1 indicates PS/2 status
+  digitalWrite(
+      EXT_LED1_PIN,
+      (ps2_keyboard_port.clock_enabled || ps2_keyboard_port.clock_inhibited ||
+       ps2_mouse_port.clock_enabled || ps2_mouse_port.clock_inhibited)
+          ? LOW
+          : HIGH);
+
+  // EXT_LED2 indicates button press
+  bool button_pressed = false;
+  for (uint8_t button = 0; button < 6; button++) {
+    button_pressed |= gameport_state.buttons[button];
+  }
+  if (button_pressed) {
+    digitalWrite(EXT_LED2_PIN, LOW);
+  } else {
+    // or highest axis value
+    uint8_t highest_axis_value = 0;
+    for (uint8_t axis = 0; axis < 4; axis++) {
+      uint8_t axisValue = abs((int16_t)gameport_state.axes[axis] - 0x80);
+      if (axisValue > highest_axis_value) {
+        highest_axis_value = axisValue;
+      }
+    }
+    digitalWrite(EXT_LED2_PIN, !soft_pwm.pwm(highest_axis_value));
+  }
 }

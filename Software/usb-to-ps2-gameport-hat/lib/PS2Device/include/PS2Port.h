@@ -7,14 +7,13 @@
 
 class PS2Port {
  private:
-  PS2PortObserver * observer;
+  PS2PortObserver *observer;
 
  public:
-  PS2Port(uint8_t clock_pin, uint8_t data_pin, uint8_t status_pin);
+  PS2Port(uint8_t clock_pin, uint8_t data_pin);
 
   const uint8_t clock_pin;
   const uint8_t data_pin;
-  const uint8_t status_pin;
 
   /**
    *  ISR vars

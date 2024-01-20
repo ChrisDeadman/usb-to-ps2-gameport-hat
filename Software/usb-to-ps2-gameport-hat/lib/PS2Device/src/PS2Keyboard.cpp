@@ -143,9 +143,8 @@ static const uint16_t typematic_delay_table[] = {250, 500, 750, 1000};
 
 // milliseconds between characters
 static const uint16_t typematic_rate_table[] = {
-    33,  37,  42,  46,  48,  54,  58,  62,  67,  75,  83,
-    92,  100, 109, 116, 125, 133, 149, 167, 182, 200, 217,
-    233, 250, 270, 303, 333, 370, 400, 435, 476, 500};
+    33,  37,  42,  46,  48,  54,  58,  62,  67,  75,  83,  92,  100, 109, 116, 125,
+    133, 149, 167, 182, 200, 217, 233, 250, 270, 303, 333, 370, 400, 435, 476, 500};
 
 static uint8_t get_keycode_entry_len(const uint8_t* entry, uint8_t size);
 static bool requires_typematic_handling(KeyboardCodes key_code);
@@ -408,6 +407,5 @@ static bool requires_typematic_handling(KeyboardCodes key_code) {
   if (key_code > KeyboardCodes::F15) {
     return false;
   }
-  return get_keycode_entry_len(keycode_table[key_code].brk,
-                               MAX_BRK_PACKET_SIZE) > 0;
+  return get_keycode_entry_len(keycode_table[key_code].brk, MAX_BRK_PACKET_SIZE) > 0;
 }
