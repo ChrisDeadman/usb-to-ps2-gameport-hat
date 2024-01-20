@@ -4,57 +4,47 @@
 
 #define PRESSED(key) (!(old_key_state & (key)) && (key_state & (key)))
 
+static bool get_led_blink(unsigned long t_delta, uint8_t count);
+
 SetupMode::SetupMode(HIDKeyboardCombiner* const keyboard,
                      JoystickState* const joystick_state)
     : keyboard(keyboard), joystick_state(joystick_state) {
   key_state = SetupKeys::None;
   item_idx = 0;
   in_setup_mode = false;
+  in_edit_mode = false;
   swap_joy_axis_3_and_4 = true;
+  dummy_value = 0;
 }
 
 void SetupMode::task() {
-  setup_timer.tick();
+  setup_mode_timer.tick();
+  led_update_timer.tick();
   blink_timer.tick();
 
   // menu buttons
   SetupKeys old_key_state = key_state;
   key_state = get_key_state();
 
-  // setup mode is triggered by holding down Button5 + Button6 for a second
+  // setup mode is triggered by holding down the setup key(s) for a duration
   if (!(key_state & SetupKeys::Setup)) {
-    setup_timer.reset();
+    setup_mode_timer.reset();
   }
-  if (setup_timer.getElapsedMillis() > SETUP_DELAY) {
+  if (setup_mode_timer.getElapsedMillis() > SETUP_ENTER_DELAY) {
     in_setup_mode = !in_setup_mode;
     in_edit_mode = false;
     key_state = SetupKeys::None;
-
-    digitalWrite(EXT_LED1_PIN, HIGH);
-    digitalWrite(EXT_LED2_PIN, HIGH);
-
-    setup_timer.reset();
+    set_led_state(in_setup_mode, in_setup_mode);
+    setup_mode_timer.reset();
     blink_timer.reset();
+    led_update_timer.reset();
     return;
   }
 
+  // do nothing if not in setup mode
   if (!in_setup_mode) {
     return;
   }
-
-  // LED1 is blinking in edit mode
-  uint8_t led1_pwm = HIGH;
-  if (blink_timer.getElapsedMillis() > SETUP_DELAY) {
-    blink_timer.reset();
-  }
-  // LED1 brightness indicates item index
-  if (!in_edit_mode || blink_timer.getElapsedMillis() < (SETUP_DELAY / 2)) {
-    led1_pwm = soft_pwm.pwm(item_idx * 0xFF / item_count);
-  }
-  digitalWrite(EXT_LED1_PIN, led1_pwm);
-
-  // LED2 indicates item value
-  digitalWrite(EXT_LED2_PIN, !soft_pwm.pwm(get_item_value()));
 
   // toggle edit mode
   if (PRESSED(SetupKeys::Select)) {
@@ -75,13 +65,43 @@ void SetupMode::task() {
     } else if (item_idx < 0) {
       item_idx = item_count - 1;
     }
-    return;
   }
 
   // update item value
-  if (delta) {
+  if (in_edit_mode && delta != 0) {
     set_item_value(delta);
   }
+
+  // don't update leds too often
+  if (led_update_timer.getElapsedMillis() < SETUP_LED_UPDATE_DELAY) {
+    return;
+  }
+  led_update_timer.reset();
+
+  // A change resets blinking
+  if (delta != 0) {
+    blink_timer.reset();
+  }
+
+  // handle blink timer
+  unsigned long blink_elapsed = blink_timer.getElapsedMillis();
+  if (blink_elapsed > SETUP_BLINK_WINDOW) {
+    blink_timer.reset();
+  }
+
+  // LED1 indicates menu item
+  bool led1 = get_led_blink(blink_elapsed, item_idx + 1);
+
+  // LED2 indicates menu item value
+  uint8_t item_value = get_item_value();
+  bool led2 = get_led_blink(blink_elapsed, item_value);
+  // many people can't count to five
+  if (item_value > 4) {
+    led2 = true;  // display as max value
+  }
+
+  // update led state
+  set_led_state(led1, led2);
 }
 
 SetupKeys SetupMode::get_key_state() {
@@ -97,6 +117,7 @@ SetupKeys SetupMode::get_key_state() {
     keys = (SetupKeys)(keys | SetupKeys::Setup);
   }
 
+  // don't consume keys if not in setup mode
   if (!in_setup_mode) {
     return keys;
   }
@@ -127,20 +148,44 @@ SetupKeys SetupMode::get_key_state() {
   return keys;
 }
 
+void SetupMode::set_led_state(bool led1, bool led2) {
+  digitalWrite(EXT_LED1_PIN, (led1 | in_edit_mode) ? LOW : HIGH);
+  digitalWrite(EXT_LED2_PIN, led2 ? LOW : HIGH);
+
+  KeyboardLeds kbd_leds = KeyboardLeds::LedNone;
+  if (led1) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedCapsLock);
+  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedScrollLock);
+  if (in_edit_mode) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedNumLock);
+  keyboard->set_led_state(kbd_leds);
+}
+
 uint8_t SetupMode::get_item_value() {
   switch (item_idx) {
     case 0:
-      return swap_joy_axis_3_and_4 ? 0xFF : 0;
+      return swap_joy_axis_3_and_4 ? UINT8_MAX : 0;
     default:
-      return 0;
+      return dummy_value < 0 ? -dummy_value : dummy_value;
   }
 }
 
-void SetupMode::set_item_value(uint8_t delta) {
+void SetupMode::set_item_value(int8_t delta) {
   switch (item_idx) {
     case 0:
       swap_joy_axis_3_and_4 = !swap_joy_axis_3_and_4;
+      break;
     default:
+      dummy_value += delta;
       break;
   }
+}
+
+static bool get_led_blink(unsigned long t_delta, uint8_t count) {
+  unsigned long window = SETUP_BLINK_WINDOW / 2;
+  if (count < 1 || t_delta > window) {
+    return false;
+  }
+
+  unsigned long blink_duration = (window * 2) / count;
+  unsigned long blink_phase = (t_delta * 2) % blink_duration;
+  return blink_phase > (blink_duration / 2);
 }

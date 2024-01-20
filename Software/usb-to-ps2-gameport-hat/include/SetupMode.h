@@ -19,30 +19,31 @@ class SetupMode {
   HIDKeyboardCombiner *const keyboard;
   JoystickState *const joystick_state;
   SetupKeys key_state;
-  SoftTimer setup_timer;
-  SoftTimer input_timer;
+
+  SoftTimer setup_mode_timer;
+  SoftTimer led_update_timer;
   SoftTimer blink_timer;
-  SoftPWM soft_pwm;
 
   const uint8_t item_count = 1;
-  uint8_t item_idx;
-
-  bool in_edit_mode;
+  int8_t item_idx;
 
  public:
   SetupMode(HIDKeyboardCombiner *const keyboard,
             JoystickState *const joystick_state);
 
   bool in_setup_mode;
+  bool in_edit_mode;
 
   bool swap_joy_axis_3_and_4;
+  int8_t dummy_value;
 
   void task();
 
  private:
   SetupKeys get_key_state();
+  void set_led_state(bool led1, bool led2);
   uint8_t get_item_value();
-  void set_item_value(uint8_t value);
+  void set_item_value(int8_t delta);
 };
 
 #endif  // _SETUP_MODE_H_

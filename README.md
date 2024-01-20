@@ -36,9 +36,9 @@ Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gamepor
 
 ### Setup Mode
 
-LED1 brightness indicates current setting.  
-LED1 blinks when in edit mode.  
-LED2 brightness indicates value of current setting.
+LED1 blink count indicates current setting.  
+LED1 is on when in edit mode.  
+LED2 indicates value of current setting.
 
 #### Bindings
 
@@ -51,9 +51,9 @@ LED2 brightness indicates value of current setting.
 
 #### Settings
 
-| LED1 Brightness | Setting               | Default  |
-|:----------------|:----------------------|:--------:|
-| MAX             | Swap joy axis 3 and 4 | Yes      |
+| LED1 Blinks | Setting               | Default  |
+|:------------|:----------------------|:--------:|
+| 1           | Swap joy axis 3 and 4 | ON       |
 
 ## Developer Notes
 * Diagnostic information is available via "Debug Conn." @ 115200 8N1  

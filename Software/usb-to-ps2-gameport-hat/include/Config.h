@@ -22,6 +22,8 @@
 
 #define POT1_CS_PIN 10
 
-#define SETUP_DELAY 1000
+#define SETUP_ENTER_DELAY 1000
+#define SETUP_BLINK_WINDOW 1500
+#define SETUP_LED_UPDATE_DELAY 50
 
 #endif  // _CONFIG_H_
