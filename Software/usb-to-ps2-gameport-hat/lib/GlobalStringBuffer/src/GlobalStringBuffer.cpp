@@ -20,8 +20,9 @@ GlobalStringBuffer* const GlobalStringBuffer::clear() {
 }
 
 GlobalStringBuffer* const GlobalStringBuffer::concat(char const* const str) {
-  uint16_t str_len = min(strlen(str), (size_t)(buffer_length - max_size));
-  if (str_len > 0) {
+  size_t remaining = max_size - buffer_length;
+  if (remaining > 0) {
+    size_t str_len = min(strlen(str), remaining);
     memcpy(&buffer[buffer_length], str, str_len);
     buffer_length += str_len;
     buffer[buffer_length] = 0;

@@ -74,9 +74,12 @@ class GlobalStringBuffer {
 template <typename T>
 GlobalStringBuffer* const GlobalStringBuffer::concat(char const* const format,
                                                      T value) {
-  uint16_t remaining = max_size + 1 - buffer_length;
-  int written = snprintf(&buffer[buffer_length], remaining, format, value);
-  if (written > 0 && written < remaining) {
+  uint16_t remaining = max_size - buffer_length;
+  int written = snprintf(&buffer[buffer_length], remaining + 1, format, value);
+  if (written > remaining) {
+    written = remaining;
+  }
+  if (written > 0) {
     buffer_length += written;
   }
   return this;
