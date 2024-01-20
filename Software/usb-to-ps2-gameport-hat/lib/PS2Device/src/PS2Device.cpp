@@ -16,7 +16,7 @@ void PS2Device::init() {
 }
 
 bool PS2Device::is_busy() {
-  return receiver.is_receiving() || sender.is_sending();
+  return !port->clock_inhibited && (receiver.is_receiving() || sender.is_sending());
 }
 
 unsigned long PS2Device::get_time_last_inhibit() { return time_last_inhibit; }
