@@ -100,8 +100,10 @@ void Logging::log_status() {
   log_buffer->concatln("╠════════════════╝");
   log_buffer->concat("║free memory: ")->concatln("%d", get_free_memory());
   log_buffer->concat("║time: ")->concatln("%lu", t_current);
-  log_buffer->concat("║ext led1: ")->concatln("%u", digitalRead(EXT_LED1_PIN));
-  log_buffer->concat("║ext led2: ")->concatln("%u", digitalRead(EXT_LED2_PIN));
+  log_buffer->concat("║ext led1: ")
+      ->concatln("%u", digitalRead(EXT_LED1_PIN) == LOW);
+  log_buffer->concat("║ext led2: ")
+      ->concatln("%u", digitalRead(EXT_LED2_PIN) == LOW);
   log_buffer->concatln("╠══════════╗");
   log_buffer->concatln("║ Settings ║");
   log_buffer->concatln("╠══════════╝");
@@ -110,8 +112,7 @@ void Logging::log_status() {
   log_buffer->concatln("╠════════════╗");
   log_buffer->concatln("║ USB status ║");
   log_buffer->concatln("╠════════════╝");
-  log_buffer->concat("║last received time: ")
-      ->concatln("%lu", t_usb_last_received);
+  log_buffer->concat("║last received time: ")->concatln("%lu", t_usb_last_received);
   log_buffer->concat("║kbd connected:   ")
       ->concatln("%u", usb_keyboard->is_connected());
   log_buffer->concat("║mouse connected: ")
@@ -120,8 +121,7 @@ void Logging::log_status() {
   log_buffer->concatln("╠═════════════╗");
   log_buffer->concatln("║ PS/2 status ║");
   log_buffer->concatln("╠═════════════╝");
-  log_buffer->concat("║last received time: ")
-      ->concatln("%lu", t_ps2_last_received);
+  log_buffer->concat("║last received time: ")->concatln("%lu", t_ps2_last_received);
   log_buffer->concat("║last sent time:     ")->concatln("%lu", t_ps2_last_sent);
   log_buffer->concatln("╠══════════════════════╗");
   log_buffer->concatln("║ PS/2 keyboard status ║");
@@ -137,8 +137,7 @@ void Logging::log_status() {
   log_buffer->concatln("╠═══════════════════╗");
   log_buffer->concatln("║ PS/2 mouse status ║");
   log_buffer->concatln("╠═══════════════════╝");
-  log_buffer->concat("║device id: ")
-      ->concatln("%d", ps2_mouse->get_device_id());
+  log_buffer->concat("║device id: ")->concatln("%d", ps2_mouse->get_device_id());
   log_buffer->concat("║clock: ")
       ->concatln("%u", digitalRead(ps2_mouse->port->clock_pin));
   log_buffer->concat("║data:  ")
