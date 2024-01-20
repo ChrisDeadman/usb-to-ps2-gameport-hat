@@ -151,28 +151,31 @@ static void sync_gameport_state() {
     return;
   }
 
+  // joy 1 input
   gameport_state.buttons[0] = joystick_states[0].buttons[0];
   gameport_state.buttons[1] = joystick_states[0].buttons[1];
+  gameport_state.buttons[2] = joystick_states[0].buttons[2];
+  gameport_state.buttons[3] = joystick_states[0].buttons[3];
   gameport_state.buttons[4] = joystick_states[0].buttons[4];
   gameport_state.buttons[5] = joystick_states[0].buttons[5];
   gameport_state.axes[0] = joystick_states[0].axes[0];
   gameport_state.axes[1] = joystick_states[0].axes[1];
-  if (num_joy_devices < 2) {
-    gameport_state.buttons[2] = joystick_states[0].buttons[2];
-    gameport_state.buttons[3] = joystick_states[0].buttons[3];
-    if (setup_mode.swap_joy_axis_3_and_4) {
-      gameport_state.axes[2] = joystick_states[0].axes[3];
-      gameport_state.axes[3] = joystick_states[0].axes[2];
-    } else {
-      gameport_state.axes[2] = joystick_states[0].axes[2];
-      gameport_state.axes[3] = joystick_states[0].axes[3];
-    }
+  if (setup_mode.swap_joy_axis_3_and_4) {
+    gameport_state.axes[2] = joystick_states[0].axes[3];
+    gameport_state.axes[3] = joystick_states[0].axes[2];
   } else {
-    gameport_state.buttons[2] = joystick_states[1].buttons[0];
-    gameport_state.buttons[3] = joystick_states[1].buttons[1];
-    gameport_state.axes[2] = joystick_states[1].axes[0];
-    gameport_state.axes[3] = joystick_states[1].axes[1];
+    gameport_state.axes[2] = joystick_states[0].axes[2];
+    gameport_state.axes[3] = joystick_states[0].axes[3];
   }
+
+  // combine joy 2+ inputs
+  for (uint8_t idx = 1; idx < num_joy_devices; idx++) {
+    gameport_state.buttons[2] |= joystick_states[idx].buttons[0];
+    gameport_state.buttons[3] |= joystick_states[idx].buttons[1];
+    gameport_state.axes[2] = (((int16_t)gameport_state.axes[2] - 0x80) + ((int16_t)joystick_states[idx].axes[0] - 0x80) + 0x80);
+    gameport_state.axes[3] = (((int16_t)gameport_state.axes[3] - 0x80) + ((int16_t)joystick_states[idx].axes[1] - 0x80) + 0x80);
+  }
+
   gameport.setAxes(gameport_state.axes[0], gameport_state.axes[1],
                    gameport_state.axes[2], gameport_state.axes[3]);
   gameport.setButtons(gameport_state.buttons[0], gameport_state.buttons[1],

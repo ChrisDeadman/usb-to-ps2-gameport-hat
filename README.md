@@ -3,7 +3,7 @@ Usb => PS/2 & Gameport HAT v1.4 DRAFT
 
 Author: ChrisDeadman
 
-Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gameport joystick with the power of arduino :-)
+Convert USB to PS/2 / Gameport devices with the power of Arduino 🙂
 
 ![Schematic](Schematic.png)
 
@@ -34,18 +34,32 @@ Convert a USB mouse into a PS/2 mouse and/or a USB joystick/gamepad to a gamepor
 * Use an USB OTG cable to connect your USB device to the arduino  
   **Recommended:** Connect an active USB Hub to the arduino if you want to use multiple USB devices
 
+### Joystick / Gamepad Mapping
+
+| Xbox 360*         | USB Joy 1         | USB Joy 2         | Gameport |
+|:------------------|:------------------|:------------------|:---------|
+| X-Axis 1 or D-Pad | X-Axis 1 or D-Pad |                   | X-Axis 1 |
+| Y-Axis 1 or D-Pad | Y-Axis 1 or D-Pad |                   | Y-Axis 1 |
+| X-Axis 2          | X-Axis 2          | X-Axis 1 or D-Pad | X-Axis 2 |
+| Y-Axis 2          | Y-Axis 2          | Y-Axis 2 or D-Pad | Y-Axis 2 |
+| A or R2           | Button 1          |                   | Button 1 |
+| B or L2           | Button 2          |                   | Button 2 |
+| X                 | Button 3          | Button 1          | Button 3 |
+| Y                 | Button 4          | Button 2          | Button 4 |
+
+*_only wireless Xbox 360 dongle supported at the moment_
+
 ### LEDs
 
-* LED1 is ON if host inhibits any PS/2 port
-* LED1 is FLASHING if data is transferred over any PS/2 port
-* LED2 indicates joy button press or highest axis value
-
+* LED1 is ON if host inhibits any PS/2 port.
+* LED1 is FLASHING if data is transferred over any PS/2 port.
+* LED2 indicates joy button press or highest axis value.
 
 ### Setup Mode
 
-LED1 blink count indicates current setting.  
-LED1 is on when in edit mode.  
-LED2 indicates value of current setting.
+* LED1 blink count indicates current setting.  
+* LED1 is on when in edit mode.  
+* LED2 indicates value of current setting.
 
 #### Bindings
 
@@ -79,8 +93,11 @@ Release notes
 =============
 
 ### Usb => PS/2 & Gameport HAT v1.4 DRAFT
-* Rework and document setup mode
 * Add keyboard support
+* Rework and document setup mode
+* Always signal inhibited state with LED1
+* Combine all secondary joy inputs
+* Improve serial logging
 
 ### Usb => PS/2 & Gameport HAT v1.3
 * @Ulfenknulfen: Make secondary PS/2 connector a combined connector
