@@ -45,6 +45,8 @@ KeyboardCodes HIDKeyboardCombiner::deq_brk() {
 
 void HIDKeyboardCombiner::set_led_state(KeyboardLeds state) {
   for (uint8_t i = 0; i < num_controllers; i++) {
-    controllers[i]->set_led_state(state);
+    if (controllers[i]->is_connected()) {
+      controllers[i]->set_led_state(state);
+    }
   }
 }

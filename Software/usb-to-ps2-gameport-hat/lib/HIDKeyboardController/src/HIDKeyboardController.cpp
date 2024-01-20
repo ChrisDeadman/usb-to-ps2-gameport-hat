@@ -236,8 +236,7 @@ static const KeyboardCodes keycode_table[] = {
 };
 
 extern "C" {
-void __usb_kbd_dummy_received_callback(uint8_t const *const data,
-                                       uint8_t length) {}
+void __usb_kbd_dummy_received_callback(uint8_t const *const data, uint8_t length) {}
 }
 /**
  * implement in your code if you want to capture packages.
@@ -255,9 +254,7 @@ HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
 
 bool HIDKeyboardController::is_connected() { return connected; }
 
-ModifierState HIDKeyboardController::get_modifier_state() {
-  return modifier_state;
-};
+ModifierState HIDKeyboardController::get_modifier_state() { return modifier_state; };
 
 KeyboardCodes HIDKeyboardController::deq_make() {
   if (make_buffer.length() <= 0) {
@@ -283,6 +280,7 @@ void HIDKeyboardController::set_led_state(KeyboardLeds state) {
   if (led_state & KeyboardLeds::LedNumLock) report_data |= 0x1;
   if (led_state & KeyboardLeds::LedCapsLock) report_data |= 0x2;
   if (led_state & KeyboardLeds::LedScrollLock) report_data |= 0x4;
+
   driver->SetReport(0, 0, 2, 0, 1, &report_data);
 }
 
