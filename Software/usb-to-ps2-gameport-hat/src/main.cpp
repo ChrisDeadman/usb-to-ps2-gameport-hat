@@ -20,13 +20,13 @@ HIDBoot<HID_PROTOCOL_MOUSE | HID_PROTOCOL_KEYBOARD> hid_mouse_keyboard_driver(&u
 HIDMouseKeyboardController usb_mouse_keyboard(&hid_mouse_keyboard_driver);
 HIDBoot<HID_PROTOCOL_MOUSE> hid_mouse_driver(&usb);
 HIDMouseController usb_mouse(&hid_mouse_driver);
-JoystickManager joystick_manager(&usb);
-JoystickState joystick_states[2];
+HIDMouseCombiner combined_mouse(&usb_mouse_keyboard, &usb_mouse);
+HIDMouseState mouse_state;
 HIDBoot<HID_PROTOCOL_KEYBOARD> hid_keyboard_driver(&usb);
 HIDKeyboardController usb_keyboard(&hid_keyboard_driver);
 HIDKeyboardCombiner combined_keyboard(&usb_mouse_keyboard, &usb_keyboard);
-HIDMouseCombiner combined_mouse(&usb_mouse_keyboard, &usb_mouse);
-HIDMouseState mouse_state;
+JoystickManager joystick_manager(&usb);
+JoystickState joystick_states[2];
 
 #include "PS2Keyboard.h"
 #include "PS2Mouse.h"
