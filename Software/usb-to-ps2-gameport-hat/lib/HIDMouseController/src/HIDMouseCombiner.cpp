@@ -7,11 +7,12 @@ HIDMouseCombiner::HIDMouseCombiner(HIDMouseController *const controller_1,
 }
 
 bool HIDMouseCombiner::is_connected() {
-  bool connected = false;
   for (uint8_t i = 0; i < num_controllers; i++) {
-    connected |= controllers[i]->is_connected();
+    if (controllers[i]->is_connected()) {
+      return true;
+    }
   }
-  return connected;
+  return false;
 }
 
 HIDMouseState HIDMouseCombiner::pop_state() {

@@ -246,13 +246,12 @@ void usb_data_received(uint8_t const *const data, uint8_t length)
 
 HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
-  connected = false;
   modifier_state = ModifierState::ModNone;
   led_state = KeyboardLeds::LedNone;
   memset(prev_state, 0x00, USB_KEYBOARD_KRO);
 }
 
-bool HIDKeyboardController::is_connected() { return connected; }
+bool HIDKeyboardController::is_connected() { return driver->isReady(); }
 
 ModifierState HIDKeyboardController::get_modifier_state() { return modifier_state; };
 
@@ -287,7 +286,6 @@ void HIDKeyboardController::set_led_state(KeyboardLeds state) {
 void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
                                   uint32_t len, uint8_t *buf) {
   usb_data_received(buf, (uint8_t)len);
-  connected = true;
 
   // handle modifier keys
   if (len > 0) {

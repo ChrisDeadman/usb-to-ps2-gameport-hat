@@ -26,7 +26,6 @@ class HIDKeyboardController : virtual public HIDReportParser {
  private:
   HID *driver;
 
-  bool connected;
   ModifierState modifier_state;
   uint8_t prev_state[USB_KEYBOARD_KRO];
   KeyboardLeds led_state;

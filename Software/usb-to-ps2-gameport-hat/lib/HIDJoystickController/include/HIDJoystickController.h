@@ -10,7 +10,6 @@ class HIDJoystickController : HIDUniversal, public HIDReportParser {
   USBHost *const usb;
   HIDDescriptionParser hidParser;
   HIDJoystickControllerState state;
-  bool connected = false;
 
  public:
   HIDJoystickController(USBHost *usb);

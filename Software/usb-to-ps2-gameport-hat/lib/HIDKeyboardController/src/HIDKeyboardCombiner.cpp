@@ -8,11 +8,12 @@ HIDKeyboardCombiner::HIDKeyboardCombiner(
 }
 
 bool HIDKeyboardCombiner::is_connected() {
-  bool connected = false;
   for (uint8_t i = 0; i < num_controllers; i++) {
-    connected |= controllers[i]->is_connected();
+    if (controllers[i]->is_connected()) {
+      return true;
+    }
   }
-  return connected;
+  return false;
 }
 
 ModifierState HIDKeyboardCombiner::get_modifier_state() {

@@ -10,7 +10,6 @@ class HIDMouseController : virtual public HIDReportParser {
  private:
   HID *driver;
 
-  bool connected;
   HIDMouseState state;
 
  public:
