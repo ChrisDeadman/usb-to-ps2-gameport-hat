@@ -1,31 +1,32 @@
 #include "GlobalStringBuffer.h"
 
-inline uint16_t safeSize(uint16_t maxSize, uint16_t offset, uint16_t size) {
-  return (size <= (maxSize - offset)) ? size : (maxSize - offset);
+GlobalStringBuffer::GlobalStringBuffer(uint16_t max_size)
+    : max_size(max_size), buffer(new char[max_size + 1]) {
+  clear();
 }
 
-GlobalStringBuffer::GlobalStringBuffer(uint16_t maxSize)
-    : maxSize(maxSize), buffer(new char[maxSize + 1]) {
-  this->buffer[0] = 0;
-}
-
-GlobalStringBuffer* const GlobalStringBuffer::alloc(uint16_t maxSize) {
-  return new GlobalStringBuffer(maxSize);
+GlobalStringBuffer* const GlobalStringBuffer::alloc(uint16_t max_size) {
+  return new GlobalStringBuffer(max_size);
 }
 
 const char* const GlobalStringBuffer::get() { return buffer; }
 
-uint16_t GlobalStringBuffer::length() { return strlen(buffer); }
-
-bool GlobalStringBuffer::isEmpty() { return length() <= 0; }
+uint16_t GlobalStringBuffer::length() { return buffer_length; }
 
 GlobalStringBuffer* const GlobalStringBuffer::clear() {
   buffer[0] = 0;
+  buffer_length = 0;
   return this;
 }
 
 GlobalStringBuffer* const GlobalStringBuffer::concat(char const* const str) {
-  strncat(buffer, str, safeSize(maxSize, length(), strlen(str)));
+  size_t remaining = max_size - buffer_length;
+  if (remaining > 0) {
+    size_t str_len = min(strlen(str), remaining);
+    memcpy(&buffer[buffer_length], str, str_len);
+    buffer_length += str_len;
+    buffer[buffer_length] = 0;
+  }
   return this;
 }
 

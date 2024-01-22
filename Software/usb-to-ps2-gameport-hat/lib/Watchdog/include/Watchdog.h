@@ -6,7 +6,7 @@ class Watchdog {
   /**
    * Perform the necessary platform setup.
    *
-   * The hard-coded period is 4s.
+   * The hard-coded period is 8s.
    */
   void init();
 

@@ -11,21 +11,8 @@ HIDDescriptionParser::getUsageDescription(uint8_t idx) {
   return &usageDescriptions[idx % usageDescriptionCount];
 }
 
-inline uint8_t scaleValue(uint16_t value,
-                          HIDReportUsageDescription const *const description) {
-  uint16_t logicalMinimum = description->logicalMinimum;
-  uint16_t logicalMaximum = description->logicalMaximum;
-  uint16_t scaleFactor;
-
-  if (logicalMaximum >= logicalMinimum) {
-    scaleFactor = (logicalMaximum - logicalMinimum) + 1;
-    value = value - logicalMinimum;
-  } else {
-    value = logicalMinimum - value;
-    scaleFactor = (logicalMinimum - logicalMaximum) + 1;
-  }
-  return value * (256.0f / scaleFactor);
-}
+static uint8_t scale_value(uint16_t value,
+                          HIDReportUsageDescription const *const description);
 
 uint32_t HIDDescriptionParser::parseHidDataBlock(
     HIDReportUsageDescription const *const description,
@@ -56,7 +43,7 @@ uint32_t HIDDescriptionParser::parseHidDataBlock(
     }
     if (outputLen < outputSize) {
       if (description->usage != 0x39) { /* do not scale HATs */
-        output[outputLen] = scaleValue(curValue, description);
+        output[outputLen] = scale_value(curValue, description);
       } else {
         output[outputLen] = min(curValue, 0xFF);
       }
@@ -334,4 +321,20 @@ uint32_t HIDDescriptionParser::parseDeviceDescriptor(uint8_t address,
   }
 
   return 0;
+}
+
+static uint8_t scale_value(uint16_t value,
+                          HIDReportUsageDescription const *const description) {
+  uint16_t logicalMinimum = description->logicalMinimum;
+  uint16_t logicalMaximum = description->logicalMaximum;
+  uint16_t scaleFactor;
+
+  if (logicalMaximum >= logicalMinimum) {
+    scaleFactor = (logicalMaximum - logicalMinimum) + 1;
+    value = value - logicalMinimum;
+  } else {
+    value = logicalMinimum - value;
+    scaleFactor = (logicalMinimum - logicalMaximum) + 1;
+  }
+  return value * (256.0f / scaleFactor);
 }

@@ -1,64 +1,64 @@
 #include "PS2Port.h"
 
-uint8_t CLOCK_PIN;
-uint8_t DATA_PIN;
-uint8_t STATUS_PIN;
-PS2PortObserver* ps2PortObserver = NULL;
+#include <assert.h>
 
-volatile int8_t platform_sub_clock = 0;
-volatile bool platform_clock_enabled = false;
-volatile bool platform_clock_inhibited = false;
+#define MAX_PORTS 2
+
+PS2Port* ports[MAX_PORTS];
+uint8_t num_ports = 0;
 
 // use TIMER/COUNTER#5
 TcCount16* const TC = (TcCount16*)TC5;
 const IRQn TCIRQn = TC5_IRQn;
 
 void TC5_Handler() {
-  // wait until host releases the clock
-  if (platform_clock_inhibited) {
-    if (digitalRead(CLOCK_PIN) == HIGH) {
-      platform_clock_inhibited = false;
-      digitalWrite(STATUS_PIN, HIGH);  // status pin
-      // Host requests to send
-      if (digitalRead(DATA_PIN) == LOW) {
-        ps2PortObserver->onHostRts();
-      }
-      // According to http://www.burtonsys.com/ps2_chapweske.htm:
-      // "The Clock line must be continuously high for at least 50 microseconds
-      // before the device can begin to transmit its data."
-      //
-      // One sub-clock is 30-50us, so we have to wait an additional cycle.
-      // If still not enough for your platform reduce it further.
-      platform_sub_clock = -1;
-    }
-  } else {
-    // Sub-Clock:
-    // negative values (used for delay): HIGH
-    // 0: HIGH
-    // 1: HIGH -> ps2Clock() is called here
-    // 2: LOW
-    // 3: LOW
-    uint8_t clk = (platform_sub_clock < 2) ? HIGH : LOW;
-    digitalWrite(CLOCK_PIN, clk);
+  for (uint8_t i = 0; i < num_ports; i++) {
+    PS2Port* port = ports[i];
 
-    // check if host inhibits clock
-    if ((clk == HIGH) && (digitalRead(CLOCK_PIN) == LOW)) {
-      platform_clock_inhibited = true;
-      platform_sub_clock = 0;
-      ps2PortObserver->onInhibit();
-      digitalWrite(CLOCK_PIN, HIGH);   // release clock pin
-      digitalWrite(DATA_PIN, HIGH);    // release data pin
-      digitalWrite(STATUS_PIN, LOW);  // status pin
-    }
-    // generate clock
-    else if (platform_clock_enabled) {
-      if (platform_sub_clock == 1) {
-        ps2PortObserver->onClock();
+    // wait until host releases the clock
+    if (port->clock_inhibited) {
+      if (digitalRead(port->clock_pin) == HIGH) {
+        port->clock_inhibited = false;
+        // Host requests to send
+        if (digitalRead(port->data_pin) == LOW) {
+          port->on_host_rts();
+        }
+        // According to http://www.burtonsys.com/ps2_chapweske.htm:
+        // "The Clock line must be continuously high for at least 50
+        // microseconds before the device can begin to transmit its data."
+        //
+        // One sub-clock is 30-50us, so we have to wait an additional cycle.
+        // If still not enough for your platform reduce it further.
+        port->sub_clock = -1;
       }
-      if (platform_sub_clock < 3) {
-        ++platform_sub_clock;
-      } else {
-        platform_sub_clock = 0;
+    } else {
+      // Sub-Clock:
+      // negative values (used for delay): HIGH
+      // 0: HIGH
+      // 1: HIGH -> on_clock() is called here
+      // 2: LOW
+      // 3: LOW
+      uint8_t clk = (port->sub_clock < 2) ? HIGH : LOW;
+      digitalWrite(port->clock_pin, clk);
+
+      // check if host inhibits clock
+      if ((clk == HIGH) && (digitalRead(port->clock_pin) == LOW)) {
+        port->clock_inhibited = true;
+        port->sub_clock = 0;
+        port->on_inhibit();
+        digitalWrite(port->clock_pin, HIGH);  // release clock pin
+        digitalWrite(port->data_pin, HIGH);   // release data pin
+      }
+      // generate clock
+      else if (port->clock_enabled) {
+        if (port->sub_clock == 1) {
+          port->on_clock();
+        }
+        if (port->sub_clock < 3) {
+          ++port->sub_clock;
+        } else {
+          port->sub_clock = 0;
+        }
       }
     }
   }
@@ -66,24 +66,55 @@ void TC5_Handler() {
   TC->INTFLAG.bit.MC0 = 1;
 }
 
-PS2Port::PS2Port(uint8_t clockPin, uint8_t dataPin, uint8_t statusPin) {
-  CLOCK_PIN = clockPin;
-  DATA_PIN = dataPin;
-  STATUS_PIN = statusPin;
+PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin)
+    : observer(NULL), clock_pin(clock_pin), data_pin(data_pin) {
+  assert(num_ports < MAX_PORTS);
+  ports[num_ports] = this;
+  ++num_ports;
+}
+
+void PS2Port::enable_clock() {
+  sub_clock = 0;
+  clock_enabled = true;
+}
+
+void PS2Port::disable_clock() {
+  clock_enabled = false;
+  sub_clock = 0;
+  digitalWrite(clock_pin, HIGH);  // release clock pin
+  digitalWrite(data_pin, HIGH);   // release data pin
+}
+
+bool PS2Port::read() { return (digitalRead(data_pin) == HIGH) ? true : false; }
+
+void PS2Port::write(bool bit) { return digitalWrite(data_pin, bit ? HIGH : LOW); }
+
+void PS2Port::set_observer(PS2PortObserver* const observer) {
+  this->observer = observer;
+}
+
+void PS2Port::on_clock() {
+  if (observer != NULL) {
+    observer->on_clock();
+  }
+}
+
+void PS2Port::on_inhibit() {
+  if (observer != NULL) {
+    observer->on_inhibit();
+  }
+}
+
+void PS2Port::on_host_rts() {
+  if (observer != NULL) {
+    observer->on_host_rts();
+  }
 }
 
 void PS2Port::init() {
-  digitalWrite(CLOCK_PIN, HIGH);
-  digitalWrite(DATA_PIN, HIGH);
-  digitalWrite(STATUS_PIN, HIGH);
-
-  pinMode(CLOCK_PIN, OUTPUT);
-  pinMode(DATA_PIN, OUTPUT);
-  pinMode(STATUS_PIN, OUTPUT);
-
   // clock the TC with the core cpu clock (48MHz)
-  GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 |
-                      GCLK_CLKCTRL_ID(GCM_TC4_TC5);
+  GCLK->CLKCTRL.reg =
+      GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5);
   while (GCLK->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
 
@@ -104,49 +135,21 @@ void PS2Port::init() {
   // enable TC interrupt request
   NVIC_ClearPendingIRQ(TCIRQn);
   NVIC_SetPriority(TCIRQn, 0);
-  enableClockIrq();
+  enable_clock_irq();
   while (TC->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
 }
 
-void PS2Port::registerObserver(PS2PortObserver* const observer) {
-  ps2PortObserver = observer;
-}
-
-void PS2Port::enableClock() {
-  platform_sub_clock = 0;
-  if (!platform_clock_enabled) {
-    platform_clock_enabled = true;
-    digitalWrite(STATUS_PIN, LOW);  // status LED
-  }
-}
-
-void PS2Port::disableClock() {
-  if (platform_clock_enabled) {
-    platform_clock_enabled = false;
-    platform_sub_clock = 0;
-    digitalWrite(CLOCK_PIN, HIGH);  // release clock pin
-    digitalWrite(DATA_PIN, HIGH);   // release data pin
-    digitalWrite(STATUS_PIN, HIGH);  // status LED
-  }
-}
-
-void PS2Port::enableClockIrq() {
+void PS2Port::enable_clock_irq() {
   TC->INTENSET.bit.MC0 = 1;
   NVIC_EnableIRQ(TCIRQn);
   while (TC->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
 }
 
-void PS2Port::disableClockIrq() {
+void PS2Port::disable_clock_irq() {
   NVIC_DisableIRQ(TCIRQn);
   TC->INTENSET.bit.MC0 = 0;
   while (TC->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
-}
-
-bool PS2Port::read() { return (digitalRead(DATA_PIN) == HIGH) ? true : false; }
-
-void PS2Port::write(bool bit) {
-  return digitalWrite(DATA_PIN, bit ? HIGH : LOW);
 }

@@ -1,22 +1,24 @@
 #ifndef _CIRCULAR_BUFFER_H_
 #define _CIRCULAR_BUFFER_H_
 
+#ifdef PIO_UNIT_TESTING
+#include <stdint.h>
+#else
 #include <Arduino.h>
+#endif
+#include <assert.h>
 
+/**
+ * Circular buffer that overflows to null.
+ * `SIZE` must be less than UINT16_MAX.
+ */
 template <typename T, uint16_t SIZE>
 class CircularBuffer {
  private:
   T buffer[SIZE];
 
-  /**
-   * index of the newest value.
-   */
-  uint16_t headIdx;
-
-  /**
-   * index of the oldest value.
-   */
-  uint16_t tailIdx;
+  uint16_t rear_idx;
+  uint16_t front_idx;
 
  public:
   CircularBuffer();
@@ -24,29 +26,34 @@ class CircularBuffer {
   /**
    * Returns the length of the buffer.
    *
-   * After it is filled it will always return 'SIZE' until it's cleared.
+   * Always returns 'SIZE' when filled, until cleared.
    */
   uint16_t length();
 
   /**
-   * Whether all slots of the buffer are filled.
+   * Whether the buffer is completely filled.
    */
-  bool isFilled();
+  bool is_filled();
 
   /**
-   * Puts a new value into the buffer after the newest value.
+   * Add an item to the rear of the buffer.
    *
-   * Overwrites the oldest value if it's full.
+   * Overwrites the rear if filled.
    */
-  void put(T value);
+  void enq(T value);
 
   /**
-   * Returns the value at the given index starting with the oldest value.
+   * Get the front item and remove it from the buffer.
+   */
+  T deq();
+
+  /**
+   * Get the item at the given index, starting at the front.
    */
   T get(uint16_t idx);
 
   /**
-   * Removes all values from the buffer.
+   * Remove all items from the buffer.
    */
   void clear();
 };
@@ -58,34 +65,49 @@ CircularBuffer<T, SIZE>::CircularBuffer() {
 
 template <typename T, uint16_t SIZE>
 uint16_t CircularBuffer<T, SIZE>::length() {
-  return (tailIdx > 0) ? SIZE : (headIdx + 1);
+  if (rear_idx == UINT16_MAX) return 0;
+  uint16_t len = (rear_idx - front_idx) + 1;
+  return len > 0 ? len : SIZE;
 }
 
 template <typename T, uint16_t SIZE>
-bool CircularBuffer<T, SIZE>::isFilled() {
+bool CircularBuffer<T, SIZE>::is_filled() {
   return length() >= SIZE;
 }
 
 template <typename T, uint16_t SIZE>
-void CircularBuffer<T, SIZE>::put(T value) {
-  if (++headIdx >= SIZE) {
-    headIdx = 0;
-    tailIdx = 1;
-  } else if (tailIdx > 0) {
-    tailIdx = (tailIdx + 1) % SIZE;
+void CircularBuffer<T, SIZE>::enq(T value) {
+  rear_idx = (uint16_t)(rear_idx + 1) % SIZE;
+  buffer[rear_idx] = value;
+  if (front_idx == UINT16_MAX) {
+    front_idx = 0;
+  } else if (rear_idx <= front_idx) {
+    front_idx = (uint16_t)(front_idx + 1) % SIZE;
   }
-  buffer[headIdx] = value;
+}
+
+template <typename T, uint16_t SIZE>
+T CircularBuffer<T, SIZE>::deq() {
+  uint16_t len = length();
+  assert(len > 0);
+  T value = buffer[front_idx];
+  if (len > 1) {
+    front_idx = (uint16_t)(front_idx + 1) % SIZE;
+  } else {
+    clear();
+  }
+  return value;
 }
 
 template <typename T, uint16_t SIZE>
 T CircularBuffer<T, SIZE>::get(uint16_t idx) {
-  return buffer[(tailIdx + idx) % SIZE];
+  return buffer[(uint16_t)(front_idx + idx) % SIZE];
 }
 
 template <typename T, uint16_t SIZE>
 void CircularBuffer<T, SIZE>::clear() {
-  headIdx = -1;
-  tailIdx = 0;
+  front_idx = UINT16_MAX;
+  rear_idx = UINT16_MAX;
 }
 
 #endif  //_CIRCULAR_BUFFER_H_

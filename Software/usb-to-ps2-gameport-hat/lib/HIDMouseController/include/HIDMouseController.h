@@ -3,33 +3,40 @@
 
 #include <Arduino.h>
 #include <hidboot.h>
-#include "HIDMouseControllerState.h"
 
-class HIDMouseController : public HIDReportParser {
+#include "HIDMouseState.h"
+
+class HIDMouseController : virtual public HIDReportParser {
  private:
-  HIDBoot<HID_PROTOCOL_MOUSE> hostMouse;
-  HIDMouseControllerState state;
+  HID *driver;
+
+  HIDMouseState state;
 
  public:
-  HIDMouseController(USBHost *usb);
+  HIDMouseController(HID *driver);
+
+  /**
+   * Returns whether a supported device is connected.
+   */
+  virtual bool is_connected();
 
   /**
    * Returns the latest mouse state and resets it.
    *
    * Mouse deltas are summed up until popState is called.
-   * This should be called periodically in the loop() function.
+   * This should be called periodically.
    */
-  HIDMouseControllerState popState();
+  HIDMouseState pop_state();
 
   /**
    * HIDReportParser implementation.
    *
-   * Called by the HIDBoot driver whenever there are changes.
+   * Called by the HID driver whenever there are changes.
    */
   virtual void Parse(HID *hid, uint32_t is_rpt_id, uint32_t len, uint8_t *buf);
 
  private:
-  void resetState();
+  void reset_state();
 };
 
 #endif  // HID_MOUSE_CONTROLLER_H

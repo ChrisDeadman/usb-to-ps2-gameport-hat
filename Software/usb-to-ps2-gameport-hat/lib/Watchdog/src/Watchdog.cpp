@@ -1,4 +1,5 @@
 #include "Watchdog.h"
+
 #include <Arduino.h>
 
 void Watchdog::init() {
@@ -24,8 +25,8 @@ void Watchdog::init() {
   NVIC_ClearPendingIRQ(WDT_IRQn);
   WDT->INTENSET.bit.EW = 0;
 
-  // Set period to 4096=2^(x+3)|x=9|00<=x<=0B clock cycles (4s)
-  WDT->CONFIG.bit.PER = 9;
+  // Set period to 8192=2^(x+3)|x=A|0<=x<=B clock cycles (8s)
+  WDT->CONFIG.bit.PER = 0xA;
   // disable windowed mode (also resets on underflow)
   WDT->CTRL.bit.WEN = 0;
   // start WDT
