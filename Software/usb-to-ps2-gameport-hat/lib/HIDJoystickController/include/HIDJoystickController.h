@@ -22,7 +22,7 @@ class HIDJoystickController : HIDUniversal, public HIDReportParser {
   /**
    * Returns the current controller state.
    */
-  HIDJoystickControllerState get_state();
+  HIDJoystickControllerState pop_state();
 
   /**
    * HIDReportParser implementation.

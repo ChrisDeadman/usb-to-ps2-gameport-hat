@@ -29,16 +29,15 @@ void Gameport::init() {
   setAxes(0x80, 0x80, 0x80, 0x80);
 }
 
-void Gameport::setButtons(bool button1, bool button2, bool button3,
-                          bool button4) {
-  digitalWrite(BUTTON1_PIN, button1 ? LOW : HIGH);
-  digitalWrite(BUTTON2_PIN, button2 ? LOW : HIGH);
-  digitalWrite(BUTTON3_PIN, button3 ? LOW : HIGH);
-  digitalWrite(BUTTON4_PIN, button4 ? LOW : HIGH);
+void Gameport::setButtons(uint8_t button1, uint8_t button2, uint8_t button3,
+                          uint8_t button4) {
+  digitalWrite(BUTTON1_PIN, button1 > 0 ? LOW : HIGH);
+  digitalWrite(BUTTON2_PIN, button2 > 0 ? LOW : HIGH);
+  digitalWrite(BUTTON3_PIN, button3 > 0 ? LOW : HIGH);
+  digitalWrite(BUTTON4_PIN, button4 > 0 ? LOW : HIGH);
 }
 
-void Gameport::setAxes(uint8_t axis1, uint8_t axis2, uint8_t axis3,
-                       uint8_t axis4) {
+void Gameport::setAxes(uint8_t axis1, uint8_t axis2, uint8_t axis3, uint8_t axis4) {
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
   spiTransfer(POT_CS_PIN, W1_ADDRESS, AXIS_TO_POT_VALUE(axis1));
   spiTransfer(POT_CS_PIN, W2_ADDRESS, AXIS_TO_POT_VALUE(axis2));

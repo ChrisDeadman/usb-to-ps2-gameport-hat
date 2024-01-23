@@ -246,14 +246,16 @@ void usb_data_received(uint8_t const *const data, uint8_t length)
 
 HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
-  modifier_state = ModifierState::ModNone;
+  modifier_state = KeyboardModifierState::ModNone;
   led_state = KeyboardLeds::LedNone;
   memset(prev_state, 0x00, USB_KEYBOARD_KRO);
 }
 
 bool HIDKeyboardController::is_connected() { return driver->isReady(); }
 
-ModifierState HIDKeyboardController::get_modifier_state() { return modifier_state; };
+KeyboardModifierState HIDKeyboardController::get_modifier_state() {
+  return modifier_state;
+};
 
 KeyboardCodes HIDKeyboardController::deq_make() {
   if (make_buffer.length() <= 0) {
@@ -289,68 +291,68 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
 
   // handle modifier keys
   if (len > 0) {
-    ModifierState old_modifier_state = modifier_state;
-    modifier_state = static_cast<ModifierState>(buf[0]);
+    KeyboardModifierState old_modifier_state = modifier_state;
+    modifier_state = static_cast<KeyboardModifierState>(buf[0]);
 
-    if ((old_modifier_state & ModifierState::ModLeftCtrl) !=
-        (modifier_state & ModifierState::ModLeftCtrl)) {
-      if (modifier_state & ModifierState::ModLeftCtrl) {
+    if ((old_modifier_state & KeyboardModifierState::ModLeftCtrl) !=
+        (modifier_state & KeyboardModifierState::ModLeftCtrl)) {
+      if (modifier_state & KeyboardModifierState::ModLeftCtrl) {
         make_buffer.enq(KeyboardCodes::LeftControl);
       } else {
         brk_buffer.enq(KeyboardCodes::LeftControl);
       }
     }
-    if ((old_modifier_state & ModifierState::ModLeftShift) !=
-        (modifier_state & ModifierState::ModLeftShift)) {
-      if (modifier_state & ModifierState::ModLeftShift) {
+    if ((old_modifier_state & KeyboardModifierState::ModLeftShift) !=
+        (modifier_state & KeyboardModifierState::ModLeftShift)) {
+      if (modifier_state & KeyboardModifierState::ModLeftShift) {
         make_buffer.enq(KeyboardCodes::LeftShift);
       } else {
         brk_buffer.enq(KeyboardCodes::LeftShift);
       }
     }
-    if ((old_modifier_state & ModifierState::ModLeftAlt) !=
-        (modifier_state & ModifierState::ModLeftAlt)) {
-      if (modifier_state & ModifierState::ModLeftAlt) {
+    if ((old_modifier_state & KeyboardModifierState::ModLeftAlt) !=
+        (modifier_state & KeyboardModifierState::ModLeftAlt)) {
+      if (modifier_state & KeyboardModifierState::ModLeftAlt) {
         make_buffer.enq(KeyboardCodes::LeftAlt);
       } else {
         brk_buffer.enq(KeyboardCodes::LeftAlt);
       }
     }
-    if ((old_modifier_state & ModifierState::ModLeftGUI) !=
-        (modifier_state & ModifierState::ModLeftGUI)) {
-      if (modifier_state & ModifierState::ModLeftGUI) {
+    if ((old_modifier_state & KeyboardModifierState::ModLeftGUI) !=
+        (modifier_state & KeyboardModifierState::ModLeftGUI)) {
+      if (modifier_state & KeyboardModifierState::ModLeftGUI) {
         make_buffer.enq(KeyboardCodes::LeftGUI);
       } else {
         brk_buffer.enq(KeyboardCodes::LeftGUI);
       }
     }
-    if ((old_modifier_state & ModifierState::ModRightCtrl) !=
-        (modifier_state & ModifierState::ModRightCtrl)) {
-      if (modifier_state & ModifierState::ModRightCtrl) {
+    if ((old_modifier_state & KeyboardModifierState::ModRightCtrl) !=
+        (modifier_state & KeyboardModifierState::ModRightCtrl)) {
+      if (modifier_state & KeyboardModifierState::ModRightCtrl) {
         make_buffer.enq(KeyboardCodes::RightControl);
       } else {
         brk_buffer.enq(KeyboardCodes::RightControl);
       }
     }
-    if ((old_modifier_state & ModifierState::ModRightShift) !=
-        (modifier_state & ModifierState::ModRightShift)) {
-      if (modifier_state & ModifierState::ModRightShift) {
+    if ((old_modifier_state & KeyboardModifierState::ModRightShift) !=
+        (modifier_state & KeyboardModifierState::ModRightShift)) {
+      if (modifier_state & KeyboardModifierState::ModRightShift) {
         make_buffer.enq(KeyboardCodes::RightShift);
       } else {
         brk_buffer.enq(KeyboardCodes::RightShift);
       }
     }
-    if ((old_modifier_state & ModifierState::ModRightAlt) !=
-        (modifier_state & ModifierState::ModRightAlt)) {
-      if (modifier_state & ModifierState::ModRightAlt) {
+    if ((old_modifier_state & KeyboardModifierState::ModRightAlt) !=
+        (modifier_state & KeyboardModifierState::ModRightAlt)) {
+      if (modifier_state & KeyboardModifierState::ModRightAlt) {
         make_buffer.enq(KeyboardCodes::RightAlt);
       } else {
         brk_buffer.enq(KeyboardCodes::RightAlt);
       }
     }
-    if ((old_modifier_state & ModifierState::ModRightGUI) !=
-        (modifier_state & ModifierState::ModRightGUI)) {
-      if (modifier_state & ModifierState::ModRightGUI) {
+    if ((old_modifier_state & KeyboardModifierState::ModRightGUI) !=
+        (modifier_state & KeyboardModifierState::ModRightGUI)) {
+      if (modifier_state & KeyboardModifierState::ModRightGUI) {
         make_buffer.enq(KeyboardCodes::RightGUI);
       } else {
         brk_buffer.enq(KeyboardCodes::RightGUI);
@@ -372,8 +374,8 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
       KeyboardCodes key = keycode_table[buf[2 + i]];
       // handle Pause / Break
       if ((key == KeyboardCodes::Pause) &&
-          (modifier_state |
-           (ModifierState::ModLeftCtrl | ModifierState::ModRightCtrl))) {
+          (modifier_state | (KeyboardModifierState::ModLeftCtrl |
+                             KeyboardModifierState::ModRightCtrl))) {
         key = KeyboardCodes::Break;
       }
       // enqueue MAKE

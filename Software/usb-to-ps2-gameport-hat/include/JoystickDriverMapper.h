@@ -3,17 +3,20 @@
 
 #include "JoystickState.h"
 
-class JoystickDriverMapper {
+class IJoystickDriverMapper {
  public:
   /**
    * Returns the number of connected devices.
    */
-  virtual uint8_t getNumConnectedDevices() = 0;
+  virtual uint8_t get_num_connected_devices() = 0;
 
   /**
-   * Returns the state of the controller with the specified index.
+   * Returns the current state of the controller at `idx`, then resets it.
+   *
+   * Deltas are summed up until pop_state is called.
+   * This should be called periodically.
    */
-  virtual JoystickState getControllerState(uint8_t idx) = 0;
+  virtual JoystickState pop_state(uint8_t idx) = 0;
 };
 
 #endif  //_JOYSTICK_DRIVER_MAPPER_H_

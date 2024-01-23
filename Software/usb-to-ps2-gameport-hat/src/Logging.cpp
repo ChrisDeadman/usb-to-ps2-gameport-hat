@@ -52,26 +52,42 @@ void ps2_data_sent(uint8_t pin, uint8_t data) {
 #endif
 }
 
-void print_and_flush_buffer() {
+static void print_and_flush_buffer() {
   if (log_buffer->length() > 0) {
     Serial.println(log_buffer->get());
     log_buffer->clear();
   }
 }
 
-Logging::Logging(HIDKeyboardCombiner* const usb_keyboard,
-                 HIDMouseCombiner* const usb_mouse,
-                 JoystickManager* const joystick_manager,
-                 PS2Keyboard* const ps2_keyboard, PS2Mouse* const ps2_mouse,
-                 SetupMode* const setup_mode)
-    : usb_keyboard(usb_keyboard),
+Logging::Logging(HIDMouseKeyboardController* const usb_mouse_keyboard,
+                 HIDKeyboardController* const usb_keyboard,
+                 HIDMouseController* const usb_mouse,
+                 JoystickState* const joystick_state,
+                 uint8_t* const num_joys_connected, PS2Keyboard* const ps2_keyboard,
+                 PS2Mouse* const ps2_mouse, SetupMode* const setup_mode)
+    : usb_mouse_keyboard(usb_mouse_keyboard),
+      usb_keyboard(usb_keyboard),
       usb_mouse(usb_mouse),
-      joystick_manager(joystick_manager),
+      joystick_state(joystick_state),
+      num_joys_connected(num_joys_connected),
       ps2_keyboard(ps2_keyboard),
       ps2_mouse(ps2_mouse),
       setup_mode(setup_mode) {}
 
-void Logging::init() { Serial.begin(SERIAL_SPEED); }
+/**
+ * stdout callback
+ */
+static int serial_write(void* uart, const char* buf, int n) {
+  Uart* s = (Uart*)uart;
+  return s->write((uint8_t*)buf, n);
+}
+
+void Logging::init() {
+  Serial.begin(SERIAL_SPEED);
+  // redirect host platform debug information to serial port
+  stdout = funopen((void*)(&Serial), NULL, serial_write, NULL, NULL);
+  setlinebuf(stdout);
+}
 
 void Logging::task() {
   t_current = millis();
@@ -89,10 +105,6 @@ void Logging::task() {
 }
 
 void Logging::log_status() {
-  uint8_t num_joys = joystick_manager->getNumConnectedDevices();
-  JoystickState joy1_state = joystick_manager->getControllerState(0);
-  JoystickState joy2_state = joystick_manager->getControllerState(1);
-
   log_buffer->concatln("╔═════════════════════════════════╗");
   log_buffer->concatln("║ USB => PS/2 & Gameport HAT V1.4 ║");
   log_buffer->concatln("╠════════════════╦════════════════╝");
@@ -112,12 +124,14 @@ void Logging::log_status() {
   log_buffer->concatln("╠════════════╗");
   log_buffer->concatln("║ USB status ║");
   log_buffer->concatln("╠════════════╝");
-  log_buffer->concat("║last received time: ")->concatln("%lu", t_usb_last_received);
-  log_buffer->concat("║kbd connected:   ")
+  log_buffer->concat("║kbd+mouse connected: ")
+      ->concatln("%u", usb_mouse_keyboard->is_connected());
+  log_buffer->concat("║keyboard connected:  ")
       ->concatln("%u", usb_keyboard->is_connected());
-  log_buffer->concat("║mouse connected: ")
+  log_buffer->concat("║mouse connected:     ")
       ->concatln("%u", usb_mouse->is_connected());
-  log_buffer->concat("║#joys/gamepads:  ")->concatln("%u", num_joys);
+  log_buffer->concat("║#joysticks/gamepads: ")->concatln("%u", *num_joys_connected);
+  log_buffer->concat("║last received time:  ")->concatln("%lu", t_usb_last_received);
   log_buffer->concatln("╠═════════════╗");
   log_buffer->concatln("║ PS/2 status ║");
   log_buffer->concatln("╠═════════════╝");
@@ -149,24 +163,14 @@ void Logging::log_status() {
   log_buffer->concatln("╠═════════════════╗");
   log_buffer->concatln("║ Joystick status ║");
   log_buffer->concatln("╠═════════════════╝");
-  log_buffer->concat("║Joy1 buttons: ");
-  for (uint8_t button = 0; button < 6; button++) {
-    log_buffer->concat("%u ", joy1_state.buttons[button]);
+  log_buffer->concat("║Joy buttons: ");
+  for (uint8_t button = 0; button < JoystickState::NUM_BUTTONS; button++) {
+    log_buffer->concat("%02X ", joystick_state->buttons[button]);
   }
   log_buffer->concatln("");
-  log_buffer->concat("║Joy1 axes:    ");
-  for (uint8_t axis = 0; axis < 4; axis++) {
-    log_buffer->concat("%02X ", joy1_state.axes[axis]);
-  }
-  log_buffer->concatln("");
-  log_buffer->concat("║Joy2 buttons: ");
-  for (uint8_t button = 0; button < 6; button++) {
-    log_buffer->concat("%u ", joy2_state.buttons[button]);
-  }
-  log_buffer->concatln("");
-  log_buffer->concat("║Joy2 axes:    ");
-  for (uint8_t axis = 0; axis < 4; axis++) {
-    log_buffer->concat("%02X ", joy2_state.axes[axis]);
+  log_buffer->concat("║Joy axes:    ");
+  for (uint8_t axis = 0; axis < JoystickState::NUM_AXES; axis++) {
+    log_buffer->concat("%02X ", joystick_state->axes[axis]);
   }
   log_buffer->concatln("");
   log_buffer->concatln("╚═════════════════════════╝");

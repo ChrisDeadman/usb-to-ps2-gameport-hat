@@ -1,9 +1,9 @@
 #ifndef _PS2_KEYBOARD_H_
 #define _PS2_KEYBOARD_H_
 
-#include "../../Common/KeyboardCodes.h"
-#include "../../Common/KeyboardLeds.h"
 #include "CircularBuffer.h"
+#include "KeyboardCodes.h"
+#include "KeyboardLeds.h"
 #include "PS2Device.h"
 #include "SoftTimer.h"
 

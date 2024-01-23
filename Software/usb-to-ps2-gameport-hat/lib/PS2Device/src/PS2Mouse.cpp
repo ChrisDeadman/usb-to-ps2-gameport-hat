@@ -28,7 +28,7 @@ void PS2Mouse::reset(bool send_ack) {
   send_toHost(packet, idx);
 }
 
-void PS2Mouse::update_state(PS2MouseState const* const new_state) {
+void PS2Mouse::update_state(MouseState const* const new_state) {
   uint8_t d_x_scaled = abs(new_state->d_x);
   uint8_t d_y_scaled = abs(new_state->d_y);
 

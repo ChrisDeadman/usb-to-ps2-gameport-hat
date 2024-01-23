@@ -95,7 +95,7 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
   This macro is in `lib/Gameport/include/Gameport.h` and can be modified to calibrate the hardware for your system.  
   Be aware that if the resulting value is too low, it might not be properly detected by some applications, including Windows.
 
-* You can add support for additional USB devices by implementing a `JoystickDriverMapper` and adding it to `JoystickManager`.
+* You can add support for additional USB devices by implementing a `JoystickDriverMapper` and adding it to `joy_mappers` in `main.cpp`.
 
 Release notes
 =============

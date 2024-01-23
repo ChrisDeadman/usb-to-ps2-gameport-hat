@@ -2,8 +2,8 @@
 #define _PS2_MOUSE_H_
 
 #include "CircularBuffer.h"
+#include "MouseState.h"
 #include "PS2Device.h"
-#include "PS2MouseState.h"
 #include "SoftTimer.h"
 
 class PS2Mouse : public PS2Device {
@@ -32,7 +32,7 @@ class PS2Mouse : public PS2Device {
   uint8_t resolution;
   bool scaling_2x1;
 
-  PS2MouseState state;
+  MouseState state;
   bool state_changed;
 
  public:
@@ -58,7 +58,7 @@ class PS2Mouse : public PS2Device {
   /**
    * Updates the mouse state from an external source.
    */
-  void update_state(PS2MouseState const* const new_state);
+  void update_state(MouseState const* const new_state);
 
   /**
    * PS/2 main task.

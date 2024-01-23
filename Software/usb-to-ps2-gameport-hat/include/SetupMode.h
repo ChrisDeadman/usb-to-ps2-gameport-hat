@@ -1,10 +1,10 @@
 #ifndef _SETUP_MODE_H_
 #define _SETUP_MODE_H_
 
-#include "HIDKeyboardCombiner.h"
 #include "JoystickState.h"
 #include "SoftPWM.h"
 #include "SoftTimer.h"
+#include "VirtualKeyboard.h"
 
 enum SetupKeys : uint8_t {
   None = 0x0,
@@ -16,20 +16,18 @@ enum SetupKeys : uint8_t {
 
 class SetupMode {
  private:
-  HIDKeyboardCombiner *const keyboard;
+  VirtualKeyboard *const keyboard;
   JoystickState *const joystick_state;
   SetupKeys key_state;
 
   SoftTimer setup_mode_timer;
-  SoftTimer led_update_timer;
   SoftTimer blink_timer;
 
   const uint8_t item_count = 1;
   int8_t item_idx;
 
  public:
-  SetupMode(HIDKeyboardCombiner *const keyboard,
-            JoystickState *const joystick_state);
+  SetupMode(VirtualKeyboard *const keyboard, JoystickState *const joystick_state);
 
   bool in_setup_mode;
   bool in_edit_mode;

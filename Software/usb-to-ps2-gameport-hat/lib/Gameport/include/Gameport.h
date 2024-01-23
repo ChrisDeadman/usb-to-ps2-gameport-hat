@@ -8,7 +8,8 @@
  *
  * This correction provides a near-linear curve for my setup.
  */
-#define AXIS_TO_POT_VALUE(axis) (uint8_t)(0xFF - log10(1.0f + ((axis) / 32.0f)) * 78.0f)
+#define AXIS_TO_POT_VALUE(axis) \
+  (uint8_t)(0xFF - log10(1.0f + ((axis) / 32.0f)) * 78.0f)
 
 class Gameport {
  private:
@@ -35,7 +36,8 @@ class Gameport {
   /**
    * Sets all button pins to the given pressed states.
    */
-  void setButtons(bool button1, bool button2, bool button3, bool button4);
+  void setButtons(uint8_t button1, uint8_t button2, uint8_t button3,
+                  uint8_t button4);
 
   /**
    * Writes all 4 wiper values to the digital potentiometer.
