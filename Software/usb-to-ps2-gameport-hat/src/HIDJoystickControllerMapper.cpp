@@ -38,6 +38,8 @@ JoystickState HIDJoystickControllerMapper::pop_state(uint8_t /* idx */) {
   state.buttons[3] = driver_state.buttons[3 % NUM_BUTTONS];
   state.buttons[4] = driver_state.buttons[4 % NUM_BUTTONS];
   state.buttons[5] = driver_state.buttons[5 % NUM_BUTTONS];
+  state.buttons[6] = driver_state.buttons[6 % NUM_BUTTONS];
+  state.buttons[7] = driver_state.buttons[7 % NUM_BUTTONS];
 
   state.changed = driver_state.changed;
 

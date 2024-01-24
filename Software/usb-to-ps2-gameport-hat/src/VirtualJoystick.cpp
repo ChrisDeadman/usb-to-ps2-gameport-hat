@@ -20,6 +20,8 @@ void VirtualJoystick::update_state(JoystickState const* const new_state,
     state.buttons[3] |= new_state->buttons[3];
     state.buttons[4] |= new_state->buttons[4];
     state.buttons[5] |= new_state->buttons[5];
+    state.buttons[6] |= new_state->buttons[6];
+    state.buttons[7] |= new_state->buttons[7];
     state.axes[0] = combine_axis(state.axes[0], new_state->axes[0]);
     state.axes[1] = combine_axis(state.axes[1], new_state->axes[1]);
     if (swap_joy_axis_3_and_4) {

@@ -44,6 +44,8 @@ JoystickState XBOXRECVMapper::pop_state(uint8_t idx) {
   state[idx].buttons[3] = driver->getButtonPress(Y, idx);
   state[idx].buttons[4] = driver->getButtonPress(R1, idx);
   state[idx].buttons[5] = driver->getButtonPress(L1, idx);
+  state[idx].buttons[6] = driver->getButtonPress(SELECT, idx);
+  state[idx].buttons[7] = driver->getButtonPress(START, idx);
 
   state[idx].changed = (state[idx].axes[0] != old_state.axes[0] ||
                         state[idx].axes[1] != old_state.axes[1] ||
@@ -54,6 +56,8 @@ JoystickState XBOXRECVMapper::pop_state(uint8_t idx) {
                         state[idx].buttons[2] != old_state.buttons[2] ||
                         state[idx].buttons[3] != old_state.buttons[3] ||
                         state[idx].buttons[4] != old_state.buttons[4] ||
-                        state[idx].buttons[5] != old_state.buttons[5]);
+                        state[idx].buttons[5] != old_state.buttons[5] ||
+                        state[idx].buttons[6] != old_state.buttons[6] ||
+                        state[idx].buttons[7] != old_state.buttons[7]);
   return state[idx];
 }
