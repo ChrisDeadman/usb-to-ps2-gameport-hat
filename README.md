@@ -95,8 +95,8 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 |:--------------------|:------------|:------------------|:---------|
 | Left / Right Arrow  | X-Axis      | X-Axis 1 / D-Pad  | X-Axis 1 |
 | Up / Down Arrow     | Y-Axis      | Y-Axis 1 / D-Pad  | Y-Axis 1 |
-| Numpad Left / Right | -           | X-Axis 2          | X-Axis 2 |
-| Numpad Up / Down    | ScrollWheel | Y-Axis 2          | Y-Axis 2 |
+| A / D               | -           | X-Axis 2          | X-Axis 2 |
+| W / S               | ScrollWheel | Y-Axis 2          | Y-Axis 2 |
 | L-Ctrl / R-Ctrl     | Button 1    | Button 1 / A / R2 | Button 1 |
 | Space / R-Shift     | Button 2    | Button 2 / B / L2 | Button 2 |
 | L-Alt / CapsLock    | Button 3    | Button 3 / X      | Button 3 |

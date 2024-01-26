@@ -35,14 +35,14 @@
 
 // clang-format off
 static const KeyboardCodes KB_EMU_MAPPINGS[NUM_KB_EMU_MAPPINGS][2] = {
-    {LeftArrow,     NoKey},
-    {RightArrow,    NoKey},
-    {UpArrow,       NoKey},
-    {DownArrow,     NoKey},
-    {Keypad4Left,   NoKey},
-    {Keypad6Right,  NoKey},
-    {Keypad8Up,     NoKey},
-    {Keypad2Down,   NoKey},
+    {LeftArrow,     Keypad4Left},
+    {RightArrow,    Keypad6Right},
+    {UpArrow,       Keypad8Up},
+    {DownArrow,     Keypad2Down},
+    {aA,            NoKey},
+    {dD,            NoKey},
+    {wW,            NoKey},
+    {sS,            NoKey},
     {LeftControl,   RightControl},
     {Space,         RightShift},
     {LeftAlt,       CapsLock},
