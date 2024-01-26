@@ -3,14 +3,6 @@
 
 #include <SPI.h>
 
-/**
- * Modify this to change digital pot calibration.
- *
- * This correction provides a near-linear curve for my setup.
- */
-#define AXIS_TO_POT_VALUE(axis) \
-  (uint8_t)(0xFF - log10(1.0f + ((axis) / 32.0f)) * 78.0f)
-
 class Gameport {
  private:
   static const uint8_t W1_ADDRESS = 0;

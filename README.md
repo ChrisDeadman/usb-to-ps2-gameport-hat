@@ -115,8 +115,7 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 
 * You can change pins in `include/Config.h`.
 
-* Depending on your computer's Gameport capacitance, you may need to adjust the values in the `AXIS_TO_POT_VALUE` macro.  
-  This macro is in `lib/Gameport/include/Gameport.h` and can be modified to calibrate the hardware for your system.  
+* Depending on your computer's Gameport capacitance, you may need to adjust the values in the `AXIS_TO_POT_VALUE` macro in `include/Config.h`.  
   Be aware that if the resulting value is too low, it might not be properly detected by some applications, including Windows.
 
 * You can add support for additional USB devices by implementing a `JoystickDriverMapper` and adding it to `joy_mappers` in `main.cpp`.

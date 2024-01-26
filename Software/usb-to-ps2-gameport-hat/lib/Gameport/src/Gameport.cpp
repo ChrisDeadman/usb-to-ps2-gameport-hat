@@ -39,10 +39,10 @@ void Gameport::setButtons(uint8_t button1, uint8_t button2, uint8_t button3,
 
 void Gameport::setAxes(uint8_t axis1, uint8_t axis2, uint8_t axis3, uint8_t axis4) {
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
-  spiTransfer(POT_CS_PIN, W1_ADDRESS, AXIS_TO_POT_VALUE(axis1));
-  spiTransfer(POT_CS_PIN, W2_ADDRESS, AXIS_TO_POT_VALUE(axis2));
-  spiTransfer(POT_CS_PIN, W3_ADDRESS, AXIS_TO_POT_VALUE(axis3));
-  spiTransfer(POT_CS_PIN, W4_ADDRESS, AXIS_TO_POT_VALUE(axis4));
+  spiTransfer(POT_CS_PIN, W1_ADDRESS, axis1);
+  spiTransfer(POT_CS_PIN, W2_ADDRESS, axis2);
+  spiTransfer(POT_CS_PIN, W3_ADDRESS, axis3);
+  spiTransfer(POT_CS_PIN, W4_ADDRESS, axis4);
   SPI.endTransaction();
 }
 

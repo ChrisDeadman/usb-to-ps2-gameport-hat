@@ -24,6 +24,8 @@
 
 #define POT1_CS_PIN 10
 
+#define AXIS_TO_POT_VALUE(axis) (0xFF - ((axis) / 3.5))
+
 #define PS2_INIT_TIME 250
 
 #define SETUP_ENTER_DELAY 1000
