@@ -14,7 +14,7 @@ SetupMode::SetupMode(VirtualKeyboard* const keyboard,
   in_setup_mode = false;
   in_edit_mode = false;
   swap_joy_axis_3_and_4 = false;
-  dummy_value = 0;
+  emu_mode = EmuModeNone;
 }
 
 void SetupMode::task() {
@@ -155,18 +155,27 @@ uint8_t SetupMode::get_item_value() {
   switch (item_idx) {
     case 0:
       return swap_joy_axis_3_and_4 ? UINT8_MAX : 0;
+    case 1:
+      return emu_mode;
     default:
-      return dummy_value < 0 ? -dummy_value : dummy_value;
+      return 0;
   }
 }
 
 void SetupMode::set_item_value(int8_t delta) {
+  int8_t new_value;
+
   switch (item_idx) {
     case 0:
       swap_joy_axis_3_and_4 = !swap_joy_axis_3_and_4;
       break;
+    case 1:
+      new_value = emu_mode + delta;
+      if (new_value >= 0 && new_value < 6) {
+        emu_mode = (EmuMode)new_value;
+      }
+      break;
     default:
-      dummy_value += delta;
       break;
   }
 }

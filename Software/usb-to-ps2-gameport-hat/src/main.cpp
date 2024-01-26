@@ -80,6 +80,9 @@ static void sync_ps2_keyboard_state();
 static void sync_ps2_mouse_state();
 static void sync_gameport_state();
 
+#include "DeviceEmulation.h"
+static void handle_device_emulation();
+
 static void update_debug_led_state();
 
 void setup() {
@@ -119,6 +122,11 @@ void loop() {
   sync_usb_keyboard_state();
   sync_usb_mouse_state();
   sync_usb_joystick_state();
+
+    // handle device emulation
+    if (!setup_mode.in_setup_mode) {
+      handle_device_emulation();
+    }
 
   // get input states
   mouse_state = virtual_mouse.pop_state();
@@ -238,6 +246,46 @@ static void sync_gameport_state() {
                      joy_state.axes[3]);
     gameport.setButtons(joy_state.buttons[0], joy_state.buttons[1],
                         joy_state.buttons[2], joy_state.buttons[3]);
+  }
+}
+
+static void handle_device_emulation() {
+  MouseState new_mouse_state = virtual_mouse.pop_state();
+  JoystickState new_joy_state = virtual_joystick.pop_state();
+
+  // keep previous input states if not changed
+  if (!new_mouse_state.changed) {
+    new_mouse_state = mouse_state;
+    new_mouse_state.changed = false;
+  }
+  if (!new_joy_state.changed) {
+    new_joy_state = joy_state;
+    joy_state.changed = false;
+  }
+
+  // push back virtual states
+  virtual_mouse.update_state(&new_mouse_state);
+  virtual_joystick.update_state(&new_joy_state, true, false);
+
+  // handle all emulation modes
+  switch (setup_mode.emu_mode) {
+    case EmuModeJoyKeyb:
+      joy_emulate_keyboard(&virtual_keyboard, &joy_state, &new_joy_state);
+      break;
+    case EmuModeJoyMouse:
+      joy_emulate_mouse(&virtual_mouse, &new_joy_state);
+      break;
+    case EmuModeKeybJoy:
+      keyboard_emulate_joy(&virtual_joystick, &virtual_keyboard);
+      break;
+    case EmuModeKeybMouse:
+      keyboard_emulate_mouse(&virtual_mouse, &virtual_keyboard);
+      break;
+    case EmuModeMouseJoy:
+      mouse_emulate_joy(&virtual_joystick, &new_mouse_state);
+      break;
+    default:
+      break;
   }
 }
 

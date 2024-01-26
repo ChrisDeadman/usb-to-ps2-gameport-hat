@@ -14,7 +14,14 @@ enum SetupKeys : uint8_t {
   SetupKeyRight = 0x08,
 };
 
-
+enum EmuMode : uint8_t {
+  EmuModeNone = 0,
+  EmuModeJoyKeyb = 1,
+  EmuModeJoyMouse = 2,
+  EmuModeKeybJoy = 3,
+  EmuModeKeybMouse = 4,
+  EmuModeMouseJoy = 5,
+};
 
 class SetupMode {
  private:
@@ -25,7 +32,7 @@ class SetupMode {
   SoftTimer setup_mode_timer;
   SoftTimer blink_timer;
 
-  const uint8_t item_count = 1;
+  const uint8_t item_count = 2;
   uint8_t item_idx;
 
  public:
@@ -35,7 +42,7 @@ class SetupMode {
   bool in_edit_mode;
 
   bool swap_joy_axis_3_and_4;
-  int8_t dummy_value;
+  EmuMode emu_mode;
 
   void task();
 
