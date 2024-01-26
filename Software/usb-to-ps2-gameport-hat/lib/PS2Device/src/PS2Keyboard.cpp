@@ -293,7 +293,7 @@ void PS2Keyboard::handle_active_command(uint8_t data_byte) {
       typematic_rate = data_byte & 0x0F;
       typematic_delay = data_byte >> 4;
       active_command = 0;
-      // No response
+      send_toHost(&ACK_CODE, 1);
       break;
     // Set Scan Code Set
     case (0xF0):
@@ -345,10 +345,12 @@ void PS2Keyboard::handle_new_command(uint8_t data_byte) {
     // Disable
     case 0xF5:
       enabled = false;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Enable
     case 0xF4:
       enabled = true;
+      send_toHost(&ACK_CODE, 1);
       break;
     // Set Typematic Rate/Delay
     case 0xF3:
