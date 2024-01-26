@@ -7,12 +7,14 @@
 #include "VirtualKeyboard.h"
 
 enum SetupKeys : uint8_t {
-  None = 0x0,
-  Setup = 0x01,
-  Select = 0x02,
-  Left = 0x04,
-  Right = 0x08,
+  SetupKeyNone = 0x0,
+  SetupKeySetup = 0x01,
+  SetupKeySelect = 0x02,
+  SetupKeyLeft = 0x04,
+  SetupKeyRight = 0x08,
 };
+
+
 
 class SetupMode {
  private:
@@ -24,7 +26,7 @@ class SetupMode {
   SoftTimer blink_timer;
 
   const uint8_t item_count = 1;
-  int8_t item_idx;
+  uint8_t item_idx;
 
  public:
   SetupMode(VirtualKeyboard *const keyboard, JoystickState *const joystick_state);

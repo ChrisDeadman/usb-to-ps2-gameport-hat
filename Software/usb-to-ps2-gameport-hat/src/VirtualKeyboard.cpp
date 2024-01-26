@@ -4,26 +4,26 @@ VirtualKeyboard::VirtualKeyboard() {}
 
 KeyboardModifierState VirtualKeyboard::pop_modifier_state() {
   KeyboardModifierState state_copy = modifier_state;
-  modifier_state = KeyboardModifierState::ModNone;
+  modifier_state = ModNone;
   return state_copy;
 }
 
 KeyboardLeds VirtualKeyboard::pop_led_state() {
   KeyboardLeds state_copy = led_state;
-  led_state = KeyboardLeds::LedNone;
+  led_state = LedNone;
   return state_copy;
 }
 
 KeyboardCodes VirtualKeyboard::deq_make() {
   if (make_buffer.length() <= 0) {
-    return KeyboardCodes::NoKey;
+    return NoKey;
   }
   return make_buffer.deq();
 }
 
 KeyboardCodes VirtualKeyboard::deq_brk() {
   if (brk_buffer.length() <= 0) {
-    return KeyboardCodes::NoKey;
+    return NoKey;
   }
   return brk_buffer.deq();
 }

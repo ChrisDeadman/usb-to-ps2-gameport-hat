@@ -1,7 +1,5 @@
 #include "VirtualJoystick.h"
 
-static uint8_t combine_axis(uint8_t value_a, uint8_t value_b);
-
 VirtualJoystick::VirtualJoystick() {}
 
 JoystickState VirtualJoystick::pop_state() {
@@ -40,18 +38,11 @@ void VirtualJoystick::update_state(JoystickState const* const new_state,
     state.axes[3] = combine_axis(state.axes[3], new_state->axes[1]);
   }
 
-  state.changed = true;
+  state.changed = new_state->changed;
 }
 
 void VirtualJoystick::reset_state() {
   memset(state.axes, 0x80, JoystickState::NUM_AXES);
   memset(state.buttons, 0, JoystickState::NUM_BUTTONS);
   state.changed = false;
-}
-
-static uint8_t combine_axis(uint8_t value_a, uint8_t value_b) {
-  int16_t combined = ((int16_t)value_a - 0x80) + ((int16_t)value_b - 0x80) + 0x80;
-  if (combined < 0) combined = 0;
-  if (combined > UINT8_MAX) combined = UINT8_MAX;
-  return (uint8_t)combined;
 }

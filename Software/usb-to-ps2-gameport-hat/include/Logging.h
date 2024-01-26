@@ -14,7 +14,8 @@ class Logging {
   HIDMouseKeyboardController* const usb_mouse_keyboard;
   HIDKeyboardController* const usb_keyboard;
   HIDMouseController* const usb_mouse;
-  JoystickState* const joystick_state;
+  MouseState* const mouse_state;
+  JoystickState* const joy_state;
   uint8_t* const num_joys_connected;
   PS2Keyboard* const ps2_keyboard;
   PS2Mouse* const ps2_mouse;
@@ -23,9 +24,10 @@ class Logging {
  public:
   Logging(HIDMouseKeyboardController* const usb_mouse_keyboard,
           HIDKeyboardController* const usb_keyboard,
-          HIDMouseController* const usb_mouse, JoystickState* const joystick_state,
-          uint8_t* const num_joys_connected, PS2Keyboard* const ps2_keyboard,
-          PS2Mouse* const ps2_mouse, SetupMode* const setup_mode);
+          HIDMouseController* const usb_mouse, MouseState* const mouse_state,
+          JoystickState* const joy_state, uint8_t* const num_joys_connected,
+          PS2Keyboard* const ps2_keyboard, PS2Mouse* const ps2_mouse,
+          SetupMode* const setup_mode);
 
   /**
    * Initializes the serial interface.

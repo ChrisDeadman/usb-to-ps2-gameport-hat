@@ -40,15 +40,11 @@ void PS2Mouse::update_state(MouseState const* const new_state) {
     res <<= 1;
   }
 
-  this->state.d_x = (new_state->d_x < 0) ? -d_x_scaled : d_x_scaled;
-  this->state.d_y = (new_state->d_y < 0) ? -d_y_scaled : d_y_scaled;
-  this->state.d_wheel = new_state->d_wheel;
-  this->state.button1 = new_state->button1;
-  this->state.button2 = new_state->button2;
-  this->state.button3 = new_state->button3;
-  this->state.button4 = new_state->button4;
-  this->state.button5 = new_state->button5;
-  this->state_changed = true;
+  state.d_x = (new_state->d_x < 0) ? -d_x_scaled : d_x_scaled;
+  state.d_y = (new_state->d_y < 0) ? -d_y_scaled : d_y_scaled;
+  state.d_wheel = new_state->d_wheel;
+  memcpy(state.buttons, new_state->buttons, MouseState::NUM_BUTTONS);
+  state_changed = true;
 }
 
 void PS2Mouse::task() {
@@ -282,9 +278,9 @@ uint8_t PS2Mouse::build_status_packet(uint8_t* packet) {
   if (!streaming_mode) packet[0] |= (1 << 6);
   if (data_reporting) packet[0] |= (1 << 5);
   if (scaling_2x1) packet[0] |= (1 << 4);
-  if (state.button1) packet[0] |= (1 << 2);
-  if (state.button3) packet[0] |= (1 << 1);
-  if (state.button2) packet[0] |= (1 << 0);
+  if (state.buttons[0] > 0) packet[0] |= (1 << 2);
+  if (state.buttons[2] > 0) packet[0] |= (1 << 1);
+  if (state.buttons[1] > 0) packet[0] |= (1 << 0);
 
   return 3;  // return packet length
 }
@@ -306,9 +302,9 @@ uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet
   if (abs_x > 128) packet[0] |= (1 << 6);
   if (state.d_y < 0) packet[0] |= (1 << 5);
   if (state.d_x < 0) packet[0] |= (1 << 4);
-  if (state.button3) packet[0] |= (1 << 2);
-  if (state.button2) packet[0] |= (1 << 1);
-  if (state.button1) packet[0] |= (1 << 0);
+  if (state.buttons[2] > 0) packet[0] |= (1 << 2);
+  if (state.buttons[1] > 0) packet[0] |= (1 << 1);
+  if (state.buttons[0] > 0) packet[0] |= (1 << 0);
 
   // include scroll wheel state
   if (device_id >= DEVICE_ID_MOUSE_WHEEL) {
@@ -319,8 +315,8 @@ uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet
   // include button 4+5 state
   if (device_id >= DEVICE_ID_MOUSE_WHEEL_5BUTTONS) {
     packet[3] &= 0x0F;  // clear top 4 bits
-    if (state.button4) packet[3] |= (1 << 4);
-    if (state.button5) packet[3] |= (1 << 5);
+    if (state.buttons[3] > 0) packet[3] |= (1 << 4);
+    if (state.buttons[4] > 0) packet[3] |= (1 << 5);
   }
 
   return device_id >= DEVICE_ID_MOUSE_WHEEL ? 4 : 3;  // return packet length

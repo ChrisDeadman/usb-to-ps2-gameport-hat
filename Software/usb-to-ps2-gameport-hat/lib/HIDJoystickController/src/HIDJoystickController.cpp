@@ -1,13 +1,13 @@
 #include "HIDJoystickController.h"
 
 extern "C" {
-void __usb_joy_dummy_received_callback(uint8_t const *const data, uint8_t length) {}
+void __usb_joy_dummy_callback(uint8_t const *const data, uint8_t length) {}
 }
 /**
  * implement in your code if you want to capture packages.
  */
 void usb_data_received(uint8_t const *const data, uint8_t length)
-    __attribute__((weak, alias("__usb_joy_dummy_received_callback")));
+    __attribute__((weak, alias("__usb_joy_dummy_callback")));
 
 HIDJoystickController::HIDJoystickController(USBHost *usb)
     : HIDUniversal::HIDUniversal(usb), usb(usb), hidParser(usb) {

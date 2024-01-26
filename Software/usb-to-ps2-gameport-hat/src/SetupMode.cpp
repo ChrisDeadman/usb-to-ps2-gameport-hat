@@ -9,11 +9,11 @@ static bool get_led_blink(unsigned long t_delta, uint8_t count);
 SetupMode::SetupMode(VirtualKeyboard* const keyboard,
                      JoystickState* const joystick_state)
     : keyboard(keyboard), joystick_state(joystick_state) {
-  key_state = SetupKeys::None;
+  key_state = SetupKeyNone;
   item_idx = 0;
   in_setup_mode = false;
   in_edit_mode = false;
-  swap_joy_axis_3_and_4 = true;
+  swap_joy_axis_3_and_4 = false;
   dummy_value = 0;
 }
 
@@ -26,13 +26,13 @@ void SetupMode::task() {
   key_state = get_key_state();
 
   // setup mode is triggered by holding down the setup key(s) for a duration
-  if (!(key_state & SetupKeys::Setup)) {
+  if (!(key_state & SetupKeySetup)) {
     setup_mode_timer.reset();
   }
   if (setup_mode_timer.getElapsedMillis() > SETUP_ENTER_DELAY) {
     in_setup_mode = !in_setup_mode;
     in_edit_mode = false;
-    key_state = SetupKeys::None;
+    key_state = SetupKeyNone;
     set_led_state(in_setup_mode, in_setup_mode);
     setup_mode_timer.reset();
     blink_timer.reset();
@@ -45,23 +45,21 @@ void SetupMode::task() {
   }
 
   // toggle edit mode
-  if (PRESSED(SetupKeys::Select)) {
+  if (PRESSED(SetupKeySelect)) {
     in_edit_mode = !in_edit_mode;
     return;
   }
 
   // left and right
   int8_t delta = 0;
-  delta -= PRESSED(SetupKeys::Left) ? 1 : 0;
-  delta += PRESSED(SetupKeys::Right) ? 1 : 0;
+  delta -= PRESSED(SetupKeyLeft) ? 1 : 0;
+  delta += PRESSED(SetupKeyRight) ? 1 : 0;
 
   // switch through setup items
   if (!in_edit_mode) {
-    item_idx += delta;
-    if (item_idx >= item_count) {
-      item_idx = 0;
-    } else if (item_idx < 0) {
-      item_idx = item_count - 1;
+    int8_t new_idx = item_idx + delta;
+    if (new_idx >= 0 && new_idx < item_count) {
+      item_idx = (uint8_t)new_idx;
     }
   }
 
@@ -97,19 +95,17 @@ void SetupMode::task() {
 }
 
 SetupKeys SetupMode::get_key_state() {
-  SetupKeys keys = SetupKeys::None;
+  SetupKeys keys = SetupKeyNone;
 
   KeyboardModifierState kbd_modifiers = keyboard->pop_modifier_state();
-  if (kbd_modifiers ==
-      (KeyboardModifierState::ModLeftCtrl | KeyboardModifierState::ModLeftShift |
-       KeyboardModifierState::ModLeftGUI)) {
-    keys = (SetupKeys)(keys | SetupKeys::Setup);
+  if (kbd_modifiers == (ModLeftCtrl | ModLeftShift | ModLeftGUI)) {
+    keys = (SetupKeys)(keys | SetupKeySetup);
   } else {
     keyboard->update_modifier_state(kbd_modifiers);
   }
 
   if (joystick_state->buttons[5] && joystick_state->buttons[4]) {
-    keys = (SetupKeys)(keys | SetupKeys::Setup);
+    keys = (SetupKeys)(keys | SetupKeySetup);
   }
 
   // don't consume keys if not in setup mode
@@ -118,32 +114,26 @@ SetupKeys SetupMode::get_key_state() {
   }
 
   KeyboardCodes keycode = keyboard->deq_make();
-  if (keycode != KeyboardCodes::NoKey) {
-    if (keycode == KeyboardCodes::Return) {
-      keys = (SetupKeys)(keys | SetupKeys::Select);
+  if (keycode != NoKey) {
+    if (keycode == Return) {
+      keys = (SetupKeys)(keys | SetupKeySelect);
     }
-    if (keycode == KeyboardCodes::LeftArrow) {
-      keys = (SetupKeys)(keys | SetupKeys::Left);
+    if (keycode == LeftArrow) {
+      keys = (SetupKeys)(keys | SetupKeyLeft);
     }
-    if (keycode == KeyboardCodes::RightArrow) {
-      keys = (SetupKeys)(keys | SetupKeys::Right);
-    }
-
-    if (keys == SetupKeys::None) {
-      keyboard->enq_make(keycode);
-    } else if (keys != SetupKeys::Setup) {
-      keyboard->deq_brk();
+    if (keycode == RightArrow) {
+      keys = (SetupKeys)(keys | SetupKeyRight);
     }
   }
 
   if (joystick_state->buttons[0] || joystick_state->buttons[1]) {
-    keys = (SetupKeys)(keys | SetupKeys::Select);
+    keys = (SetupKeys)(keys | SetupKeySelect);
   }
   if (joystick_state->buttons[5]) {
-    keys = (SetupKeys)(keys | SetupKeys::Left);
+    keys = (SetupKeys)(keys | SetupKeyLeft);
   }
   if (joystick_state->buttons[4]) {
-    keys = (SetupKeys)(keys | SetupKeys::Right);
+    keys = (SetupKeys)(keys | SetupKeyRight);
   }
 
   return keys;
@@ -153,10 +143,10 @@ void SetupMode::set_led_state(bool led1, bool led2) {
   digitalWrite(EXT_LED1_PIN, (led1 | in_edit_mode) ? LOW : HIGH);
   digitalWrite(EXT_LED2_PIN, led2 ? LOW : HIGH);
 
-  KeyboardLeds kbd_leds = KeyboardLeds::LedNone;
-  if (led1) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedCapsLock);
-  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedScrollLock);
-  if (in_edit_mode) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedNumLock);
+  KeyboardLeds kbd_leds = LedNone;
+  if (led1) kbd_leds = (KeyboardLeds)(kbd_leds | LedCapsLock);
+  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | LedScrollLock);
+  if (in_edit_mode) kbd_leds = (KeyboardLeds)(kbd_leds | LedNumLock);
   keyboard->pop_led_state();
   keyboard->update_led_state(kbd_leds);
 }

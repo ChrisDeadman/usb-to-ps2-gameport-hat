@@ -22,7 +22,8 @@ class PS2Keyboard : public PS2Device {
   uint8_t send_buffer_len = 0;
 
   uint8_t active_command;
-  KeyboardCodes last_keycode;
+  KeyboardCodes last_make_code;
+  KeyboardCodes last_brk_code;
   SoftTimer typematic_delay_timer;
   SoftTimer typematic_rate_timer;
 

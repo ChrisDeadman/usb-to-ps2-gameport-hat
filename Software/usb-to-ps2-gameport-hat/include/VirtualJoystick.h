@@ -23,7 +23,18 @@ class VirtualJoystick {
    *
    * Deltas are summed up until pop_state is called.
    */
-  void update_state(JoystickState const* const new_state, bool is_player_1, bool swap_joy_axis_3_and_4);
+  void update_state(JoystickState const* const new_state, bool is_player_1,
+                    bool swap_joy_axis_3_and_4);
+
+  /**
+   * Combines two axis.
+   */
+  static uint8_t combine_axis(uint8_t value_a, uint8_t value_b) {
+    int16_t combined = ((int16_t)value_a - 0x80) + ((int16_t)value_b - 0x80) + 0x80;
+    if (combined < 0) combined = 0;
+    if (combined > UINT8_MAX) combined = UINT8_MAX;
+    return (uint8_t)combined;
+  }
 
  private:
   void reset_state();

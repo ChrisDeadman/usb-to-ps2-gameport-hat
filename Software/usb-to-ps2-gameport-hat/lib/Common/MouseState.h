@@ -4,14 +4,12 @@
 #include <Arduino.h>
 
 struct MouseState {
+  static const uint8_t NUM_BUTTONS = 5;
+
   int8_t d_x = 0;
   int8_t d_y = 0;
   int8_t d_wheel = 0;
-  bool button1 = false;
-  bool button2 = false;
-  bool button3 = false;
-  bool button4 = false;
-  bool button5 = false;
+  uint8_t buttons[NUM_BUTTONS] = {0, 0, 0, 0, 0};
   bool changed = false;
 };
 

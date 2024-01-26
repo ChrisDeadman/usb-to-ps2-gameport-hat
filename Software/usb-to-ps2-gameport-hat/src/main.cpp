@@ -61,22 +61,25 @@ VirtualKeyboard virtual_keyboard;
 VirtualMouse virtual_mouse;
 VirtualJoystick virtual_joystick;
 MouseState mouse_state;
-JoystickState joystick_state;
+JoystickState joy_state;
 uint8_t num_joys_connected = 0;
 
 #include "SetupMode.h"
-SetupMode setup_mode(&virtual_keyboard, &joystick_state);
+SetupMode setup_mode(&virtual_keyboard, &joy_state);
 
 #include "Logging.h"
-Logging logging(&usb_mouse_keyboard, &usb_keyboard, &usb_mouse, &joystick_state,
-                &num_joys_connected, &ps2_keyboard, &ps2_mouse, &setup_mode);
+Logging logging(&usb_mouse_keyboard, &usb_keyboard, &usb_mouse, &mouse_state,
+                &joy_state, &num_joys_connected, &ps2_keyboard, &ps2_mouse,
+                &setup_mode);
 
 static void sync_usb_keyboard_state();
-static void sync_ps2_keyboard_state();
 static void sync_usb_mouse_state();
-static void sync_ps2_mouse_state();
 static void sync_usb_joystick_state();
+
+static void sync_ps2_keyboard_state();
+static void sync_ps2_mouse_state();
 static void sync_gameport_state();
+
 static void update_debug_led_state();
 
 void setup() {
@@ -109,15 +112,17 @@ void loop() {
     return;
   }
 
-  // handle usb task
+  // synchronize input devices
   // NOTE: lower USB_XFER_TIMEOUT (e.g. to 1000) in UsbCore.h,
   // otherwise this may take longer than the watchdog timeout.
   usb.Task();
-
-  // synchronize input devices
   sync_usb_keyboard_state();
   sync_usb_mouse_state();
   sync_usb_joystick_state();
+
+  // get input states
+  mouse_state = virtual_mouse.pop_state();
+  joy_state = virtual_joystick.pop_state();
 
   // handle setup mode
   setup_mode.task();
@@ -139,9 +144,9 @@ void loop() {
 static void sync_usb_keyboard_state() {
   while (true) {
     KeyboardCodes make = usb_keyboard.deq_make();
-    if (make == KeyboardCodes::NoKey) {
+    if (make == NoKey) {
       make = usb_mouse_keyboard.deq_make();
-      if (make == KeyboardCodes::NoKey) {
+      if (make == NoKey) {
         break;
       }
     }
@@ -150,9 +155,9 @@ static void sync_usb_keyboard_state() {
 
   while (true) {
     KeyboardCodes brk = usb_keyboard.deq_brk();
-    if (brk == KeyboardCodes::NoKey) {
+    if (brk == NoKey) {
       brk = usb_mouse_keyboard.deq_brk();
-      if (brk == KeyboardCodes::NoKey) {
+      if (brk == NoKey) {
         break;
       }
     }
@@ -166,28 +171,6 @@ static void sync_usb_keyboard_state() {
   KeyboardLeds led_state = virtual_keyboard.pop_led_state();
   usb_keyboard.set_led_state(led_state);
   usb_mouse_keyboard.set_led_state(led_state);
-}
-
-static void sync_ps2_keyboard_state() {
-  while (true) {
-    KeyboardCodes make = virtual_keyboard.deq_make();
-    if (make == KeyboardCodes::NoKey) {
-      break;
-    }
-    ps2_keyboard.enq_make(make);
-  }
-
-  while (true) {
-    KeyboardCodes brk = virtual_keyboard.deq_brk();
-    if (brk == KeyboardCodes::NoKey) {
-      break;
-    }
-    ps2_keyboard.enq_brk(brk);
-  }
-
-  if (!setup_mode.in_setup_mode) {
-    virtual_keyboard.update_led_state(ps2_keyboard.get_led_state());
-  }
 }
 
 static void sync_usb_mouse_state() {
@@ -204,47 +187,57 @@ static void sync_usb_mouse_state() {
   }
 }
 
-static void sync_ps2_mouse_state() {
-  MouseState device_state = virtual_mouse.pop_state();
-  if (device_state.changed) {
-    mouse_state = device_state;
-    ps2_mouse.update_state(&mouse_state);
-  }
-}
-
 static void sync_usb_joystick_state() {
   JoystickState device_state;
 
   num_joys_connected = 0;
-  bool state_changed = false;
 
   for (uint8_t mapper_idx = 0; mapper_idx < num_joy_mappers; mapper_idx++) {
     uint8_t num_devices = joy_mappers[mapper_idx]->get_num_connected_devices();
     for (uint8_t device_idx = 0; device_idx < num_devices; device_idx++) {
       num_joys_connected += 1;
-      device_state = joy_mappers[mapper_idx]->pop_state(device_idx);
-      // next joystick might update state, so provide this state in any case
-      state_changed |= device_state.changed;
       bool is_player_1 = num_joys_connected < 2;
+      device_state = joy_mappers[mapper_idx]->pop_state(device_idx);
       virtual_joystick.update_state(&device_state, is_player_1,
                                     setup_mode.swap_joy_axis_3_and_4);
     }
   }
+}
 
-  // revert updates if no change
-  if (!state_changed) {
-    virtual_joystick.pop_state();
+static void sync_ps2_keyboard_state() {
+  while (true) {
+    KeyboardCodes make = virtual_keyboard.deq_make();
+    if (make == NoKey) {
+      break;
+    }
+    ps2_keyboard.enq_make(make);
+  }
+
+  while (true) {
+    KeyboardCodes brk = virtual_keyboard.deq_brk();
+    if (brk == NoKey) {
+      break;
+    }
+    ps2_keyboard.enq_brk(brk);
+  }
+
+  if (!setup_mode.in_setup_mode) {
+    virtual_keyboard.update_led_state(ps2_keyboard.get_led_state());
+  }
+}
+
+static void sync_ps2_mouse_state() {
+  if (mouse_state.changed) {
+    ps2_mouse.update_state(&mouse_state);
   }
 }
 
 static void sync_gameport_state() {
-  JoystickState device_state = virtual_joystick.pop_state();
-  if (device_state.changed) {
-    joystick_state = device_state;
-    gameport.setAxes(joystick_state.axes[0], joystick_state.axes[1],
-                     joystick_state.axes[2], joystick_state.axes[3]);
-    gameport.setButtons(joystick_state.buttons[0], joystick_state.buttons[1],
-                        joystick_state.buttons[2], joystick_state.buttons[3]);
+  if (joy_state.changed) {
+    gameport.setAxes(joy_state.axes[0], joy_state.axes[1], joy_state.axes[2],
+                     joy_state.axes[3]);
+    gameport.setButtons(joy_state.buttons[0], joy_state.buttons[1],
+                        joy_state.buttons[2], joy_state.buttons[3]);
   }
 }
 
@@ -260,7 +253,7 @@ static void update_debug_led_state() {
   // EXT_LED2 indicates button press
   bool button_pressed = false;
   for (uint8_t button = 0; button < JoystickState::NUM_BUTTONS; button++) {
-    button_pressed |= joystick_state.buttons[button];
+    button_pressed |= joy_state.buttons[button];
   }
   if (button_pressed) {
     digitalWrite(EXT_LED2_PIN, LOW);
@@ -268,7 +261,7 @@ static void update_debug_led_state() {
     // or highest axis value
     uint8_t highest_axis_value = 0;
     for (uint8_t axis = 0; axis < JoystickState::NUM_AXES; axis++) {
-      uint8_t axisValue = abs((int16_t)joystick_state.axes[axis] - 0x80);
+      uint8_t axisValue = abs((int16_t)joy_state.axes[axis] - 0x80);
       if (axisValue > highest_axis_value) {
         highest_axis_value = axisValue;
       }

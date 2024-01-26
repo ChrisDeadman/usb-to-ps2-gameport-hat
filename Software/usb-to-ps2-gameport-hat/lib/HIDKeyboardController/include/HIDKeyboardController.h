@@ -37,14 +37,14 @@ class HIDKeyboardController : virtual public HIDReportParser {
   /**
    * Dequeues the next make code.
    *
-   * Returns `KeyboardCodes::NoKey` if the queue is empty.
+   * Returns `NoKey` if the queue is empty.
    */
   KeyboardCodes deq_make();
 
   /**
    * Dequeues the next break code.
    *
-   * Returns `KeyboardCodes::NoKey` if the queue is empty.
+   * Returns `NoKey` if the queue is empty.
    */
   KeyboardCodes deq_brk();
 
