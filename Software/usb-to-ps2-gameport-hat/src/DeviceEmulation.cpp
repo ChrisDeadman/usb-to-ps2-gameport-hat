@@ -13,8 +13,8 @@
 static CircularBuffer<KeyboardCodes, VIRTUAL_KEYBOARD_KRO> make_buffer;
 static CircularBuffer<KeyboardCodes, VIRTUAL_KEYBOARD_KRO> brk_buffer;
 
-static void sync_kb_emu_keys(VirtualKeyboard* const keyboard,
-                             const KeyboardCodes* kb_codes, bool key_down);
+static void sync_kb_emu_keys(VirtualKeyboard* const keyboard, KeyboardCodes code,
+                             bool key_down);
 
 void joy_emulate_keyboard(VirtualKeyboard* const keyboard,
                           JoystickState const* const old_state,
@@ -105,7 +105,7 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
 
     uint8_t mapping_idx;
     for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
-      if (make == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2][0]) {
+      if (make == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
         break;
       }
     }
@@ -168,7 +168,7 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
 
     uint8_t mapping_idx;
     for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
-      if (brk == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2][0]) {
+      if (brk == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
         break;
       }
     }
@@ -236,7 +236,7 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
 
     uint8_t mapping_idx;
     for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
-      if (make == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2][0]) {
+      if (make == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
         break;
       }
     }
@@ -295,7 +295,7 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
 
     uint8_t mapping_idx;
     for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
-      if (brk == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2][0]) {
+      if (brk == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
         break;
       }
     }
@@ -389,15 +389,13 @@ void mouse_emulate_joy(VirtualJoystick* const joystick,
   joystick->update_state(&new_joy_state, true, false);
 }
 
-static void sync_kb_emu_keys(VirtualKeyboard* const keyboard,
-                             const KeyboardCodes* kb_codes, bool key_down) {
-  for (uint8_t i = 0; i < 2; i++) {
-    if (kb_codes[i] != NoKey) {
-      if (key_down) {
-        keyboard->enq_make(kb_codes[i]);
-      } else {
-        keyboard->enq_brk(kb_codes[i]);
-      }
+static void sync_kb_emu_keys(VirtualKeyboard* const keyboard, KeyboardCodes code,
+                             bool key_down) {
+  if (code != NoKey) {
+    if (key_down) {
+      keyboard->enq_make(code);
+    } else {
+      keyboard->enq_brk(code);
     }
   }
 }

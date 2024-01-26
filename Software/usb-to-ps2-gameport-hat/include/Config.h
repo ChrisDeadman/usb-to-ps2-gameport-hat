@@ -33,23 +33,25 @@
 
 #define NUM_KB_EMU_MAPPINGS 16
 
-static const KeyboardCodes KB_EMU_MAPPINGS[NUM_KB_EMU_MAPPINGS][2][2] = {
-    {{LeftArrow, NoKey}, {NoKey, NoKey}},
-    {{RightArrow, NoKey}, {NoKey, NoKey}},
-    {{UpArrow, NoKey}, {NoKey, NoKey}},
-    {{DownArrow, NoKey}, {NoKey, NoKey}},
-    {{Keypad4Left, NoKey}, {NoKey, NoKey}},
-    {{Keypad6Right, NoKey}, {NoKey, NoKey}},
-    {{Keypad8Up, NoKey}, {NoKey, NoKey}},
-    {{Keypad2Down, NoKey}, {NoKey, NoKey}},
-    {{LeftControl, NoKey}, {RightControl, NoKey}},
-    {{Space, NoKey}, {RightShift, NoKey}},
-    {{LeftAlt, NoKey}, {CapsLock, NoKey}},
-    {{LeftShift, NoKey}, {NoKey, NoKey}},
-    {{LeftAlt, RightArrow}, {NoKey, NoKey}},
-    {{LeftAlt, LeftArrow}, {NoKey, NoKey}},
-    {{Escape, NoKey}, {NoKey, NoKey}},
-    {{Tab, NoKey}, {NoKey, NoKey}},
+// clang-format off
+static const KeyboardCodes KB_EMU_MAPPINGS[NUM_KB_EMU_MAPPINGS][2] = {
+    {LeftArrow,     NoKey},
+    {RightArrow,    NoKey},
+    {UpArrow,       NoKey},
+    {DownArrow,     NoKey},
+    {Keypad4Left,   NoKey},
+    {Keypad6Right,  NoKey},
+    {Keypad8Up,     NoKey},
+    {Keypad2Down,   NoKey},
+    {LeftControl,   RightControl},
+    {Space,         RightShift},
+    {LeftAlt,       CapsLock},
+    {LeftShift,     NoKey},
+    {PeriodGreater, NoKey},
+    {CommaLess,     NoKey},
+    {Escape,        NoKey},
+    {Tab,           NoKey},
 };
+// clang-format on
 
 #endif  // _CONFIG_H_

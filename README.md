@@ -101,8 +101,8 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 | Space / R-Shift     | Button 2    | Button 2 / B / L2 | Button 2 |
 | L-Alt / CapsLock    | Button 3    | Button 3 / X      | Button 3 |
 | L-Shift             | Button 4    | Button 4 / Y      | Button 4 |
-| L-Alt + Right Arrow | -           | Button 5 / R1     | -        |
-| L-Alt + Left Arrow  | -           | Button 6 / L1     | -        |
+| Period              | -           | Button 5 / R1     | -        |
+| Comma               | -           | Button 6 / L1     | -        |
 | Escape              | Button 5    | Button 7 / SELECT | -        |
 | Tab                 | -           | Button 8 / START  | -        |
 
