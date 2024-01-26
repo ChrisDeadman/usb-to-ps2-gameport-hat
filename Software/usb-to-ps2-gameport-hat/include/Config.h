@@ -24,6 +24,8 @@
 
 #define POT1_CS_PIN 10
 
+#define PS2_INIT_TIME 250
+
 #define SETUP_ENTER_DELAY 1000
 #define SETUP_BLINK_WINDOW 1500
 

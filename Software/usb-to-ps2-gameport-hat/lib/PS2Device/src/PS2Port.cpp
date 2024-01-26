@@ -27,8 +27,8 @@ void TC5_Handler() {
         // "The Clock line must be continuously high for at least 50
         // microseconds before the device can begin to transmit its data."
         //
-        // One sub-clock is 30-50us, so we have to wait an additional cycle.
-        // If still not enough for your platform reduce it further.
+        // One sub-clock is 16.67us, so we have to wait an additional cycle.
+        // Note that sub-clocks 0 and 1 are also HIGH.
         port->sub_clock = -1;
       }
     } else {

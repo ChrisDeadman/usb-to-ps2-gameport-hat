@@ -2,7 +2,9 @@
 
 #include "Config.h"
 #include "SoftPWM.h"
+#include "SoftTimer.h"
 SoftPWM soft_pwm;
+SoftTimer init_timer;
 
 #include "Watchdog.h"
 Watchdog watchdog;
@@ -91,8 +93,6 @@ void setup() {
   pinMode(EXT_LED1_PIN, OUTPUT);
   pinMode(EXT_LED2_PIN, OUTPUT);
   usb.Init();
-  delay(1000);  // wait a second for USB devices to be ready
-  usb.Task();
   PS2Port::init();
   ps2_keyboard.init();
   ps2_mouse.init();
@@ -101,6 +101,7 @@ void setup() {
   watchdog.init();
   ps2_keyboard.reset();
   ps2_mouse.reset();
+  init_timer.reset();
 }
 
 void loop() {
@@ -110,27 +111,39 @@ void loop() {
   ps2_keyboard.task();
   ps2_mouse.task();
 
-  // don't do anything if PS/2 is busy
-  if (ps2_keyboard.is_busy() || ps2_mouse.is_busy()) {
+  // check if PS/2 is busy
+  bool ps2_busy = ps2_keyboard.is_busy() || ps2_mouse.is_busy();
+
+  // give host some time to respond before we initialize USB devices
+  if (init_timer.getElapsedMillis() < PS2_INIT_TIME) {
+    init_timer.tick();
     return;
   }
 
-  // synchronize input devices
-  // NOTE: lower USB_XFER_TIMEOUT (e.g. to 1000) in UsbCore.h,
-  // otherwise this may take longer than the watchdog timeout.
-  usb.Task();
-  sync_usb_keyboard_state();
-  sync_usb_mouse_state();
-  sync_usb_joystick_state();
+  // Only if PS/2 is not busy
+  if (!ps2_busy) {
+    // cannot handle PS/2 while USB is working
+    PS2Port::disable_clock_irq();
+
+    // synchronize input devices
+    // NOTE: lower USB_XFER_TIMEOUT (e.g. to 1000) in UsbCore.h,
+    // otherwise this may take longer than the watchdog timeout.
+    usb.Task();
+    sync_usb_keyboard_state();
+    sync_usb_mouse_state();
+    sync_usb_joystick_state();
 
     // handle device emulation
     if (!setup_mode.in_setup_mode) {
       handle_device_emulation();
     }
 
-  // get input states
-  mouse_state = virtual_mouse.pop_state();
-  joy_state = virtual_joystick.pop_state();
+    // get input states
+    mouse_state = virtual_mouse.pop_state();
+    joy_state = virtual_joystick.pop_state();
+
+    PS2Port::enable_clock_irq();
+  }
 
   // handle setup mode
   setup_mode.task();
