@@ -104,11 +104,12 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
     }
 
     uint8_t mapping_idx;
-    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS; mapping_idx++) {
-      if (make == KB_EMU_MAPPINGS[mapping_idx][0][0]) {
+    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
+      if (make == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2][0]) {
         break;
       }
     }
+    mapping_idx /= 2;
 
     switch (mapping_idx) {
       case 0:
@@ -166,11 +167,12 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
     }
 
     uint8_t mapping_idx;
-    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS; mapping_idx++) {
-      if (brk == KB_EMU_MAPPINGS[mapping_idx][0][0]) {
+    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
+      if (brk == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2][0]) {
         break;
       }
     }
+    mapping_idx /= 2;
 
     switch (mapping_idx) {
       case 0:
@@ -233,11 +235,12 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
     }
 
     uint8_t mapping_idx;
-    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS; mapping_idx++) {
-      if (make == KB_EMU_MAPPINGS[mapping_idx][0][0]) {
+    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
+      if (make == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2][0]) {
         break;
       }
     }
+    mapping_idx /= 2;
 
     switch (mapping_idx) {
       case 0:  // Left
@@ -291,11 +294,12 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
     }
 
     uint8_t mapping_idx;
-    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS; mapping_idx++) {
-      if (brk == KB_EMU_MAPPINGS[mapping_idx][0][0]) {
+    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
+      if (brk == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2][0]) {
         break;
       }
     }
+    mapping_idx /= 2;
 
     switch (mapping_idx) {
       case 0:  // Left
