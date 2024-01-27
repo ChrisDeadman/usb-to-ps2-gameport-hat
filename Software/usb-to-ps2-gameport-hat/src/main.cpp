@@ -117,6 +117,7 @@ void loop() {
   // give host some time to respond before we initialize USB devices
   if (init_timer.getElapsedMillis() < PS2_INIT_TIME) {
     init_timer.tick();
+    if (ps2_busy) init_timer.reset();
     return;
   }
 

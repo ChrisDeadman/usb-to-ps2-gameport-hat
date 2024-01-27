@@ -79,8 +79,8 @@ void SetupMode::task() {
     blink_timer.reset();
   }
 
-  // LED1 indicates menu item
-  bool led1 = get_led_blink(blink_elapsed, item_idx + 1);
+  // LED1 indicates menu item or edit mode
+  bool led1 = get_led_blink(blink_elapsed, item_idx + 1) | in_edit_mode;
 
   // LED2 indicates menu item value
   uint8_t item_value = get_item_value();
@@ -140,13 +140,12 @@ SetupKeys SetupMode::get_key_state() {
 }
 
 void SetupMode::set_led_state(bool led1, bool led2) {
-  digitalWrite(EXT_LED1_PIN, (led1 | in_edit_mode) ? LOW : HIGH);
+  digitalWrite(EXT_LED1_PIN, led1 ? LOW : HIGH);
   digitalWrite(EXT_LED2_PIN, led2 ? LOW : HIGH);
 
   KeyboardLeds kbd_leds = LedNone;
   if (led1) kbd_leds = (KeyboardLeds)(kbd_leds | LedCapsLock);
-  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | LedScrollLock);
-  if (in_edit_mode) kbd_leds = (KeyboardLeds)(kbd_leds | LedNumLock);
+  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | LedScrollLock | LedNumLock);
   keyboard->pop_led_state();
   keyboard->update_led_state(kbd_leds);
 }
