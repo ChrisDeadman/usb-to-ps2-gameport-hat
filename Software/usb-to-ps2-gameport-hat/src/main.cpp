@@ -165,25 +165,14 @@ void loop() {
 
 static void sync_usb_keyboard_state() {
   while (true) {
-    KeyboardCodes make = usb_keyboard.deq_make();
-    if (make == NoKey) {
-      make = usb_mouse_keyboard.deq_make();
-      if (make == NoKey) {
+    KeyboardAction kb_action = usb_keyboard.deq();
+    if (kb_action.type == KbActionNone) {
+      kb_action = usb_mouse_keyboard.deq();
+      if (kb_action.type == KbActionNone) {
         break;
       }
     }
-    virtual_keyboard.enq_make(make);
-  }
-
-  while (true) {
-    KeyboardCodes brk = usb_keyboard.deq_brk();
-    if (brk == NoKey) {
-      brk = usb_mouse_keyboard.deq_brk();
-      if (brk == NoKey) {
-        break;
-      }
-    }
-    virtual_keyboard.enq_brk(brk);
+    virtual_keyboard.enq(kb_action);
   }
 
   virtual_keyboard.pop_modifier_state();
@@ -228,19 +217,11 @@ static void sync_usb_joystick_state() {
 
 static void sync_ps2_keyboard_state() {
   while (true) {
-    KeyboardCodes make = virtual_keyboard.deq_make();
-    if (make == NoKey) {
+    KeyboardAction kb_action = virtual_keyboard.deq();
+    if (kb_action.type == KbActionNone) {
       break;
     }
-    ps2_keyboard.enq_make(make);
-  }
-
-  while (true) {
-    KeyboardCodes brk = virtual_keyboard.deq_brk();
-    if (brk == NoKey) {
-      break;
-    }
-    ps2_keyboard.enq_brk(brk);
+    ps2_keyboard.enq(kb_action);
   }
 
   if (!setup_mode.in_setup_mode) {

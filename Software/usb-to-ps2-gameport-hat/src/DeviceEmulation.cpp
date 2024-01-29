@@ -1,6 +1,7 @@
 #include "DeviceEmulation.h"
 
 #include "Config.h"
+#include "KeyboardAction.h"
 
 #define JOY_AXIS_TO_KEYPRESS(axis, positive) \
   (((positive) > 0) ? ((axis) > 0xA0) : ((axis) < 0x60))
@@ -10,8 +11,7 @@
 
 #define MOUSE_DELTA_TO_JOY_AXIS(delta) (0x80 + (delta))
 
-static CircularBuffer<KeyboardCodes, VIRTUAL_KEYBOARD_KRO> make_buffer;
-static CircularBuffer<KeyboardCodes, VIRTUAL_KEYBOARD_KRO> brk_buffer;
+static CircularBuffer<KeyboardAction, VIRTUAL_KEYBOARD_KRO * 2> kb_action_buffer;
 
 static void sync_kb_emu_keys(VirtualKeyboard* const keyboard, KeyboardCodes code,
                              bool key_down);
@@ -90,129 +90,110 @@ void joy_emulate_mouse(VirtualMouse* const mouse,
 
 void keyboard_emulate_joy(VirtualJoystick* const joystick,
                           VirtualKeyboard* const keyboard) {
-  KeyboardCodes make;
-  KeyboardCodes brk;
   JoystickState new_joy_state = joystick->pop_state();
-  make_buffer.clear();
-  brk_buffer.clear();
 
-  // Handle MAKE
+  // For each keyboard action
+  kb_action_buffer.clear();
   while (true) {
-    make = keyboard->deq_make();
-    if (make == NoKey) {
+    KeyboardAction kb_action = keyboard->deq();
+    if (kb_action.type == KbActionNone) {
       break;
     }
 
     uint8_t mapping_idx;
     for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
-      if (make == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
+      if (kb_action.code == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
         break;
       }
     }
     mapping_idx /= 2;
 
-    switch (mapping_idx) {
-      case 0:
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-      case 7: {  // Axes
-        if (mapping_idx % 2 == 0) {
-          if (new_joy_state.axes[mapping_idx >> 1] > 0x40) {
-            new_joy_state.axes[mapping_idx >> 1] = 0x40;
+    // Handle MAKE
+    if (kb_action.type == KbActionMake) {
+      switch (mapping_idx) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7: {  // Axes
+          if (mapping_idx % 2 == 0) {
+            if (new_joy_state.axes[mapping_idx >> 1] > 0x40) {
+              new_joy_state.axes[mapping_idx >> 1] = 0x40;
+              new_joy_state.changed = true;
+            }
+          } else {
+            if (new_joy_state.axes[mapping_idx >> 1] < 0xC0) {
+              new_joy_state.axes[mapping_idx >> 1] = 0xC0;
+              new_joy_state.changed = true;
+            }
+          }
+          break;
+        }
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15: {  // Buttons 1-8
+          if (new_joy_state.buttons[mapping_idx - 8] < 1) {
+            new_joy_state.buttons[mapping_idx - 8] = 1;
             new_joy_state.changed = true;
           }
-        } else {
-          if (new_joy_state.axes[mapping_idx >> 1] < 0xC0) {
-            new_joy_state.axes[mapping_idx >> 1] = 0xC0;
+          break;
+        }
+        default:
+          // put back what we don't consume
+          kb_action_buffer.enq(kb_action);
+          break;
+      }
+    }
+    // Handle BREAK
+    else {
+      switch (mapping_idx) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7: {  // Axes
+          if (new_joy_state.axes[mapping_idx >> 1] != 0x80) {
+            new_joy_state.axes[mapping_idx >> 1] = 0x80;
             new_joy_state.changed = true;
           }
+          break;
         }
-        break;
-      }
-      case 8:
-      case 9:
-      case 10:
-      case 11:
-      case 12:
-      case 13:
-      case 14:
-      case 15: {  // Buttons 1-8
-        if (new_joy_state.buttons[mapping_idx - 8] < 1) {
-          new_joy_state.buttons[mapping_idx - 8] = 1;
-          new_joy_state.changed = true;
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15: {  // Buttons 1-8
+          if (new_joy_state.buttons[mapping_idx - 8] != 0) {
+            new_joy_state.buttons[mapping_idx - 8] = 0;
+            new_joy_state.changed = true;
+          }
+          break;
         }
-        break;
+        default:
+          // put back what we don't consume
+          kb_action_buffer.enq(kb_action);
+          break;
       }
-      default:
-        // put back what we don't consume
-        make_buffer.enq(make);
-        break;
     }
   }
 
-  // restore MAKE codes we did not consume
-  while (make_buffer.length() > 0) {
-    keyboard->enq_make(make_buffer.deq());
-  }
-
-  // Handle BREAK
-  while (true) {
-    brk = keyboard->deq_brk();
-    if (brk == NoKey) {
-      break;
-    }
-
-    uint8_t mapping_idx;
-    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
-      if (brk == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
-        break;
-      }
-    }
-    mapping_idx /= 2;
-
-    switch (mapping_idx) {
-      case 0:
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-      case 7: {  // Axes
-        if (new_joy_state.axes[mapping_idx >> 1] != 0x80) {
-          new_joy_state.axes[mapping_idx >> 1] = 0x80;
-          new_joy_state.changed = true;
-        }
-        break;
-      }
-      case 8:
-      case 9:
-      case 10:
-      case 11:
-      case 12:
-      case 13:
-      case 14:
-      case 15: {  // Buttons 1-8
-        if (new_joy_state.buttons[mapping_idx - 8] != 0) {
-          new_joy_state.buttons[mapping_idx - 8] = 0;
-          new_joy_state.changed = true;
-        }
-        break;
-      }
-      default:
-        // put back what we don't consume
-        brk_buffer.enq(brk);
-        break;
-    }
-  }
-
-  // restore BREAK codes we did not consume
-  while (brk_buffer.length() > 0) {
-    keyboard->enq_brk(brk_buffer.deq());
+  // restore actions we did not consume
+  while (kb_action_buffer.length() > 0) {
+    keyboard->enq(kb_action_buffer.deq());
   }
 
   // push back updated state
@@ -221,122 +202,103 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
 
 void keyboard_emulate_mouse(VirtualMouse* const mouse,
                             VirtualKeyboard* const keyboard) {
-  KeyboardCodes make;
-  KeyboardCodes brk;
   MouseState new_mouse_state = mouse->pop_state();
-  make_buffer.clear();
-  brk_buffer.clear();
 
-  // Handle MAKE
+  // For each keyboard action
+  kb_action_buffer.clear();
   while (true) {
-    make = keyboard->deq_make();
-    if (make == NoKey) {
+    KeyboardAction kb_action = keyboard->deq();
+    if (kb_action.type == KbActionNone) {
       break;
     }
 
     uint8_t mapping_idx;
     for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
-      if (make == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
+      if (kb_action.code == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
         break;
       }
     }
     mapping_idx /= 2;
 
-    switch (mapping_idx) {
-      case 0:  // Left
-        new_mouse_state.d_x = -MOUSE_EMU_SPEED;
-        break;
-      case 1:  // Right
-        new_mouse_state.d_x = MOUSE_EMU_SPEED;
-        break;
-      case 2:  // Up
-        new_mouse_state.d_y = -MOUSE_EMU_SPEED;
-        break;
-      case 3:  // Down
-        new_mouse_state.d_y = MOUSE_EMU_SPEED;
-        break;
-      case 4:  // Unused
-      case 5:  // Unused
-        break;
-      case 6:  // Scroll Up
-        new_mouse_state.d_wheel = -1;
-        break;
-      case 7:  // Scroll Down
-        new_mouse_state.d_wheel = 1;
-        break;
-      case 8:
-      case 9:
-      case 10:
-      case 11: {  // Buttons 1-4
-        if (new_mouse_state.buttons[mapping_idx - 8] < 1) {
-          new_mouse_state.buttons[mapping_idx - 8] = 1;
-          new_mouse_state.changed = true;
+    // Handle MAKE
+    if (kb_action.type == KbActionMake) {
+      switch (mapping_idx) {
+        case 0:  // Left
+          new_mouse_state.d_x = -MOUSE_EMU_SPEED;
+          break;
+        case 1:  // Right
+          new_mouse_state.d_x = MOUSE_EMU_SPEED;
+          break;
+        case 2:  // Up
+          new_mouse_state.d_y = -MOUSE_EMU_SPEED;
+          break;
+        case 3:  // Down
+          new_mouse_state.d_y = MOUSE_EMU_SPEED;
+          break;
+        case 4:  // Unused
+        case 5:  // Unused
+          break;
+        case 6:  // Scroll Up
+          new_mouse_state.d_wheel = -1;
+          break;
+        case 7:  // Scroll Down
+          new_mouse_state.d_wheel = 1;
+          break;
+        case 8:
+        case 9:
+        case 10:
+        case 11: {  // Buttons 1-4
+          if (new_mouse_state.buttons[mapping_idx - 8] < 1) {
+            new_mouse_state.buttons[mapping_idx - 8] = 1;
+            new_mouse_state.changed = true;
+          }
+          break;
         }
-        break;
-      }
-      default:
-        // put back what we don't consume
-        make_buffer.enq(make);
-        break;
-    }
-  }
-
-  // restore MAKE codes we did not consume
-  while (make_buffer.length() > 0) {
-    keyboard->enq_make(make_buffer.deq());
-  }
-
-  // Handle BREAK
-  while (true) {
-    brk = keyboard->deq_brk();
-    if (brk == NoKey) {
-      break;
-    }
-
-    uint8_t mapping_idx;
-    for (mapping_idx = 0; mapping_idx < NUM_KB_EMU_MAPPINGS * 2; mapping_idx++) {
-      if (brk == KB_EMU_MAPPINGS[mapping_idx / 2][mapping_idx % 2]) {
-        break;
+        default:
+          // put back what we don't consume
+          kb_action_buffer.enq(kb_action);
+          break;
       }
     }
-    mapping_idx /= 2;
+    // Handle BREAK
+    else {
+      switch (mapping_idx) {
+        case 0:  // Left
+        case 1:  // Right
+          new_mouse_state.d_x = 0;
+          break;
+        case 2:  // Up
+        case 3:  // Down
+          new_mouse_state.d_y = 0;
+          break;
+        case 4:  // Unused
+        case 5:  // Unused
+          break;
+        case 6:  // Scroll Up
+        case 7:  // Scroll Down
+          new_mouse_state.d_wheel = 0;
+          break;
+        case 8:
+        case 9:
+        case 10:
+        case 11:  // Buttons 1-4
+          if (new_mouse_state.buttons[mapping_idx - 8] != 0) {
+            new_mouse_state.buttons[mapping_idx - 8] = 0;
+            new_mouse_state.changed = true;
+          }
+          break;
 
-    switch (mapping_idx) {
-      case 0:  // Left
-      case 1:  // Right
-        new_mouse_state.d_x = 0;
-        break;
-      case 2:  // Up
-      case 3:  // Down
-        new_mouse_state.d_y = 0;
-        break;
-      case 4:  // Unused
-      case 5:  // Unused
-        break;
-      case 6:  // Scroll Up
-      case 7:  // Scroll Down
-        new_mouse_state.d_wheel = 0;
-        break;
-      case 8:
-      case 9:
-      case 10:
-      case 11:  // Buttons 1-4
-        if (new_mouse_state.buttons[mapping_idx - 8] != 0) {
-          new_mouse_state.buttons[mapping_idx - 8] = 0;
-          new_mouse_state.changed = true;
-        }
-        break;
-
-      default:
-        // put back what we don't consume
-        brk_buffer.enq(brk);
-        break;
+        default:
+          // put back what we don't consume
+          kb_action_buffer.enq(kb_action);
+          break;
+      }
     }
   }
 
-  // restore BREAK codes we did not consume
-  while (brk_buffer.length() > 0) {
-    keyboard->enq_brk(brk_buffer.deq());
+  // restore actions we did not consume
+  while (kb_action_buffer.length() > 0) {
+    keyboard->enq(kb_action_buffer.deq());
   }
 
   // push back updated state
@@ -391,11 +353,12 @@ void mouse_emulate_joy(VirtualJoystick* const joystick,
 
 static void sync_kb_emu_keys(VirtualKeyboard* const keyboard, KeyboardCodes code,
                              bool key_down) {
-  if (code != NoKey) {
-    if (key_down) {
-      keyboard->enq_make(code);
-    } else {
-      keyboard->enq_brk(code);
-    }
+  if (code == NoKey) {
+    return;
   }
+
+  KeyboardAction kb_action;
+  kb_action.type = key_down ? KbActionMake : KbActionBreak;
+  kb_action.code = code;
+  keyboard->enq(kb_action);
 }

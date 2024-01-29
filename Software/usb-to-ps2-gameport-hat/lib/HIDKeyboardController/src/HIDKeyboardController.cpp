@@ -260,18 +260,14 @@ KeyboardModifierState HIDKeyboardController::get_modifier_state() {
   return modifier_state;
 };
 
-KeyboardCodes HIDKeyboardController::deq_make() {
-  if (make_buffer.length() <= 0) {
-    return NoKey;
+KeyboardAction HIDKeyboardController::deq() {
+  KeyboardAction kb_action;
+  if (action_buffer.length() > 0) {
+    kb_action = action_buffer.deq();
+  } else {
+    kb_action.type = KbActionNone;
   }
-  return make_buffer.deq();
-}
-
-KeyboardCodes HIDKeyboardController::deq_brk() {
-  if (brk_buffer.length() <= 0) {
-    return NoKey;
-  }
-  return brk_buffer.deq();
+  return kb_action;
 }
 
 void HIDKeyboardController::set_led_state(KeyboardLeds state) {
@@ -291,6 +287,8 @@ void HIDKeyboardController::set_led_state(KeyboardLeds state) {
 
 void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
                                   uint32_t len, uint8_t *buf) {
+  KeyboardAction kb_action;
+
   usb_data_received(buf, (uint8_t)len);
 
   // handle modifier keys
@@ -299,60 +297,44 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
     modifier_state = static_cast<KeyboardModifierState>(buf[0]);
 
     if ((old_modifier_state & ModLeftCtrl) != (modifier_state & ModLeftCtrl)) {
-      if (modifier_state & ModLeftCtrl) {
-        make_buffer.enq(LeftControl);
-      } else {
-        brk_buffer.enq(LeftControl);
-      }
+      kb_action.code = LeftControl;
+      kb_action.type = (modifier_state & ModLeftCtrl) ? KbActionMake : KbActionBreak;
+      action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModLeftShift) != (modifier_state & ModLeftShift)) {
-      if (modifier_state & ModLeftShift) {
-        make_buffer.enq(LeftShift);
-      } else {
-        brk_buffer.enq(LeftShift);
-      }
+      kb_action.code = LeftShift;
+      kb_action.type = (modifier_state & ModLeftShift) ? KbActionMake : KbActionBreak;
+      action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModLeftAlt) != (modifier_state & ModLeftAlt)) {
-      if (modifier_state & ModLeftAlt) {
-        make_buffer.enq(LeftAlt);
-      } else {
-        brk_buffer.enq(LeftAlt);
-      }
+      kb_action.code = LeftAlt;
+      kb_action.type = (modifier_state & ModLeftAlt) ? KbActionMake : KbActionBreak;
+      action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModLeftGUI) != (modifier_state & ModLeftGUI)) {
-      if (modifier_state & ModLeftGUI) {
-        make_buffer.enq(LeftGUI);
-      } else {
-        brk_buffer.enq(LeftGUI);
-      }
+      kb_action.code = LeftGUI;
+      kb_action.type = (modifier_state & ModLeftGUI) ? KbActionMake : KbActionBreak;
+      action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightCtrl) != (modifier_state & ModRightCtrl)) {
-      if (modifier_state & ModRightCtrl) {
-        make_buffer.enq(RightControl);
-      } else {
-        brk_buffer.enq(RightControl);
-      }
+      kb_action.code = RightControl;
+      kb_action.type = (modifier_state & ModRightCtrl) ? KbActionMake : KbActionBreak;
+      action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightShift) != (modifier_state & ModRightShift)) {
-      if (modifier_state & ModRightShift) {
-        make_buffer.enq(RightShift);
-      } else {
-        brk_buffer.enq(RightShift);
-      }
+      kb_action.code = RightShift;
+      kb_action.type = (modifier_state & ModRightShift) ? KbActionMake : KbActionBreak;
+      action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightAlt) != (modifier_state & ModRightAlt)) {
-      if (modifier_state & ModRightAlt) {
-        make_buffer.enq(RightAlt);
-      } else {
-        brk_buffer.enq(RightAlt);
-      }
+      kb_action.code = RightAlt;
+      kb_action.type = (modifier_state & ModRightAlt) ? KbActionMake : KbActionBreak;
+      action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightGUI) != (modifier_state & ModRightGUI)) {
-      if (modifier_state & ModRightGUI) {
-        make_buffer.enq(RightGUI);
-      } else {
-        brk_buffer.enq(RightGUI);
-      }
+      kb_action.code = RightGUI;
+      kb_action.type = (modifier_state & ModRightGUI) ? KbActionMake : KbActionBreak;
+      action_buffer.enq(kb_action);
     }
   }
 
@@ -374,7 +356,9 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
       }
       // enqueue MAKE
       if (key != NoKey) {
-        make_buffer.enq(key);
+        kb_action.code = key;
+        kb_action.type = KbActionMake;
+        action_buffer.enq(kb_action);
       }
     }
 
@@ -382,7 +366,9 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
       KeyboardCodes key = keycode_table[prev_state[i]];
       // enqueue BREAK
       if (key != NoKey) {
-        brk_buffer.enq(key);
+        kb_action.code = key;
+        kb_action.type = KbActionBreak;
+        action_buffer.enq(kb_action);
       }
     }
   }

@@ -3,13 +3,13 @@
 #define MAX_MAKE_PACKET_SIZE 8
 #define MAX_BRK_PACKET_SIZE 3
 
-struct MakeBreakCodeEntry {
+struct KeycodeTableEntry {
   uint8_t make[MAX_MAKE_PACKET_SIZE];
   uint8_t brk[MAX_BRK_PACKET_SIZE];
 };
 
 // clang-format off
-static const MakeBreakCodeEntry keycode_table[] = {
+static const KeycodeTableEntry keycode_table[] = {
   {{0x00,NoKey,NoKey,NoKey,NoKey,NoKey,NoKey,NoKey}, {NoKey,NoKey,NoKey}}, // Overrun Error
   {{0xFC,NoKey,NoKey,NoKey,NoKey,NoKey,NoKey,NoKey}, {NoKey,NoKey,NoKey}}, // POST Fail
   {{0x1C,NoKey,NoKey,NoKey,NoKey,NoKey,NoKey,NoKey}, {0xF0,0x1C,NoKey}},     // a A
@@ -153,8 +153,7 @@ PS2Keyboard::PS2Keyboard(PS2Port* port) : PS2Device(port) { set_defaults(); }
 
 void PS2Keyboard::set_defaults() {
   active_command = 0;
-  last_make_code = NoKey;
-  last_brk_code = NoKey;
+  last_action.type = KbActionNone;
 
   enabled = true;
   typematic_delay = DEFAULT_TYPEMATIC_DELAY;
@@ -176,9 +175,11 @@ void PS2Keyboard::reset(bool send_ack) {
   send_toHost(packet, idx);
 }
 
-void PS2Keyboard::enq_make(KeyboardCodes code) { make_buffer.enq(code); }
-
-void PS2Keyboard::enq_brk(KeyboardCodes code) { brk_buffer.enq(code); }
+void PS2Keyboard::enq(KeyboardAction kb_action) {
+  if (kb_action.type != KbActionNone) {
+    action_buffer.enq(kb_action);
+  }
+}
 
 void PS2Keyboard::task() {
   // wait until transmission is finished
@@ -209,7 +210,7 @@ void PS2Keyboard::task() {
   }
 
   // don't send if
-  if (!enabled ||             // or keyboard is disabled
+  if (!enabled ||             // keyboard is disabled
       (active_command != 0))  // or an active command is being processed
   {
     return;
@@ -219,41 +220,50 @@ void PS2Keyboard::task() {
   typematic_delay_timer.tick();
   typematic_rate_timer.tick();
 
-  bool do_make = make_buffer.length() > 0;
-  bool do_brk = brk_buffer.length() > 0;
-
-  // handle make
-  if (do_make) {
-    // get new MAKE code
-    last_make_code = make_buffer.deq();
-
-    // send make packet
-    const uint8_t* packet = keycode_table[last_make_code].make;
-    uint8_t packet_len = get_keycode_entry_len(packet, MAX_MAKE_PACKET_SIZE);
-    if (packet_len > 0) {
-      send_toHost(packet, packet_len);
-    }
+  // get next action
+  KeyboardAction kb_action;
+  if (action_buffer.length() > 0) {
+    kb_action = action_buffer.deq();
+  } else {
+    kb_action.type = KbActionNone;
   }
-  // handle break
-  else if (do_brk) {
-    // get new BREAK code
-    last_brk_code = brk_buffer.deq();
 
-    // clear last MAKE code
-    if (last_make_code == last_brk_code) {
-      last_make_code = NoKey;
+  // handle action
+  if (kb_action.type != KbActionNone) {
+    const uint8_t* packet;
+    uint8_t packet_len;
+
+    // ignore if same as last action
+    if (kb_action.type == last_action.type && kb_action.code == last_action.code) {
+      return;
     }
 
-    // send break packet
-    const uint8_t* packet = keycode_table[last_brk_code].brk;
-    uint8_t packet_len = get_keycode_entry_len(packet, MAX_BRK_PACKET_SIZE);
+    // save last action
+    last_action = kb_action;
+
+    // build MAKE packet
+    if (kb_action.type == KbActionMake) {
+      packet = keycode_table[kb_action.code].make;
+      packet_len = get_keycode_entry_len(packet, MAX_MAKE_PACKET_SIZE);
+    }
+    // build BREAK packet
+    else {
+      packet = keycode_table[kb_action.code].brk;
+      packet_len = get_keycode_entry_len(packet, MAX_BRK_PACKET_SIZE);
+    }
+
+    // send packet
     if (packet_len > 0) {
       send_toHost(packet, packet_len);
     }
+
+    // apply typematic delay after keycode change
+    typematic_delay_timer.reset();
   }
 
   // typematic handling
-  if (!do_make && requires_typematic_handling(last_make_code)) {
+  if (last_action.type == KbActionMake &&
+      requires_typematic_handling(last_action.code)) {
     // wait for typematic delay
     if (typematic_delay_timer.getElapsedMillis() <
         typematic_delay_table[typematic_delay]) {
@@ -266,7 +276,7 @@ void PS2Keyboard::task() {
     }
 
     // send make packet
-    const uint8_t* packet = keycode_table[last_make_code].make;
+    const uint8_t* packet = keycode_table[last_action.code].make;
     uint8_t packet_len = get_keycode_entry_len(packet, MAX_MAKE_PACKET_SIZE);
     if (packet_len > 0) {
       send_toHost(packet, packet_len);
@@ -274,9 +284,6 @@ void PS2Keyboard::task() {
 
     // apply typematic rate again on next repeat
     typematic_rate_timer.reset();
-  } else {
-    // apply typematic delay after keycode change
-    typematic_delay_timer.reset();
   }
 }
 
@@ -325,8 +332,7 @@ void PS2Keyboard::handle_active_command(uint8_t data_byte) {
 
 void PS2Keyboard::handle_new_command(uint8_t data_byte) {
   // clear state after every command
-  make_buffer.clear();
-  brk_buffer.clear();
+  action_buffer.clear();
 
   switch (data_byte) {
     // Reset

@@ -5,7 +5,7 @@
 #include <hidboot.h>
 
 #include "CircularBuffer.h"
-#include "KeyboardCodes.h"
+#include "KeyboardAction.h"
 #include "KeyboardLeds.h"
 #include "KeyboardModifierState.h"
 
@@ -18,8 +18,7 @@ class HIDKeyboardController : virtual public HIDReportParser {
   KeyboardModifierState modifier_state;
   uint8_t prev_state[USB_KEYBOARD_KRO];
   KeyboardLeds led_state;
-  CircularBuffer<KeyboardCodes, USB_KEYBOARD_KRO> make_buffer;
-  CircularBuffer<KeyboardCodes, USB_KEYBOARD_KRO> brk_buffer;
+  CircularBuffer<KeyboardAction, USB_KEYBOARD_KRO * 2> action_buffer;
 
  public:
   HIDKeyboardController(HID *driver);
@@ -35,18 +34,11 @@ class HIDKeyboardController : virtual public HIDReportParser {
   KeyboardModifierState get_modifier_state();
 
   /**
-   * Dequeues the next make code.
+   * Dequeues the next keyboard action.
    *
-   * Returns `NoKey` if the queue is empty.
+   * Returns `KbActionNone` if the queue is empty.
    */
-  KeyboardCodes deq_make();
-
-  /**
-   * Dequeues the next break code.
-   *
-   * Returns `NoKey` if the queue is empty.
-   */
-  KeyboardCodes deq_brk();
+  KeyboardAction deq();
 
   /**
    * Updates the state of the keyboard leds.

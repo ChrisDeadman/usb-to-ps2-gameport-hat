@@ -2,7 +2,7 @@
 #define _VIRTUAL_KEYBOARD_H_
 
 #include "CircularBuffer.h"
-#include "KeyboardCodes.h"
+#include "KeyboardAction.h"
 #include "KeyboardLeds.h"
 #include "KeyboardModifierState.h"
 
@@ -12,8 +12,7 @@ class VirtualKeyboard {
  private:
   KeyboardModifierState modifier_state;
   KeyboardLeds led_state;
-  CircularBuffer<KeyboardCodes, VIRTUAL_KEYBOARD_KRO> make_buffer;
-  CircularBuffer<KeyboardCodes, VIRTUAL_KEYBOARD_KRO> brk_buffer;
+  CircularBuffer<KeyboardAction, VIRTUAL_KEYBOARD_KRO * 2> action_buffer;
 
  public:
   VirtualKeyboard();
@@ -35,18 +34,11 @@ class VirtualKeyboard {
   KeyboardLeds pop_led_state();
 
   /**
-   * Dequeues the next make code.
+   * Dequeues the next keyboard action.
    *
-   * Returns `NoKey` if the queue is empty.
+   * Returns `KbActionNone` if the queue is empty.
    */
-  KeyboardCodes deq_make();
-
-  /**
-   * Dequeues the next break code.
-   *
-   * Returns `NoKey` if the queue is empty.
-   */
-  KeyboardCodes deq_brk();
+  KeyboardAction deq();
 
   /**
    * Updates the state of the keyboard leds.
@@ -63,14 +55,9 @@ class VirtualKeyboard {
   void update_led_state(KeyboardLeds new_state);
 
   /**
-   * Enqueues a make code.
+   * Enqueues a keyboard action.
    */
-  void enq_make(KeyboardCodes code);
-
-  /**
-   * Enqueues a break code.
-   */
-  void enq_brk(KeyboardCodes code);
+  void enq(KeyboardAction kb_action);
 };
 
 #endif  //_VIRTUAL_KEYBOARD_H_

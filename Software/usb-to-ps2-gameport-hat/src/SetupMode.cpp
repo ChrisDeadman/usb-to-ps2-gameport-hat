@@ -113,17 +113,26 @@ SetupKeys SetupMode::get_key_state() {
     return keys;
   }
 
-  KeyboardCodes keycode = keyboard->deq_make();
-  if (keycode != NoKey) {
-    if (keycode == Return) {
-      keys = (SetupKeys)(keys | SetupKeySelect);
+  KeyboardAction kb_action = keyboard->deq();
+  if (kb_action.type == KbActionMake) {
+    switch (kb_action.code) {
+      case Return:
+        keys = (SetupKeys)(keys | SetupKeySelect);
+        break;
+      case LeftArrow:
+        keys = (SetupKeys)(keys | SetupKeyLeft);
+        break;
+      case RightArrow:
+        keys = (SetupKeys)(keys | SetupKeyRight);
+        break;
+      default:
+        // put back what we don't consume
+        keyboard->enq(kb_action);
+        break;
     }
-    if (keycode == LeftArrow) {
-      keys = (SetupKeys)(keys | SetupKeyLeft);
-    }
-    if (keycode == RightArrow) {
-      keys = (SetupKeys)(keys | SetupKeyRight);
-    }
+  } else {
+    // put back what we don't consume
+    keyboard->enq(kb_action);
   }
 
   if (joystick_state->buttons[0] || joystick_state->buttons[1]) {
