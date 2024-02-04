@@ -1,31 +1,32 @@
 #include "HIDJoystickController.h"
 
 extern "C" {
-void __usb_joy_dummy_received_callback(uint8_t const *const data, uint8_t length) {}
+void __usb_joy_dummy_callback(uint8_t const *const data, uint8_t length) {}
 }
 /**
  * implement in your code if you want to capture packages.
  */
 void usb_data_received(uint8_t const *const data, uint8_t length)
-    __attribute__((weak, alias("__usb_joy_dummy_received_callback")));
+    __attribute__((weak, alias("__usb_joy_dummy_callback")));
 
 HIDJoystickController::HIDJoystickController(USBHost *usb)
     : HIDUniversal::HIDUniversal(usb), usb(usb), hidParser(usb) {
   SetReportParser(0, this);
-  memset(state.axes, 0, HIDJoystickControllerState::NUM_AXES);
-  memset(state.buttons, 0, HIDJoystickControllerState::NUM_BUTTONS);
-  memset(state.hats, 0, HIDJoystickControllerState::NUM_HATS);
 }
 
 bool HIDJoystickController::is_connected() { return isReady(); }
 
-HIDJoystickControllerState HIDJoystickController::get_state() { return state; }
+HIDJoystickControllerState HIDJoystickController::pop_state() {
+  HIDJoystickControllerState state_copy = state;
+  state.changed = false;
+  return state_copy;
+}
 
 void HIDJoystickController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
                                   uint32_t len, uint8_t *buf) {
   usb_data_received(buf, (uint8_t)len);
 
-  memset(state.axes, 0, HIDJoystickControllerState::NUM_AXES);
+  memset(state.axes, 0x80, HIDJoystickControllerState::NUM_AXES);
   memset(state.buttons, 0, HIDJoystickControllerState::NUM_BUTTONS);
   memset(state.hats, 0, HIDJoystickControllerState::NUM_HATS);
 
@@ -62,7 +63,8 @@ void HIDJoystickController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
       hidParser.parseHidDataBlock(desc, buf, &bufIdx, &bitIdx, NULL, 0);
     }
   }
-  state.version_counter += 1;
+
+  state.changed = true;
 };
 
 uint32_t HIDJoystickController::Init(uint32_t parent, uint32_t port,

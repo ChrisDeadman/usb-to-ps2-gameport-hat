@@ -4,17 +4,16 @@
 #include "HIDJoystickController.h"
 #include "JoystickDriverMapper.h"
 
-class HIDJoystickControllerMapper : public JoystickDriverMapper {
+class HIDJoystickControllerMapper : public IJoystickDriverMapper {
  private:
   HIDJoystickController* const driver;
-  JoystickState state;
 
  public:
   HIDJoystickControllerMapper(HIDJoystickController* driver);
 
-  uint8_t getNumConnectedDevices() override;
+  uint8_t get_num_connected_devices() override;
 
-  JoystickState getControllerState(uint8_t idx) override;
+  JoystickState pop_state(uint8_t idx) override;
 };
 
 #endif  //_HID_JOYSTICK_CONTROLLER_MAPPER_H_

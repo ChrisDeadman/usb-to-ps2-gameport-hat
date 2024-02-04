@@ -6,20 +6,19 @@
 
 static bool get_led_blink(unsigned long t_delta, uint8_t count);
 
-SetupMode::SetupMode(HIDKeyboardCombiner* const keyboard,
+SetupMode::SetupMode(VirtualKeyboard* const keyboard,
                      JoystickState* const joystick_state)
     : keyboard(keyboard), joystick_state(joystick_state) {
-  key_state = SetupKeys::None;
+  key_state = SetupKeyNone;
   item_idx = 0;
   in_setup_mode = false;
   in_edit_mode = false;
-  swap_joy_axis_3_and_4 = true;
-  dummy_value = 0;
+  swap_joy_axis_3_and_4 = false;
+  emu_mode = EmuModeNone;
 }
 
 void SetupMode::task() {
   setup_mode_timer.tick();
-  led_update_timer.tick();
   blink_timer.tick();
 
   // menu buttons
@@ -27,17 +26,16 @@ void SetupMode::task() {
   key_state = get_key_state();
 
   // setup mode is triggered by holding down the setup key(s) for a duration
-  if (!(key_state & SetupKeys::Setup)) {
+  if (!(key_state & SetupKeySetup)) {
     setup_mode_timer.reset();
   }
   if (setup_mode_timer.getElapsedMillis() > SETUP_ENTER_DELAY) {
     in_setup_mode = !in_setup_mode;
     in_edit_mode = false;
-    key_state = SetupKeys::None;
+    key_state = SetupKeyNone;
     set_led_state(in_setup_mode, in_setup_mode);
     setup_mode_timer.reset();
     blink_timer.reset();
-    led_update_timer.reset();
     return;
   }
 
@@ -47,23 +45,21 @@ void SetupMode::task() {
   }
 
   // toggle edit mode
-  if (PRESSED(SetupKeys::Select)) {
+  if (PRESSED(SetupKeySelect)) {
     in_edit_mode = !in_edit_mode;
     return;
   }
 
   // left and right
   int8_t delta = 0;
-  delta -= PRESSED(SetupKeys::Left) ? 1 : 0;
-  delta += PRESSED(SetupKeys::Right) ? 1 : 0;
+  delta -= PRESSED(SetupKeyLeft) ? 1 : 0;
+  delta += PRESSED(SetupKeyRight) ? 1 : 0;
 
   // switch through setup items
   if (!in_edit_mode) {
-    item_idx += delta;
-    if (item_idx >= item_count) {
-      item_idx = 0;
-    } else if (item_idx < 0) {
-      item_idx = item_count - 1;
+    int8_t new_idx = item_idx + delta;
+    if (new_idx >= 0 && new_idx < item_count) {
+      item_idx = (uint8_t)new_idx;
     }
   }
 
@@ -71,12 +67,6 @@ void SetupMode::task() {
   if (in_edit_mode && delta != 0) {
     set_item_value(delta);
   }
-
-  // don't update leds too often
-  if (led_update_timer.getElapsedMillis() < SETUP_LED_UPDATE_DELAY) {
-    return;
-  }
-  led_update_timer.reset();
 
   // A change resets blinking
   if (delta != 0) {
@@ -89,8 +79,8 @@ void SetupMode::task() {
     blink_timer.reset();
   }
 
-  // LED1 indicates menu item
-  bool led1 = get_led_blink(blink_elapsed, item_idx + 1);
+  // LED1 indicates menu item or edit mode
+  bool led1 = get_led_blink(blink_elapsed, item_idx + 1) | in_edit_mode;
 
   // LED2 indicates menu item value
   uint8_t item_value = get_item_value();
@@ -105,16 +95,17 @@ void SetupMode::task() {
 }
 
 SetupKeys SetupMode::get_key_state() {
-  SetupKeys keys = SetupKeys::None;
+  SetupKeys keys = SetupKeyNone;
 
-  if (keyboard->get_modifier_state() ==
-      (ModifierState::ModLeftCtrl | ModifierState::ModLeftShift |
-       ModifierState::ModLeftGUI)) {
-    keys = (SetupKeys)(keys | SetupKeys::Setup);
+  KeyboardModifierState kbd_modifiers = keyboard->pop_modifier_state();
+  if (kbd_modifiers == (ModLeftCtrl | ModLeftShift | ModLeftGUI)) {
+    keys = (SetupKeys)(keys | SetupKeySetup);
+  } else {
+    keyboard->update_modifier_state(kbd_modifiers);
   }
 
   if (joystick_state->buttons[5] && joystick_state->buttons[4]) {
-    keys = (SetupKeys)(keys | SetupKeys::Setup);
+    keys = (SetupKeys)(keys | SetupKeySetup);
   }
 
   // don't consume keys if not in setup mode
@@ -122,59 +113,77 @@ SetupKeys SetupMode::get_key_state() {
     return keys;
   }
 
-  KeyboardCodes keycode = keyboard->deq_make();
-  keyboard->deq_brk();
-
-  if (keycode == KeyboardCodes::Return) {
-    keys = (SetupKeys)(keys | SetupKeys::Select);
-  }
-  if (keycode == KeyboardCodes::LeftArrow) {
-    keys = (SetupKeys)(keys | SetupKeys::Left);
-  }
-  if (keycode == KeyboardCodes::RightArrow) {
-    keys = (SetupKeys)(keys | SetupKeys::Right);
+  KeyboardAction kb_action = keyboard->deq();
+  if (kb_action.type == KbActionMake) {
+    switch (kb_action.code) {
+      case Return:
+        keys = (SetupKeys)(keys | SetupKeySelect);
+        break;
+      case LeftArrow:
+        keys = (SetupKeys)(keys | SetupKeyLeft);
+        break;
+      case RightArrow:
+        keys = (SetupKeys)(keys | SetupKeyRight);
+        break;
+      default:
+        // put back what we don't consume
+        keyboard->enq(kb_action);
+        break;
+    }
+  } else {
+    // put back what we don't consume
+    keyboard->enq(kb_action);
   }
 
   if (joystick_state->buttons[0] || joystick_state->buttons[1]) {
-    keys = (SetupKeys)(keys | SetupKeys::Select);
+    keys = (SetupKeys)(keys | SetupKeySelect);
   }
   if (joystick_state->buttons[5]) {
-    keys = (SetupKeys)(keys | SetupKeys::Left);
+    keys = (SetupKeys)(keys | SetupKeyLeft);
   }
   if (joystick_state->buttons[4]) {
-    keys = (SetupKeys)(keys | SetupKeys::Right);
+    keys = (SetupKeys)(keys | SetupKeyRight);
   }
 
   return keys;
 }
 
 void SetupMode::set_led_state(bool led1, bool led2) {
-  digitalWrite(EXT_LED1_PIN, (led1 | in_edit_mode) ? LOW : HIGH);
+  digitalWrite(EXT_LED1_PIN, led1 ? LOW : HIGH);
   digitalWrite(EXT_LED2_PIN, led2 ? LOW : HIGH);
 
-  KeyboardLeds kbd_leds = KeyboardLeds::LedNone;
-  if (led1) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedCapsLock);
-  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedScrollLock);
-  if (in_edit_mode) kbd_leds = (KeyboardLeds)(kbd_leds | KeyboardLeds::LedNumLock);
-  keyboard->set_led_state(kbd_leds);
+  KeyboardLeds kbd_leds = LedNone;
+  if (led1) kbd_leds = (KeyboardLeds)(kbd_leds | LedCapsLock);
+  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | LedScrollLock | LedNumLock);
+  keyboard->pop_led_state();
+  keyboard->update_led_state(kbd_leds);
 }
 
 uint8_t SetupMode::get_item_value() {
   switch (item_idx) {
     case 0:
       return swap_joy_axis_3_and_4 ? UINT8_MAX : 0;
+    case 1:
+      return emu_mode;
     default:
-      return dummy_value < 0 ? -dummy_value : dummy_value;
+      return 0;
   }
 }
 
 void SetupMode::set_item_value(int8_t delta) {
+  int8_t new_value;
+
   switch (item_idx) {
     case 0:
       swap_joy_axis_3_and_4 = !swap_joy_axis_3_and_4;
       break;
+    case 1:
+      new_value = emu_mode + delta;
+      if (new_value >= 0 && new_value < 6) {
+        emu_mode = (EmuMode)new_value;
+      }
+      break;
     default:
-      dummy_value += delta;
       break;
   }
 }

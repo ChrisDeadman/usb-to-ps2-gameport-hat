@@ -5,32 +5,20 @@
 #include <hidboot.h>
 
 #include "CircularBuffer.h"
-#include "KeyboardCodes.h"
+#include "KeyboardAction.h"
 #include "KeyboardLeds.h"
+#include "KeyboardModifierState.h"
 
 #define USB_KEYBOARD_KRO 6
-
-enum ModifierState : uint8_t {
-  ModNone = 0,
-  ModLeftCtrl = 0x01,
-  ModLeftShift = 0x02,
-  ModLeftAlt = 0x04,
-  ModLeftGUI = 0x08,
-  ModRightCtrl = 0x10,
-  ModRightShift = 0x20,
-  ModRightAlt = 0x40,
-  ModRightGUI = 0x80,
-};
 
 class HIDKeyboardController : virtual public HIDReportParser {
  private:
   HID *driver;
 
-  ModifierState modifier_state;
+  KeyboardModifierState modifier_state;
   uint8_t prev_state[USB_KEYBOARD_KRO];
   KeyboardLeds led_state;
-  CircularBuffer<KeyboardCodes, USB_KEYBOARD_KRO> make_buffer;
-  CircularBuffer<KeyboardCodes, USB_KEYBOARD_KRO> brk_buffer;
+  CircularBuffer<KeyboardAction, USB_KEYBOARD_KRO * 2> action_buffer;
 
  public:
   HIDKeyboardController(HID *driver);
@@ -43,21 +31,14 @@ class HIDKeyboardController : virtual public HIDReportParser {
   /**
    * Returns the current modifier state.
    */
-  ModifierState get_modifier_state();
+  KeyboardModifierState get_modifier_state();
 
   /**
-   * Dequeues the next make code.
+   * Dequeues the next keyboard action.
    *
-   * Returns `KeyboardCodes::NoKey` if the queue is empty.
+   * Returns `KbActionNone` if the queue is empty.
    */
-  KeyboardCodes deq_make();
-
-  /**
-   * Dequeues the next break code.
-   *
-   * Returns `KeyboardCodes::NoKey` if the queue is empty.
-   */
-  KeyboardCodes deq_brk();
+  KeyboardAction deq();
 
   /**
    * Updates the state of the keyboard leds.

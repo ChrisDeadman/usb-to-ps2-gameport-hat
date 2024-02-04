@@ -1,6 +1,8 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#include "KeyboardCodes.h"
+
 #define Serial Serial1  // use pins D0/D1
 #define SERIAL_SPEED 115200
 
@@ -22,8 +24,36 @@
 
 #define POT1_CS_PIN 10
 
+#define AXIS_TO_POT_VALUE(axis) (0xFF - ((axis) / 3.5))
+
+#define PS2_INIT_TIME 250
+
 #define SETUP_ENTER_DELAY 1000
 #define SETUP_BLINK_WINDOW 1500
-#define SETUP_LED_UPDATE_DELAY 50
+
+#define MOUSE_EMU_SPEED 10
+
+#define NUM_KB_EMU_MAPPINGS 16
+
+// clang-format off
+static const KeyboardCodes KB_EMU_MAPPINGS[NUM_KB_EMU_MAPPINGS][2] = {
+    {LeftArrow,     Keypad4Left},
+    {RightArrow,    Keypad6Right},
+    {UpArrow,       Keypad8Up},
+    {DownArrow,     Keypad2Down},
+    {aA,            NoKey},
+    {dD,            NoKey},
+    {wW,            NoKey},
+    {sS,            NoKey},
+    {LeftControl,   RightControl},
+    {Space,         RightShift},
+    {LeftAlt,       CapsLock},
+    {LeftShift,     NoKey},
+    {PeriodGreater, NoKey},
+    {CommaLess,     NoKey},
+    {Escape,        NoKey},
+    {Tab,           NoKey},
+};
+// clang-format on
 
 #endif  // _CONFIG_H_

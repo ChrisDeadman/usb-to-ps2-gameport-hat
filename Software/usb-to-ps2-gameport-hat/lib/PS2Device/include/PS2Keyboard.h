@@ -1,9 +1,9 @@
 #ifndef _PS2_KEYBOARD_H_
 #define _PS2_KEYBOARD_H_
 
-#include "../../Common/KeyboardCodes.h"
-#include "../../Common/KeyboardLeds.h"
 #include "CircularBuffer.h"
+#include "KeyboardAction.h"
+#include "KeyboardLeds.h"
 #include "PS2Device.h"
 #include "SoftTimer.h"
 
@@ -22,7 +22,7 @@ class PS2Keyboard : public PS2Device {
   uint8_t send_buffer_len = 0;
 
   uint8_t active_command;
-  KeyboardCodes last_keycode;
+  KeyboardAction last_action;
   SoftTimer typematic_delay_timer;
   SoftTimer typematic_rate_timer;
 
@@ -31,8 +31,7 @@ class PS2Keyboard : public PS2Device {
   uint8_t typematic_rate;
 
   KeyboardLeds led_state;
-  CircularBuffer<KeyboardCodes, PS2_KEYBOARD_KRO> make_buffer;
-  CircularBuffer<KeyboardCodes, PS2_KEYBOARD_KRO> brk_buffer;
+  CircularBuffer<KeyboardAction, PS2_KEYBOARD_KRO * 2> action_buffer;
 
  public:
   PS2Keyboard(PS2Port* const port);
@@ -55,14 +54,9 @@ class PS2Keyboard : public PS2Device {
   void reset(bool send_ack = false);
 
   /**
-   * Enqueues a make code.
+   * Enqueues a keyboard action.
    */
-  void enq_make(KeyboardCodes code);
-
-  /**
-   * Enqueues a break code.
-   */
-  void enq_brk(KeyboardCodes code);
+  void enq(KeyboardAction kb_action);
 
   /**
    * PS/2 main task.
