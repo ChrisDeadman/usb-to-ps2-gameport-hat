@@ -24,7 +24,7 @@
 
 #define POT1_CS_PIN 10
 
-#define AXIS_TO_POT_VALUE(axis) (0xFF - ((axis) / 3.5))
+#define AXIS_TO_POT_VALUE(axis) (0xFF - (uint8_t)((axis) / 3))
 
 #define PS2_INIT_TIME 250
 

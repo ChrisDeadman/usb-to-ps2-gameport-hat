@@ -6,18 +6,18 @@ uint8_t HIDDescriptionParser::getUsageDescriptionCount() {
   return usageDescriptionCount;
 }
 
-HIDReportUsageDescription const *const
-HIDDescriptionParser::getUsageDescription(uint8_t idx) {
+HIDReportUsageDescription const *const HIDDescriptionParser::getUsageDescription(
+    uint8_t idx) {
   return &usageDescriptions[idx % usageDescriptionCount];
 }
 
 static uint8_t scale_value(uint16_t value,
-                          HIDReportUsageDescription const *const description);
+                           HIDReportUsageDescription const *const description);
 
 uint32_t HIDDescriptionParser::parseHidDataBlock(
-    HIDReportUsageDescription const *const description,
-    uint8_t const *const input, uint32_t *const inputIdx, uint8_t *const bitIdx,
-    uint8_t *const output, uint32_t outputSize) {
+    HIDReportUsageDescription const *const description, uint8_t const *const input,
+    uint32_t *const inputIdx, uint8_t *const bitIdx, uint8_t *const output,
+    uint32_t outputSize) {
   uint32_t outputLen = 0;
 
   // in case of placeholder -> ignore incomplete byte
@@ -83,11 +83,10 @@ uint32_t HIDDescriptionParser::parseDeviceDescriptor(uint8_t address,
   USBTRACE2("bNumConfigurations=", devDesc->bNumConfigurations);
   USBTRACE("\r\n");
 
-  for (uint8_t configIdx = 0; configIdx < devDesc->bNumConfigurations;
-       configIdx++) {
-    rcode = usb->getConfDescr(address, endpoint,
-                              sizeof(USB_CONFIGURATION_DESCRIPTOR), configIdx,
-                              (uint8_t *)receiveBuffer);
+  for (uint8_t configIdx = 0; configIdx < devDesc->bNumConfigurations; configIdx++) {
+    rcode =
+        usb->getConfDescr(address, endpoint, sizeof(USB_CONFIGURATION_DESCRIPTOR),
+                          configIdx, (uint8_t *)receiveBuffer);
     if (rcode) return rcode;
 
     USB_CONFIGURATION_DESCRIPTOR *confDesc =
@@ -101,8 +100,8 @@ uint32_t HIDDescriptionParser::parseDeviceDescriptor(uint8_t address,
     USBTRACE("\r\n");
 
     uint16_t totalLength = min(confDesc->wTotalLength, BUFFER_SIZE);
-    rcode = usb->getConfDescr(address, endpoint, totalLength, configIdx,
-                              receiveBuffer);
+    rcode =
+        usb->getConfDescr(address, endpoint, totalLength, configIdx, receiveBuffer);
     if (rcode) return rcode;
 
     uint8_t hidInterfaceNumber = 0;
@@ -147,12 +146,10 @@ uint32_t HIDDescriptionParser::parseDeviceDescriptor(uint8_t address,
 
           for (uint8_t hidClassDescIdx = 0;
                hidClassDescIdx < hidDesc->bNumDescriptors; hidClassDescIdx++) {
-            hidClassDesc =
-                reinterpret_cast<HID_CLASS_DESCRIPTOR_LEN_AND_TYPE *>(
-                    &receiveBuffer[bufferIdx + 6 +
-                                   (hidClassDescIdx *
-                                    sizeof(
-                                        HID_CLASS_DESCRIPTOR_LEN_AND_TYPE))]);
+            hidClassDesc = reinterpret_cast<HID_CLASS_DESCRIPTOR_LEN_AND_TYPE *>(
+                &receiveBuffer[bufferIdx + 6 +
+                               (hidClassDescIdx *
+                                sizeof(HID_CLASS_DESCRIPTOR_LEN_AND_TYPE))]);
 
             USBTRACE("HID_CLASS_DESCRIPTOR\r\n");
             USBTRACE2("bDescrType=", hidClassDesc->bDescrType);
@@ -166,8 +163,7 @@ uint32_t HIDDescriptionParser::parseDeviceDescriptor(uint8_t address,
             // and query an interface (00001)
             uint8_t requestType = 0x81;
             uint8_t request = GET_DESCRIPTOR;
-            uint16_t responseLen =
-                min(hidClassDesc->wDescriptorLength, BUFFER_SIZE);
+            uint16_t responseLen = min(hidClassDesc->wDescriptorLength, BUFFER_SIZE);
             rcode = usb->ctrlReq(address, endpoint, requestType, request,
                                  hidInterfaceNumber, HID_DESCRIPTOR_REPORT,
                                  hidInterfaceNumber, responseLen, 0,
@@ -276,8 +272,7 @@ uint32_t HIDDescriptionParser::parseDeviceDescriptor(uint8_t address,
                   USBTRACE("\r\n");
 
                   if (usageDescriptionCount < MAX_USAGE_DESCRIPTIONS) {
-                    usageDescriptions[usageDescriptionCount].usagePage =
-                        usagePage;
+                    usageDescriptions[usageDescriptionCount].usagePage = usagePage;
                     usageDescriptions[usageDescriptionCount].usage = usage;
                     usageDescriptions[usageDescriptionCount].logicalMinimum =
                         logicalMinimum;
@@ -291,12 +286,10 @@ uint32_t HIDDescriptionParser::parseDeviceDescriptor(uint8_t address,
                         usageMinimum;
                     usageDescriptions[usageDescriptionCount].usageMaximum =
                         usageMaximum;
-                    usageDescriptions[usageDescriptionCount].reportSize =
-                        reportSize;
+                    usageDescriptions[usageDescriptionCount].reportSize = reportSize;
                     usageDescriptions[usageDescriptionCount].reportCount =
                         reportCount;
-                    usageDescriptions[usageDescriptionCount].placeholder =
-                        value & 1;
+                    usageDescriptions[usageDescriptionCount].placeholder = value & 1;
                     usageDescriptionCount++;
                   }
 
@@ -324,10 +317,11 @@ uint32_t HIDDescriptionParser::parseDeviceDescriptor(uint8_t address,
 }
 
 static uint8_t scale_value(uint16_t value,
-                          HIDReportUsageDescription const *const description) {
+                           HIDReportUsageDescription const *const description) {
   uint16_t logicalMinimum = description->logicalMinimum;
   uint16_t logicalMaximum = description->logicalMaximum;
-  uint16_t scaleFactor;
+  uint32_t scaleFactor;
+  uint32_t scaledValue;
 
   if (logicalMaximum >= logicalMinimum) {
     scaleFactor = (logicalMaximum - logicalMinimum) + 1;
@@ -336,5 +330,8 @@ static uint8_t scale_value(uint16_t value,
     value = logicalMinimum - value;
     scaleFactor = (logicalMinimum - logicalMaximum) + 1;
   }
-  return value * (256.0f / scaleFactor);
+
+  scaledValue = (((uint32_t)value * UINT8_MAX) + (scaleFactor >> 1)) / scaleFactor;
+
+  return (uint8_t)scaledValue;
 }

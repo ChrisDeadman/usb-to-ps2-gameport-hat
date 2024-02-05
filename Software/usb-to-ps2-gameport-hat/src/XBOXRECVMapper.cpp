@@ -1,5 +1,8 @@
 #include "XBOXRECVMapper.h"
 
+#define CONVERT_AXIS_VALUE(x) \
+  (uint8_t)(((uint32_t)((x)-INT16_MIN) * UINT8_MAX) / (UINT16_MAX))
+
 XBOXRECVMapper::XBOXRECVMapper(XBOXRECV* driver) : driver(driver) {}
 
 uint8_t XBOXRECVMapper::get_num_connected_devices() {
@@ -12,22 +15,14 @@ uint8_t XBOXRECVMapper::get_num_connected_devices() {
   return num_connected;
 }
 
-uint8_t convert_axis_value(int16_t value) {
-  if (value < 0) {
-    return 0x80 + max((value / (-INT16_MIN / 0x80)), -0x80);
-  } else {
-    return 0x80 + min((value / (INT16_MAX / 0x7F)), 0x7F);
-  }
-}
-
 JoystickState XBOXRECVMapper::pop_state(uint8_t idx) {
   JoystickState old_state = state[idx];
 
   // Analog axes
-  state[idx].axes[0] = convert_axis_value(driver->getAnalogHat(LeftHatX, idx));
-  state[idx].axes[1] = convert_axis_value(-driver->getAnalogHat(LeftHatY, idx));
-  state[idx].axes[2] = convert_axis_value(driver->getAnalogHat(RightHatX, idx));
-  state[idx].axes[3] = convert_axis_value(-driver->getAnalogHat(RightHatY, idx));
+  state[idx].axes[0] = CONVERT_AXIS_VALUE(driver->getAnalogHat(LeftHatX, idx));
+  state[idx].axes[1] = CONVERT_AXIS_VALUE(-driver->getAnalogHat(LeftHatY, idx));
+  state[idx].axes[2] = CONVERT_AXIS_VALUE(driver->getAnalogHat(RightHatX, idx));
+  state[idx].axes[3] = CONVERT_AXIS_VALUE(-driver->getAnalogHat(RightHatY, idx));
 
   // Digital axes
   if (driver->getButtonPress(LEFT, idx)) state[idx].axes[0] = 0;
