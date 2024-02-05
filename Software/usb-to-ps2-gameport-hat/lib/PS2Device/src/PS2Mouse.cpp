@@ -296,11 +296,11 @@ uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet
 
   packet[0] = 1 << 3;                                   // bit3 is always 1
   packet[1] = (state.d_x >= 0) ? abs_x : (~abs_x + 1);  // two's complement
-  packet[2] = (state.d_y >= 0) ? abs_y : (~abs_y + 1);  // two's complement
+  packet[2] = (state.d_y < 0) ? abs_y : (~abs_y + 1);   // y is inverted
 
   if (abs_y > 128) packet[0] |= (1 << 7);
   if (abs_x > 128) packet[0] |= (1 << 6);
-  if (state.d_y < 0) packet[0] |= (1 << 5);
+  if (state.d_y >= 0) packet[0] |= (1 << 5);  // y is inverted
   if (state.d_x < 0) packet[0] |= (1 << 4);
   if (state.buttons[2] > 0) packet[0] |= (1 << 2);
   if (state.buttons[1] > 0) packet[0] |= (1 << 1);
@@ -309,7 +309,7 @@ uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet
   // include scroll wheel state
   if (device_id >= DEVICE_ID_MOUSE_WHEEL) {
     uint8_t absW = min(abs(state.d_wheel), 7);
-    packet[3] = (state.d_wheel >= 0) ? absW : (~absW + 1);  // two's complement
+    packet[3] = (state.d_wheel < 0) ? absW : (~absW + 1);  // wheel is inverted
   }
 
   // include button 4+5 state

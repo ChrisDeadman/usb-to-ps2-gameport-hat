@@ -1,8 +1,7 @@
 #include "HIDMouseController.h"
 
 extern "C" {
-void __usb_mouse_dummy_callback(uint8_t const *const data, uint8_t length) {
-}
+void __usb_mouse_dummy_callback(uint8_t const *const data, uint8_t length) {}
 }
 /**
  * implement in your code if you want to capture packages.
@@ -40,11 +39,11 @@ void HIDMouseController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
 
   if (len > 2) {
     state.d_x = add_delta(state.d_x, buf[1]);
-    state.d_y = add_delta(state.d_y, -buf[2]);  // y is inverted
+    state.d_y = add_delta(state.d_y, buf[2]);
   }
 
   if (len > 3) {
-    state.d_wheel = add_delta(state.d_wheel, -buf[3]);  // wheel is inverted
+    state.d_wheel = add_delta(state.d_wheel, buf[3]);
   }
 };
 

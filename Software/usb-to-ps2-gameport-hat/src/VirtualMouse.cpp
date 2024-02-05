@@ -12,7 +12,11 @@ void VirtualMouse::update_state(MouseState const* const new_state) {
   state.d_x = combine_axis(state.d_x, new_state->d_x);
   state.d_y = combine_axis(state.d_y, new_state->d_y);
   state.d_wheel = combine_axis(state.d_wheel, new_state->d_wheel);
-  memcpy(state.buttons, new_state->buttons, MouseState::NUM_BUTTONS);
+
+  for (uint8_t button = 0; button < MouseState::NUM_BUTTONS; button++) {
+    state.buttons[button] |= new_state->buttons[button];
+  }
+
   state.changed = new_state->changed;
 }
 

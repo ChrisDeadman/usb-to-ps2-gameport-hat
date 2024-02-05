@@ -251,12 +251,12 @@ static void handle_device_emulation() {
 
   // keep previous input states if not changed
   if (!new_mouse_state.changed) {
+    mouse_state.changed = false;
     new_mouse_state = mouse_state;
-    new_mouse_state.changed = false;
   }
   if (!new_joy_state.changed) {
-    new_joy_state = joy_state;
     joy_state.changed = false;
+    new_joy_state = joy_state;
   }
 
   // push back virtual states

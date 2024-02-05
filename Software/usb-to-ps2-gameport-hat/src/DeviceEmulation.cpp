@@ -6,10 +6,11 @@
 #define JOY_AXIS_TO_KEYPRESS(axis, positive) \
   (((positive) > 0) ? ((axis) > 0xA0) : ((axis) < 0x60))
 
-#define JOY_AXIS_TO_MOUSE_DELTA(axis) \
-  (((axis) < 0x80) ? -((0x80 - (axis)) >> 3) : +(((axis)-0x80) >> 3))
+#define JOY_AXIS_TO_MOUSE_DELTA(axis)                                      \
+  (((axis) < 0x80) ? -(((uint16_t)(0x80 - (axis)) * MOUSE_EMU_SPEED) >> 6) \
+                   : +(((uint16_t)((axis)-0x80) * MOUSE_EMU_SPEED) >> 6))
 
-#define MOUSE_DELTA_TO_JOY_AXIS(delta) (0x80 + (delta))
+#define MOUSE_DELTA_TO_JOY_AXIS(delta) (0x80 + (((delta) * MOUSE_EMU_SPEED) >> 1))
 
 static CircularBuffer<KeyboardAction, VIRTUAL_KEYBOARD_KRO * 2> kb_action_buffer;
 
@@ -34,10 +35,9 @@ void joy_emulate_keyboard(VirtualKeyboard* const keyboard,
   }
 
   // Buttons
-  for (uint8_t button_idx = 0; button_idx < JoystickState::NUM_BUTTONS;
-       button_idx++) {
-    key_down = new_state->buttons[button_idx] > 0;
-    if (key_down != (old_state->buttons[button_idx] > 0)) {
+  for (uint8_t button = 0; button < JoystickState::NUM_BUTTONS; button++) {
+    key_down = new_state->buttons[button] > 0;
+    if (key_down != (old_state->buttons[button] > 0)) {
       sync_kb_emu_keys(keyboard, KB_EMU_MAPPINGS[mapping_idx][0], key_down);
     }
     ++mapping_idx;
@@ -46,21 +46,22 @@ void joy_emulate_keyboard(VirtualKeyboard* const keyboard,
 
 void joy_emulate_mouse(VirtualMouse* const mouse,
                        JoystickState const* const new_state) {
-  int8_t delta;
+  int8_t d_x;
+  int8_t d_y;
   uint8_t button_state;
   MouseState new_mouse_state = mouse->pop_state();
-
-  // X-Axis 1
-  delta = JOY_AXIS_TO_MOUSE_DELTA(new_state->axes[0]);
-  if (delta != 0) {
-    new_mouse_state.d_x = delta;
-    new_mouse_state.changed = true;
+  if (!new_mouse_state.changed) {
+    new_mouse_state.d_x = 0;
+    new_mouse_state.d_y = 0;
+    new_mouse_state.d_wheel = 0;
   }
 
-  // Y-Axis 1
-  delta = JOY_AXIS_TO_MOUSE_DELTA(new_state->axes[1]);
-  if (delta != 0) {
-    new_mouse_state.d_y = delta;
+  // X- & Y-Axis 1
+  d_x = JOY_AXIS_TO_MOUSE_DELTA(new_state->axes[0]);
+  d_y = JOY_AXIS_TO_MOUSE_DELTA(new_state->axes[1]);
+  if (d_x != 0 || d_y != 0) {
+    new_mouse_state.d_x = d_x;
+    new_mouse_state.d_y = d_y;
     new_mouse_state.changed = true;
   }
 
@@ -76,11 +77,13 @@ void joy_emulate_mouse(VirtualMouse* const mouse,
   }
 
   // Buttons
-  for (uint8_t button_idx = 0; button_idx < MouseState::NUM_BUTTONS; button_idx++) {
-    button_state = new_state->buttons[button_idx];
-    if (button_state != new_mouse_state.buttons[button_idx]) {
-      new_mouse_state.buttons[button_idx] = button_state;
-      new_mouse_state.changed = true;
+  if (new_state->changed) {
+    for (uint8_t button = 0; button < MouseState::NUM_BUTTONS; button++) {
+      button_state = new_state->buttons[button];
+      if (button_state != new_mouse_state.buttons[button]) {
+        new_mouse_state.buttons[button] = button_state;
+        new_mouse_state.changed = true;
+      }
     }
   }
 
@@ -287,7 +290,6 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
             new_mouse_state.changed = true;
           }
           break;
-
         default:
           // put back what we don't consume
           kb_action_buffer.enq(kb_action);
@@ -316,14 +318,14 @@ void mouse_emulate_joy(VirtualJoystick* const joystick,
 
   // X-Axis 1
   axis = MOUSE_DELTA_TO_JOY_AXIS(new_state->changed ? new_state->d_x : 0);
-  if (axis != new_joy_state.axes[0]) {
+  if (axis != 0x80 && axis != new_joy_state.axes[0]) {
     new_joy_state.axes[0] = axis;
     new_joy_state.changed = true;
   }
 
   // Y-Axis 1
   axis = MOUSE_DELTA_TO_JOY_AXIS(new_state->changed ? new_state->d_y : 0);
-  if (axis != new_joy_state.axes[1]) {
+  if (axis != 0x80 && axis != new_joy_state.axes[1]) {
     new_joy_state.axes[1] = axis;
     new_joy_state.changed = true;
   }
@@ -339,11 +341,13 @@ void mouse_emulate_joy(VirtualJoystick* const joystick,
   }
 
   // Buttons
-  for (uint8_t button_idx = 0; button_idx < MouseState::NUM_BUTTONS; button_idx++) {
-    button_state = new_state->buttons[button_idx];
-    if (button_state != new_joy_state.buttons[button_idx]) {
-      new_joy_state.buttons[button_idx] = button_state;
-      new_joy_state.changed = true;
+  if (new_state->changed) {
+    for (uint8_t button = 0; button < MouseState::NUM_BUTTONS; button++) {
+      button_state = new_state->buttons[button];
+      if (button_state != new_joy_state.buttons[button]) {
+        new_joy_state.buttons[button] = button_state;
+        new_joy_state.changed = true;
+      }
     }
   }
 
