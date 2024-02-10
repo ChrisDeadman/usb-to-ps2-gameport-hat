@@ -1,6 +1,7 @@
 #ifndef _JOYSTICK_DRIVER_MAPPER_H_
 #define _JOYSTICK_DRIVER_MAPPER_H_
 
+#include "JoystickLeds.h"
 #include "JoystickState.h"
 
 class IJoystickDriverMapper {
@@ -17,6 +18,11 @@ class IJoystickDriverMapper {
    * This should be called periodically.
    */
   virtual JoystickState pop_state(uint8_t idx) = 0;
+
+  /**
+   * [Optional] Sets the state of the joystick leds.
+   */
+  virtual void set_led_state(JoystickLeds new_state) {}
 };
 
 #endif  //_JOYSTICK_DRIVER_MAPPER_H_

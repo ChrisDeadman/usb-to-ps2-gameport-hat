@@ -41,7 +41,7 @@ class HIDKeyboardController : virtual public HIDReportParser {
   KeyboardAction deq();
 
   /**
-   * Updates the state of the keyboard leds.
+   * Sets the state of the keyboard leds.
    */
   void set_led_state(KeyboardLeds state);
 

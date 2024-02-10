@@ -250,7 +250,7 @@ void usb_data_sent(uint8_t const *const data, uint8_t length)
 HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
   modifier_state = ModNone;
-  led_state = LedNone;
+  led_state = KbLedNone;
   memset(prev_state, NoKey, USB_KEYBOARD_KRO);
 }
 
@@ -277,9 +277,9 @@ void HIDKeyboardController::set_led_state(KeyboardLeds state) {
   led_state = state;
 
   uint8_t report_data = 0x0;
-  if (led_state & LedNumLock) report_data |= 0x1;
-  if (led_state & LedCapsLock) report_data |= 0x2;
-  if (led_state & LedScrollLock) report_data |= 0x4;
+  if (led_state & KbLedNumLock) report_data |= 0x1;
+  if (led_state & KbLedCapsLock) report_data |= 0x2;
+  if (led_state & KbLedScrollLock) report_data |= 0x4;
 
   driver->SetReport(0, 0, 2, 0, 1, &report_data);
   usb_data_sent(&report_data, 1);
@@ -303,7 +303,8 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
     }
     if ((old_modifier_state & ModLeftShift) != (modifier_state & ModLeftShift)) {
       kb_action.code = LeftShift;
-      kb_action.type = (modifier_state & ModLeftShift) ? KbActionMake : KbActionBreak;
+      kb_action.type =
+          (modifier_state & ModLeftShift) ? KbActionMake : KbActionBreak;
       action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModLeftAlt) != (modifier_state & ModLeftAlt)) {
@@ -318,12 +319,14 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
     }
     if ((old_modifier_state & ModRightCtrl) != (modifier_state & ModRightCtrl)) {
       kb_action.code = RightControl;
-      kb_action.type = (modifier_state & ModRightCtrl) ? KbActionMake : KbActionBreak;
+      kb_action.type =
+          (modifier_state & ModRightCtrl) ? KbActionMake : KbActionBreak;
       action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightShift) != (modifier_state & ModRightShift)) {
       kb_action.code = RightShift;
-      kb_action.type = (modifier_state & ModRightShift) ? KbActionMake : KbActionBreak;
+      kb_action.type =
+          (modifier_state & ModRightShift) ? KbActionMake : KbActionBreak;
       action_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightAlt) != (modifier_state & ModRightAlt)) {

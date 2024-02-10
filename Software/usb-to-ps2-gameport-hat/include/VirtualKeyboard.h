@@ -26,12 +26,21 @@ class VirtualKeyboard {
   KeyboardModifierState pop_modifier_state();
 
   /**
-   * Returns the current LED state, then resets it.
+   * Updates the state of the modifier keys.
    *
-   * Deltas are summed up until pop_led_state is called.
-   * This should be called periodically.
+   * Deltas are summed up until pop_modifier_state is called.
    */
-  KeyboardLeds pop_led_state();
+  void update_modifier_state(KeyboardModifierState new_state);
+
+  /**
+   * Returns the current LED state.
+   */
+  KeyboardLeds get_led_state();
+
+  /**
+   * Sets the state of the keyboard leds.
+   */
+  void set_led_state(KeyboardLeds new_state);
 
   /**
    * Dequeues the next keyboard action.
@@ -39,20 +48,6 @@ class VirtualKeyboard {
    * Returns `KbActionNone` if the queue is empty.
    */
   KeyboardAction deq();
-
-  /**
-   * Updates the state of the keyboard leds.
-   *
-   * Deltas are summed up until pop_modifier_state is called.
-   */
-  void update_modifier_state(KeyboardModifierState new_state);
-
-  /**
-   * Updates the state of the keyboard leds.
-   *
-   * Deltas are summed up until pop_led_state is called.
-   */
-  void update_led_state(KeyboardLeds new_state);
 
   /**
    * Enqueues a keyboard action.

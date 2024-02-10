@@ -159,7 +159,7 @@ void PS2Keyboard::set_defaults() {
   typematic_delay = DEFAULT_TYPEMATIC_DELAY;
   typematic_rate = DEFAULT_TYPEMATIC_RATE;
 
-  led_state = LedAll;
+  led_state = KbLedAll;
 }
 
 KeyboardLeds PS2Keyboard::get_led_state() { return led_state; }

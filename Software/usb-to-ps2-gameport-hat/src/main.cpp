@@ -179,7 +179,7 @@ static void sync_usb_keyboard_state() {
   virtual_keyboard.update_modifier_state(usb_keyboard.get_modifier_state());
   virtual_keyboard.update_modifier_state(usb_mouse_keyboard.get_modifier_state());
 
-  KeyboardLeds led_state = virtual_keyboard.pop_led_state();
+  KeyboardLeds led_state = virtual_keyboard.get_led_state();
   usb_keyboard.set_led_state(led_state);
   usb_mouse_keyboard.set_led_state(led_state);
 }
@@ -200,6 +200,16 @@ static void sync_usb_mouse_state() {
 
 static void sync_usb_joystick_state() {
   JoystickState device_state;
+  JoystickLeds joy_leds = JoyLedNone;
+  KeyboardLeds keyboard_leds = virtual_keyboard.get_led_state();
+
+  // map keyboard LEDs to joystick LEDs
+  if (keyboard_leds & KbLedCapsLock) {
+    joy_leds = (JoystickLeds)(joy_leds | JoyLed1);
+  }
+  if (keyboard_leds & KbLedNumLock) {
+    joy_leds = (JoystickLeds)(joy_leds | JoyLed2);
+  }
 
   num_joys_connected = 0;
 
@@ -211,6 +221,12 @@ static void sync_usb_joystick_state() {
       device_state = joy_mappers[mapper_idx]->pop_state(device_idx);
       virtual_joystick.update_state(&device_state, is_player_1,
                                     setup_mode.swap_joy_axis_3_and_4);
+      // in setup-mode, set LEDs of supporting joysticks
+      if (setup_mode.in_setup_mode) {
+        joy_mappers[mapper_idx]->set_led_state(joy_leds);
+      } else {
+        joy_mappers[mapper_idx]->set_led_state(JoyLedNone);
+      }
     }
   }
 }
@@ -225,7 +241,7 @@ static void sync_ps2_keyboard_state() {
   }
 
   if (!setup_mode.in_setup_mode) {
-    virtual_keyboard.update_led_state(ps2_keyboard.get_led_state());
+    virtual_keyboard.set_led_state(ps2_keyboard.get_led_state());
   }
 }
 

@@ -90,6 +90,11 @@ void SetupMode::task() {
     led2 = true;  // display as max value
   }
 
+  // do not blink both leds simultaniously
+  if (!in_edit_mode && (item_idx > 0) && (item_value > 0)) {
+    led2 = true;
+  }
+
   // update led state
   set_led_state(led1, led2);
 }
@@ -152,11 +157,10 @@ void SetupMode::set_led_state(bool led1, bool led2) {
   digitalWrite(EXT_LED1_PIN, led1 ? LOW : HIGH);
   digitalWrite(EXT_LED2_PIN, led2 ? LOW : HIGH);
 
-  KeyboardLeds kbd_leds = LedNone;
-  if (led1) kbd_leds = (KeyboardLeds)(kbd_leds | LedCapsLock);
-  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | LedScrollLock | LedNumLock);
-  keyboard->pop_led_state();
-  keyboard->update_led_state(kbd_leds);
+  KeyboardLeds kbd_leds = KbLedNone;
+  if (led1) kbd_leds = (KeyboardLeds)(kbd_leds | KbLedCapsLock);
+  if (led2) kbd_leds = (KeyboardLeds)(kbd_leds | KbLedScrollLock | KbLedNumLock);
+  keyboard->set_led_state(kbd_leds);
 }
 
 uint8_t SetupMode::get_item_value() {
