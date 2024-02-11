@@ -46,8 +46,8 @@ void joy_emulate_keyboard(VirtualKeyboard* const keyboard,
 
 void joy_emulate_mouse(VirtualMouse* const mouse,
                        JoystickState const* const new_state) {
-  int8_t d_x;
-  int8_t d_y;
+  int16_t d_x;
+  int16_t d_y;
   uint8_t button_state;
   MouseState new_mouse_state = mouse->pop_state();
   if (!new_mouse_state.changed) {

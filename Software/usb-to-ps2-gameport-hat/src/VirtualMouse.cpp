@@ -9,9 +9,9 @@ MouseState VirtualMouse::pop_state() {
 }
 
 void VirtualMouse::update_state(MouseState const* const new_state) {
-  state.d_x = combine_axis(state.d_x, new_state->d_x);
-  state.d_y = combine_axis(state.d_y, new_state->d_y);
-  state.d_wheel = combine_axis(state.d_wheel, new_state->d_wheel);
+  state.d_x = add_mouse_delta(state.d_x, new_state->d_x);
+  state.d_y = add_mouse_delta(state.d_y, new_state->d_y);
+  state.d_wheel = add_mouse_delta(state.d_wheel, new_state->d_wheel);
 
   for (uint8_t button = 0; button < MouseState::NUM_BUTTONS; button++) {
     state.buttons[button] |= new_state->buttons[button];

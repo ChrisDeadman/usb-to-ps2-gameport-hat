@@ -25,19 +25,6 @@ class VirtualMouse {
    */
   void update_state(MouseState const* const state);
 
-  /**
-   * Combines two axis.
-   */
-  static int8_t combine_axis(int8_t value_a, int8_t value_b) {
-    int16_t combined = value_a + value_b;
-    if (combined < INT8_MIN) {
-      combined = INT8_MIN;
-    } else if (combined > INT8_MAX) {
-      combined = INT8_MAX;
-    }
-    return (int8_t)combined;
-  }
-
  private:
   void reset_state();
 };

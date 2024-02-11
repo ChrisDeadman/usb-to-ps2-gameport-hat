@@ -9,8 +9,6 @@ void __usb_mouse_dummy_callback(uint8_t const *const data, uint8_t length) {}
 void usb_data_received(uint8_t const *const data, uint8_t length)
     __attribute__((weak, alias("__usb_mouse_dummy_callback")));
 
-static int8_t add_delta(int8_t value, int8_t delta);
-
 HIDMouseController::HIDMouseController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
   reset_state();
@@ -38,12 +36,12 @@ void HIDMouseController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
   }
 
   if (len > 2) {
-    state.d_x = add_delta(state.d_x, buf[1]);
-    state.d_y = add_delta(state.d_y, buf[2]);
+    state.d_x = add_mouse_delta(state.d_x, (int8_t)buf[1]);
+    state.d_y = add_mouse_delta(state.d_y, (int8_t)buf[2]);
   }
 
   if (len > 3) {
-    state.d_wheel = add_delta(state.d_wheel, buf[3]);
+    state.d_wheel = add_mouse_delta(state.d_wheel, (int8_t)buf[3]);
   }
 };
 
@@ -53,15 +51,4 @@ void HIDMouseController::reset_state() {
   state.d_wheel = 0;
   memset(state.buttons, 0, MouseState::NUM_BUTTONS);
   state.changed = false;
-}
-
-static int8_t add_delta(int8_t value, int8_t delta) {
-  int16_t result = (int16_t)value + delta;
-  if (result > 128) {
-    return 128;
-  } else if (result < -127) {
-    return -127;
-  } else {
-    return (int8_t)(value + delta);
-  }
 }

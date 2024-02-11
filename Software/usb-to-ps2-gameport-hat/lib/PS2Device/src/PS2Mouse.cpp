@@ -29,14 +29,14 @@ void PS2Mouse::reset(bool send_ack) {
 }
 
 void PS2Mouse::update_state(MouseState const* const new_state) {
-  uint8_t d_x_scaled = abs(new_state->d_x);
-  uint8_t d_y_scaled = abs(new_state->d_y);
+  uint16_t d_x_scaled = abs(new_state->d_x);
+  uint16_t d_y_scaled = abs(new_state->d_y);
 
   // assume input is max.resolution
   uint8_t res = resolution;
   while (res < MAX_RESOLUTION) {
-    d_x_scaled = (d_x_scaled >> 1) | ((d_x_scaled & 1) ? 1 : 0);
-    d_y_scaled = (d_y_scaled >> 1) | ((d_y_scaled & 1) ? 1 : 0);
+    if (d_x_scaled > 1) d_x_scaled >>= 1;
+    if (d_y_scaled > 1) d_y_scaled >>= 1;
     res <<= 1;
   }
 
@@ -80,6 +80,12 @@ void PS2Mouse::task() {
     return;
   }
 
+  // wait until sample time has passed
+  sample_timer.tick();
+  if (sample_timer.getElapsedMillis() < (1000 / sample_rate)) {
+    return;
+  }
+
   // don't send movement data if
   if (!state_changed ||       // there is no change
       !streaming_mode ||      // or streaming mode is disabled
@@ -89,15 +95,9 @@ void PS2Mouse::task() {
     return;
   }
 
-  // wait until sample time has passed
-  sample_timer.tick();
-  if (sample_timer.getElapsedMillis() < (1000 / sample_rate)) {
-    return;
-  }
-
   // send movement data
   uint8_t packet[4];
-  uint8_t packet_len = build_movement_packet(scaling_2x1 ? true : false, packet);
+  uint8_t packet_len = build_movement_packet(scaling_2x1, packet);
   send_toHost(packet, packet_len);
   state_changed = false;
   sample_timer.reset();
@@ -291,30 +291,35 @@ uint8_t PS2Mouse::build_status_packet(uint8_t* packet) {
 }
 
 uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet) {
-  uint8_t abs_x = abs(state.d_x);
-  uint8_t abs_y = abs(state.d_y);
+  int16_t d_x = state.d_x;
+  int16_t d_y = -state.d_y;          // y is inverted
+  int16_t d_wheel = -state.d_wheel;  // wheel is inverted
 
   if (use_2x1_scaling) {
-    abs_x = apply_2x1_scaling(abs_x);
-    abs_y = apply_2x1_scaling(abs_y);
+    d_x = apply_2x1_scaling(d_x);
+    d_y = apply_2x1_scaling(d_y);
   }
 
-  packet[0] = 1 << 3;                                   // bit3 is always 1
-  packet[1] = (state.d_x >= 0) ? abs_x : (~abs_x + 1);  // two's complement
-  packet[2] = (state.d_y < 0) ? abs_y : (~abs_y + 1);   // y is inverted
+  packet[0] = 1 << 3;  // bit3 is always 1
+  packet[1] = (uint8_t)(d_x & 0xFF);
+  packet[2] = (uint8_t)(d_y & 0xFF);
 
-  if (abs_y > 128) packet[0] |= (1 << 7);
-  if (abs_x > 128) packet[0] |= (1 << 6);
-  if (state.d_y >= 0) packet[0] |= (1 << 5);  // y is inverted
-  if (state.d_x < 0) packet[0] |= (1 << 4);
+  if (abs(d_x) > UINT8_MAX) packet[0] |= (1 << 7);
+  if (abs(d_y) > UINT8_MAX) packet[0] |= (1 << 6);
+  if (d_y & 0x100) packet[0] |= (1 << 5);
+  if (d_x & 0x100) packet[0] |= (1 << 4);
   if (state.buttons[2] > 0) packet[0] |= (1 << 2);
   if (state.buttons[1] > 0) packet[0] |= (1 << 1);
   if (state.buttons[0] > 0) packet[0] |= (1 << 0);
 
   // include scroll wheel state
   if (device_id >= DEVICE_ID_MOUSE_WHEEL) {
-    uint8_t absW = min(abs(state.d_wheel), 7);
-    packet[3] = (state.d_wheel < 0) ? absW : (~absW + 1);  // wheel is inverted
+    if (d_wheel > 7) {
+      d_wheel = 7;
+    } else if (d_wheel < -8) {
+      d_wheel = -8;
+    }
+    packet[3] = (uint8_t)(d_wheel & 0xFF);
   }
 
   // include button 4+5 state
@@ -327,21 +332,35 @@ uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet
   return device_id >= DEVICE_ID_MOUSE_WHEEL ? 4 : 3;  // return packet length
 }
 
-uint8_t PS2Mouse::apply_2x1_scaling(uint8_t movement) {
+int16_t PS2Mouse::apply_2x1_scaling(int16_t movement) {
+  uint16_t abs_result = abs(movement);
+
   // scaling=2:1 table
-  switch (movement) {
+  switch (abs_result) {
     case 0:
-      return 0;
+      abs_result = 0;
+      break;
     case 1:
     case 2:
-      return 1;
+      abs_result = 1;
+      break;
     case 3:
-      return 3;
+      abs_result = 3;
+      break;
     case 4:
-      return 6;
+      abs_result = 6;
+      break;
     case 5:
-      return 9;
+      abs_result = 9;
+      break;
     default:
-      return movement << 1;
+      abs_result <<= 1;
+      break;
   }
+
+  if (abs_result > UINT8_MAX) {
+    abs_result = UINT8_MAX;
+  }
+
+  return (movement < 0) ? -abs_result : abs_result;
 }

@@ -73,7 +73,7 @@ class PS2Mouse : public PS2Device {
   void handle_new_command(uint8_t data_byte);
   uint8_t build_status_packet(uint8_t* packet);
   uint8_t build_movement_packet(boolean use_2x1_scaling, uint8_t* packet);
-  uint8_t apply_2x1_scaling(uint8_t movement);
+  int16_t apply_2x1_scaling(int16_t movement);
 };
 
 #endif  //_PS2_MOUSE_H_
