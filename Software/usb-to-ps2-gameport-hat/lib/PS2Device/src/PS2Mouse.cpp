@@ -53,6 +53,11 @@ void PS2Mouse::task() {
     return;
   }
 
+  // don't do anything if inhibited
+  if (port->clock_inhibited) {
+    return;
+  }
+
   // data received
   if (receiver.has_data()) {
     // stop sending in case we currently are

@@ -15,6 +15,13 @@ void TC5_Handler() {
   for (uint8_t i = 0; i < num_ports; i++) {
     PS2Port* port = ports[i];
 
+    // Ensure proper idle state
+    if (!port->clock_enabled || port->clock_inhibited) {
+      port->sub_clock = 0;
+      digitalWrite(port->clock_pin, HIGH);
+      digitalWrite(port->data_pin, HIGH);
+    }
+
     // wait until host releases the clock
     if (port->clock_inhibited) {
       if (digitalRead(port->clock_pin) == HIGH) {
@@ -22,14 +29,15 @@ void TC5_Handler() {
         // Host requests to send
         if (digitalRead(port->data_pin) == LOW) {
           port->on_host_rts();
+        } else {
+          // According to http://www.burtonsys.com/ps2_chapweske.htm:
+          // "The Clock line must be continuously high for at least 50
+          // microseconds before the device can begin to transmit its data."
+          //
+          // One sub-clock is 16.67us, so we have to wait an additional cycle.
+          // Note that sub-clocks 0 and 1 are also HIGH.
+          port->sub_clock = -1;
         }
-        // According to http://www.burtonsys.com/ps2_chapweske.htm:
-        // "The Clock line must be continuously high for at least 50
-        // microseconds before the device can begin to transmit its data."
-        //
-        // One sub-clock is 16.67us, so we have to wait an additional cycle.
-        // Note that sub-clocks 0 and 1 are also HIGH.
-        port->sub_clock = -1;
       }
     } else {
       // Sub-Clock:
@@ -44,10 +52,7 @@ void TC5_Handler() {
       // check if host inhibits clock
       if ((clk == HIGH) && (digitalRead(port->clock_pin) == LOW)) {
         port->clock_inhibited = true;
-        port->sub_clock = 0;
         port->on_inhibit();
-        digitalWrite(port->clock_pin, HIGH);  // release clock pin
-        digitalWrite(port->data_pin, HIGH);   // release data pin
       }
       // generate clock
       else if (port->clock_enabled) {
@@ -76,11 +81,12 @@ PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin)
 void PS2Port::enable_clock() {
   sub_clock = 0;
   clock_enabled = true;
+  digitalWrite(clock_pin, HIGH);  // release clock pin
+  digitalWrite(data_pin, HIGH);   // release data pin
 }
 
 void PS2Port::disable_clock() {
   clock_enabled = false;
-  sub_clock = 0;
   digitalWrite(clock_pin, HIGH);  // release clock pin
   digitalWrite(data_pin, HIGH);   // release data pin
 }
