@@ -16,51 +16,51 @@ class PS2Port {
   const uint8_t data_pin;
 
   /**
+   * Called by PS/2 devices to set callbacks.
+   */
+  void set_observer(PS2PortObserver *const observer);
+
+  /**
    *  ISR vars
    */
-  volatile int8_t sub_clock;
+  volatile uint8_t sub_clock;
   volatile bool clock_enabled;
   volatile bool clock_inhibited;
 
   /**
    * Enable clock generation.
    */
-  void enable_clock();
+  volatile void enable_clock();
 
   /**
    * Disable clock generation.
    */
-  void disable_clock();
+  volatile void disable_clock();
 
   /**
    * Read one bit from the data bus.
    */
-  bool read();
+  volatile bool read();
 
   /**
    * Write one bit to the data bus.
    */
-  void write(bool bit);
-
-  /**
-   * Called by PS/2 devices to set callbacks.
-   */
-  void set_observer(PS2PortObserver *const observer);
+  volatile void write(bool bit);
 
   /**
    * Called upon each clock cycle. This is the time to send or receive data.
    */
-  void on_clock();
+  volatile void on_clock();
 
   /**
    * Called when the host inhibits communication.
    */
-  void on_inhibit();
+  volatile void on_inhibit();
 
   /**
    * Called when the host requests to send.
    */
-  void on_host_rts();
+  volatile void on_host_rts();
 
   /**
    * Initializes the PS/2 port interface.

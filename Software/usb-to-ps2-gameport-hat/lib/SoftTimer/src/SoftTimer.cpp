@@ -17,9 +17,5 @@ void SoftTimer::reset() {
 
 void SoftTimer::tick() {
   tCurrentMicros = micros();
-  if (tCurrentMicros < tStartMicros) {
-    tElapsedMicros = (((unsigned long)-1) - tStartMicros) + tCurrentMicros;
-  } else {
-    tElapsedMicros = tCurrentMicros - tStartMicros;
-  }
+  tElapsedMicros = tCurrentMicros - tStartMicros;
 }

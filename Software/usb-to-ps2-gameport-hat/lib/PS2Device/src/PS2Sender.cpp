@@ -10,48 +10,39 @@ void ps2_data_sent(uint8_t pin, uint8_t data)
     __attribute__((weak, alias("__ps2_data_sent_dummy_callback")));
 
 PS2Sender::PS2Sender(PS2Port* const port) : port(port) {
-  sending = false;
-  data_byte = 0;
+  busy = false;
   bit_idx = 0;
+  data_byte = 0;
   parity = 0;
 }
 
-bool PS2Sender::is_sending() { return sending; }
+volatile bool PS2Sender::is_busy() { return busy; }
 
-void PS2Sender::begin_send(uint8_t data_byte) {
+volatile bool PS2Sender::is_sending() { return busy && (bit_idx > 1); }
+
+volatile void PS2Sender::begin_send(uint8_t data_byte) {
+  if (busy) {
+    end_send();
+  }
+
+  busy = true;
   this->data_byte = data_byte;
   bit_idx = 0;
-  if (!sending) {
-    sending = true;
-    port->enable_clock();
-  }
+  port->enable_clock();
 }
 
-bool PS2Sender::end_send() {
-  bool finished = bit_idx >= 11;
-
-  if (!sending) {
-    return true;
-  }
-
-  port->disable_clock();
-  bit_idx = 0;
-  sending = false;
-
-  if (finished) {
-    ps2_data_sent(port->data_pin, data_byte);
-  }
-  return finished;
-}
-
-void PS2Sender::on_clock() {
-  if (!sending) {
+volatile void PS2Sender::end_send() {
+  if (!busy) {
     return;
   }
 
-  // all bits sent, stop sending
-  if (bit_idx >= 11) {
-    end_send();
+  busy = false;
+  bit_idx = 0;
+  port->disable_clock();
+}
+
+volatile void PS2Sender::on_clock() {
+  if (!busy) {
     return;
   }
 
@@ -71,6 +62,10 @@ void PS2Sender::on_clock() {
     case 10:  // stop bit
       bit = 1;
       break;
+    case 11:  // transmission complete
+      end_send();
+      ps2_data_sent(port->data_pin, data_byte);
+      return;
   }
   bit_idx++;
 

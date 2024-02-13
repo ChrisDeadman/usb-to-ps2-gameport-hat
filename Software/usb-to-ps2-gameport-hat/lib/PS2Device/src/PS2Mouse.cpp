@@ -53,7 +53,7 @@ void PS2Mouse::update_state(MouseState const* const new_state) {
 
 void PS2Mouse::task() {
   // wait until transmission is finished
-  if (receiver.is_receiving() || sender.is_sending()) {
+  if (receiver.is_busy() || sender.is_busy()) {
     sample_timer.reset();
     return;
   }

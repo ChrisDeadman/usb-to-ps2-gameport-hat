@@ -4,23 +4,16 @@
 
 #define MAX_PORTS 2
 
-PS2Port* ports[MAX_PORTS];
-uint8_t num_ports = 0;
+static PS2Port* volatile ports[MAX_PORTS];
+static volatile uint8_t num_ports = 0;
 
 // use TIMER/COUNTER#5
-TcCount16* const TC = (TcCount16*)TC5;
-const IRQn TCIRQn = TC5_IRQn;
+static volatile TcCount16* const TC = (TcCount16*)TC5;
+static volatile const IRQn TCIRQn = TC5_IRQn;
 
 void TC5_Handler() {
-  for (uint8_t i = 0; i < num_ports; i++) {
-    PS2Port* port = ports[i];
-
-    // Ensure proper idle state
-    if (!port->clock_enabled || port->clock_inhibited) {
-      port->sub_clock = 0;
-      digitalWrite(port->clock_pin, HIGH);
-      digitalWrite(port->data_pin, HIGH);
-    }
+  for (uint8_t port_idx = 0; port_idx < num_ports; port_idx++) {
+    PS2Port* port = ports[port_idx];
 
     // wait until host releases the clock
     if (port->clock_inhibited) {
@@ -29,41 +22,41 @@ void TC5_Handler() {
         // Host requests to send
         if (digitalRead(port->data_pin) == LOW) {
           port->on_host_rts();
-        } else {
-          // According to http://www.burtonsys.com/ps2_chapweske.htm:
-          // "The Clock line must be continuously high for at least 50
-          // microseconds before the device can begin to transmit its data."
-          //
-          // One sub-clock is 16.67us, so we have to wait an additional cycle.
-          // Note that sub-clocks 0 and 1 are also HIGH.
-          port->sub_clock = -1;
         }
       }
     } else {
       // Sub-Clock:
-      // negative values (used for delay): HIGH
+      //<0: HIGH -> used for delay
       // 0: HIGH
       // 1: HIGH -> on_clock() is called here
       // 2: LOW
       // 3: LOW
-      uint8_t clk = (port->sub_clock < 2) ? HIGH : LOW;
+      uint8_t clk = HIGH;
+      if (port->clock_enabled) {
+        switch (port->sub_clock++) {
+          case 0:
+            clk = HIGH;
+            break;
+          case 1:
+            port->on_clock();
+            clk = HIGH;
+            break;
+          case 2:
+            clk = LOW;
+            break;
+          case 3:
+            clk = LOW;
+            port->sub_clock = 0;
+            break;
+        }
+      }
       digitalWrite(port->clock_pin, clk);
 
       // check if host inhibits clock
       if ((clk == HIGH) && (digitalRead(port->clock_pin) == LOW)) {
         port->clock_inhibited = true;
         port->on_inhibit();
-      }
-      // generate clock
-      else if (port->clock_enabled) {
-        if (port->sub_clock == 1) {
-          port->on_clock();
-        }
-        if (port->sub_clock < 3) {
-          ++port->sub_clock;
-        } else {
-          port->sub_clock = 0;
-        }
+        digitalWrite(port->data_pin, HIGH);  // release data pin
       }
     }
   }
@@ -75,7 +68,7 @@ PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin)
     : observer(NULL), clock_pin(clock_pin), data_pin(data_pin) {
   sub_clock = 0;
   clock_enabled = false;
-  clock_inhibited = true;
+  clock_inhibited = false;
 
   digitalWrite(clock_pin, HIGH);
   digitalWrite(data_pin, HIGH);
@@ -87,40 +80,40 @@ PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin)
   ++num_ports;
 }
 
-void PS2Port::enable_clock() {
-  sub_clock = 0;
-  clock_enabled = true;
-  digitalWrite(clock_pin, HIGH);  // release clock pin
-  digitalWrite(data_pin, HIGH);   // release data pin
-}
-
-void PS2Port::disable_clock() {
-  clock_enabled = false;
-  digitalWrite(clock_pin, HIGH);  // release clock pin
-  digitalWrite(data_pin, HIGH);   // release data pin
-}
-
-bool PS2Port::read() { return (digitalRead(data_pin) == HIGH) ? true : false; }
-
-void PS2Port::write(bool bit) { return digitalWrite(data_pin, bit ? HIGH : LOW); }
-
 void PS2Port::set_observer(PS2PortObserver* const observer) {
   this->observer = observer;
 }
 
-void PS2Port::on_clock() {
+volatile void PS2Port::enable_clock() {
+  sub_clock = 0;
+  clock_enabled = true;
+}
+
+volatile void PS2Port::disable_clock() {
+  sub_clock = 0;
+  clock_enabled = false;
+  digitalWrite(data_pin, HIGH);  // release data pin
+}
+
+volatile bool PS2Port::read() {
+  return (digitalRead(data_pin) == HIGH) ? true : false;
+}
+
+volatile void PS2Port::write(bool bit) { digitalWrite(data_pin, bit ? HIGH : LOW); }
+
+volatile void PS2Port::on_clock() {
   if (observer != NULL) {
     observer->on_clock();
   }
 }
 
-void PS2Port::on_inhibit() {
+volatile void PS2Port::on_inhibit() {
   if (observer != NULL) {
     observer->on_inhibit();
   }
 }
 
-void PS2Port::on_host_rts() {
+volatile void PS2Port::on_host_rts() {
   if (observer != NULL) {
     observer->on_host_rts();
   }

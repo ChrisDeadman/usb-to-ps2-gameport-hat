@@ -12,8 +12,8 @@ const uint8_t BAT_OK = 0xAA;
 
 class PS2Device : PS2PortObserver {
  private:
-  unsigned long time_last_inhibit;
-  unsigned long time_last_host_rts;
+  volatile unsigned long time_last_inhibit;
+  volatile unsigned long time_last_host_rts;
 
  protected:
   PS2Sender sender;
@@ -54,17 +54,17 @@ class PS2Device : PS2PortObserver {
   /**
    * Called upon each clock cycle. This is the time to send or receive data.
    */
-  void on_clock() override;
+  volatile void on_clock() override;
 
   /**
    * Called when the host inhibits communication.
    */
-  void on_inhibit() override;
+  volatile void on_inhibit() override;
 
   /**
    * Called when the host requests to send.
    */
-  void on_host_rts() override;
+  volatile void on_host_rts() override;
 };
 
 #endif  //_PS2_DEVICE_H_

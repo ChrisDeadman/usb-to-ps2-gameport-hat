@@ -6,8 +6,8 @@
 #define Serial Serial1  // use pins D0/D1
 #define SERIAL_SPEED 115200
 
+// #define DEBUG_USB
 #define DEBUG_PS2
-//#define DEBUG_USB
 
 #define PS2_1_DATA_PIN 2
 #define PS2_1_CLOCK_PIN 3
@@ -26,8 +26,6 @@
 #define POT1_CS_PIN 10
 
 #define AXIS_TO_POT_VALUE(axis) (0xFF - (uint8_t)((axis) / 3))
-
-#define PS2_INIT_TIME 250
 
 #define SETUP_ENTER_DELAY 1000
 #define SETUP_BLINK_WINDOW 1500

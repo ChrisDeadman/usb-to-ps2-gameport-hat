@@ -10,61 +10,50 @@ void ps2_data_received(uint8_t pin, uint8_t data, bool valid)
     __attribute__((weak, alias("__ps2_dummy_received_callback")));
 
 PS2Receiver::PS2Receiver(PS2Port* const port) : port(port) {
-  receiving = false;
+  busy = false;
   data_present = false;
   data_valid = false;
-  data_byte = 0;
   bit_idx = 0;
+  data_byte = 0;
   parity = 0;
 }
 
-bool PS2Receiver::is_receiving() { return receiving; }
+volatile bool PS2Receiver::is_busy() { return busy; }
 
-bool PS2Receiver::has_data() { return data_present; }
+volatile bool PS2Receiver::has_data() { return data_present; }
 
-bool PS2Receiver::is_data_valid() { return data_valid; }
+volatile bool PS2Receiver::is_data_valid() { return data_valid; }
 
-uint8_t PS2Receiver::pop_data() {
+volatile uint8_t PS2Receiver::pop_data() {
   data_present = false;
   return data_byte;
 }
 
-void PS2Receiver::begin_receive() {
-  data_byte = 0;
-  bit_idx = 0;
-  data_valid = true;
+volatile void PS2Receiver::begin_receive() {
+  if (busy) {
+    end_receive();
+  }
+
+  busy = true;
   data_present = false;
-  if (!receiving) {
-    receiving = true;
-    port->enable_clock();
-  }
-}
-
-bool PS2Receiver::end_receive() {
-  bool finished = bit_idx >= 11;
-
-  if (!receiving) {
-    return true;
-  }
-
-  port->disable_clock();
+  data_valid = true;
   bit_idx = 0;
-  receiving = false;
-
-  if (finished) {
-    ps2_data_received(port->data_pin, data_byte, data_valid);
-  }
-  return finished;
+  data_byte = 0;
+  port->enable_clock();
 }
 
-void PS2Receiver::on_clock() {
-  if (!receiving) {
+volatile void PS2Receiver::end_receive() {
+  if (!busy) {
     return;
   }
 
-  // ACK sent, stop receiving
-  if (bit_idx >= 11) {
-    end_receive();
+  busy = false;
+  bit_idx = 0;
+  port->disable_clock();
+}
+
+volatile void PS2Receiver::on_clock() {
+  if (!busy) {
     return;
   }
 
@@ -93,6 +82,10 @@ void PS2Receiver::on_clock() {
       data_present = true;
       port->write(data_valid ? 0 : 1);  // ACK / NAK
       break;
+    case 11:  // transmission complete
+      end_receive();
+      ps2_data_received(port->data_pin, data_byte, data_valid);
+      return;
   }
   bit_idx++;
 }

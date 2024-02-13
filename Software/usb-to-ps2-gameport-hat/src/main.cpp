@@ -2,9 +2,7 @@
 
 #include "Config.h"
 #include "SoftPWM.h"
-#include "SoftTimer.h"
 SoftPWM soft_pwm;
-SoftTimer init_timer;
 
 #include "Watchdog.h"
 Watchdog watchdog;
@@ -101,7 +99,6 @@ void setup() {
   watchdog.init();
   ps2_keyboard.reset();
   ps2_mouse.reset();
-  init_timer.reset();
 }
 
 void loop() {
@@ -114,22 +111,13 @@ void loop() {
   // check if PS/2 is busy
   bool ps2_busy = ps2_keyboard.is_busy() || ps2_mouse.is_busy();
 
-  // give host some time to respond before we initialize USB devices
-  if (init_timer.getElapsedMillis() < PS2_INIT_TIME) {
-    init_timer.tick();
-    if (ps2_busy) init_timer.reset();
-    return;
-  }
-
   // Only if PS/2 is not busy
   if (!ps2_busy) {
-    // cannot handle PS/2 while USB is working
-    PS2Port::disable_clock_irq();
-
-    // synchronize input devices
     // NOTE: lower USB_XFER_TIMEOUT (e.g. to 1000) in UsbCore.h,
     // otherwise this may take longer than the watchdog timeout.
     usb.Task();
+
+    // synchronize input devices
     sync_usb_keyboard_state();
     sync_usb_mouse_state();
     sync_usb_joystick_state();
@@ -142,8 +130,6 @@ void loop() {
     // get input states
     mouse_state = virtual_mouse.pop_state();
     joy_state = virtual_joystick.pop_state();
-
-    PS2Port::enable_clock_irq();
   }
 
   // handle setup mode

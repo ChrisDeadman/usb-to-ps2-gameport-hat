@@ -187,7 +187,7 @@ void PS2Keyboard::enq(KeyboardAction kb_action) {
 
 void PS2Keyboard::task() {
   // wait until transmission is finished
-  if (receiver.is_receiving() || sender.is_sending()) {
+  if (receiver.is_busy() || sender.is_busy()) {
     typematic_rate_timer.reset();
     return;
   }
@@ -292,9 +292,7 @@ void PS2Keyboard::task() {
   }
 }
 
-void PS2Keyboard::resend() {
-  send_buffer_idx = 0;
-}
+void PS2Keyboard::resend() { send_buffer_idx = 0; }
 
 void PS2Keyboard::send_toHost(const uint8_t* data, uint8_t len) {
   memcpy(send_buffer, data, len);
