@@ -45,6 +45,13 @@ class PS2Device : PS2PortObserver {
   unsigned long get_time_last_host_rts();
 
   /**
+   * Triggers resending of data upon next clock cycle.
+   *
+   * This has no effect if no data is currently being sent.
+   */
+  virtual void resend() = 0;
+
+  /**
    * Called upon each clock cycle. This is the time to send or receive data.
    */
   void on_clock() override;

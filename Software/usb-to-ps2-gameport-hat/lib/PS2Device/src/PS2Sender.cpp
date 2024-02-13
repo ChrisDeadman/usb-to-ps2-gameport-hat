@@ -9,7 +9,12 @@ void __ps2_data_sent_dummy_callback(uint8_t pin, uint8_t data) {}
 void ps2_data_sent(uint8_t pin, uint8_t data)
     __attribute__((weak, alias("__ps2_data_sent_dummy_callback")));
 
-PS2Sender::PS2Sender(PS2Port* const port) : port(port) {}
+PS2Sender::PS2Sender(PS2Port* const port) : port(port) {
+  sending = false;
+  data_byte = 0;
+  bit_idx = 0;
+  parity = 0;
+}
 
 bool PS2Sender::is_sending() { return sending; }
 
@@ -22,29 +27,21 @@ void PS2Sender::begin_send(uint8_t data_byte) {
   }
 }
 
-void PS2Sender::end_send() {
+bool PS2Sender::end_send() {
+  bool finished = bit_idx >= 11;
+
   if (!sending) {
-    return;
+    return true;
   }
-  sending = false;
+
   port->disable_clock();
-  if (bit_idx >= 11) {
+  bit_idx = 0;
+  sending = false;
+
+  if (finished) {
     ps2_data_sent(port->data_pin, data_byte);
   }
-}
-
-void PS2Sender::resend() {
-  if (!sending) {
-    return;
-  }
-  // all bits sent, stop sending
-  if (bit_idx >= 11) {
-    end_send();
-  }
-  // resend on next clock
-  else {
-    bit_idx = 0;
-  }
+  return finished;
 }
 
 void PS2Sender::on_clock() {

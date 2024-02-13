@@ -18,9 +18,9 @@ class PS2Port {
   /**
    *  ISR vars
    */
-  volatile int8_t sub_clock = 0;
-  volatile bool clock_enabled = false;
-  volatile bool clock_inhibited = false;
+  volatile int8_t sub_clock;
+  volatile bool clock_enabled;
+  volatile bool clock_inhibited;
 
   /**
    * Enable clock generation.

@@ -149,7 +149,11 @@ static const uint16_t typematic_rate_table[] = {
 static uint8_t get_keycode_entry_len(const uint8_t* entry, uint8_t size);
 static bool requires_typematic_handling(KeyboardCodes key_code);
 
-PS2Keyboard::PS2Keyboard(PS2Port* port) : PS2Device(port) { set_defaults(); }
+PS2Keyboard::PS2Keyboard(PS2Port* port) : PS2Device(port) {
+  send_buffer_idx = 0;
+  send_buffer_len = 0;
+  set_defaults();
+}
 
 void PS2Keyboard::set_defaults() {
   active_command = 0;
@@ -184,11 +188,7 @@ void PS2Keyboard::enq(KeyboardAction kb_action) {
 void PS2Keyboard::task() {
   // wait until transmission is finished
   if (receiver.is_receiving() || sender.is_sending()) {
-    return;
-  }
-
-  // don't do anything if inhibited
-  if (port->clock_inhibited) {
+    typematic_rate_timer.reset();
     return;
   }
 
@@ -292,6 +292,10 @@ void PS2Keyboard::task() {
   }
 }
 
+void PS2Keyboard::resend() {
+  send_buffer_idx = 0;
+}
+
 void PS2Keyboard::send_toHost(const uint8_t* data, uint8_t len) {
   memcpy(send_buffer, data, len);
   send_buffer_idx = 0;
@@ -346,7 +350,7 @@ void PS2Keyboard::handle_new_command(uint8_t data_byte) {
       break;
     // Resend
     case 0xFE:
-      send_buffer_idx = 0;
+      resend();
       break;
     // Set defaults
     case 0xF6:

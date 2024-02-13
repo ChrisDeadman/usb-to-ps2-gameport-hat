@@ -73,6 +73,15 @@ void TC5_Handler() {
 
 PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin)
     : observer(NULL), clock_pin(clock_pin), data_pin(data_pin) {
+  sub_clock = 0;
+  clock_enabled = false;
+  clock_inhibited = true;
+
+  digitalWrite(clock_pin, HIGH);
+  digitalWrite(data_pin, HIGH);
+  pinMode(clock_pin, OUTPUT);
+  pinMode(data_pin, OUTPUT);
+
   assert(num_ports < MAX_PORTS);
   ports[num_ports] = this;
   ++num_ports;

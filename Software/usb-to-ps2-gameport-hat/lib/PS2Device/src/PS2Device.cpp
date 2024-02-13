@@ -3,15 +3,7 @@
 PS2Device::PS2Device(PS2Port* const port)
     : sender(port), receiver(port), port(port) {}
 
-void PS2Device::init() {
-  digitalWrite(port->clock_pin, HIGH);
-  digitalWrite(port->data_pin, HIGH);
-
-  pinMode(port->clock_pin, OUTPUT);
-  pinMode(port->data_pin, OUTPUT);
-
-  port->set_observer(this);
-}
+void PS2Device::init() { port->set_observer(this); }
 
 bool PS2Device::is_busy() {
   return !port->clock_inhibited && (receiver.is_receiving() || sender.is_sending());
@@ -27,14 +19,19 @@ void PS2Device::on_clock() {
 }
 
 void PS2Device::on_inhibit() {
-  receiver.end_receive();
-  sender.resend();
   time_last_inhibit = millis();
+  receiver.end_receive();
+  // If a transmission is inhibited before the 11th clock pulse,
+  // the device must abort the current transmission and prepare to
+  // retransmit the current "chunk" of data.
+  if (sender.is_sending() && !sender.end_send()) {
+    resend();
+  }
 }
 
 void PS2Device::on_host_rts() {
+  time_last_host_rts = millis();
   sender.end_send();
   receiver.end_receive();
   receiver.begin_receive();
-  time_last_host_rts = millis();
 }

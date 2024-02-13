@@ -18,8 +18,8 @@ class PS2Keyboard : public PS2Device {
   const uint8_t DEVICE_ID[2] = {0xAB, 0x83};
 
   uint8_t send_buffer[8];
-  uint8_t send_buffer_idx = 0;
-  uint8_t send_buffer_len = 0;
+  uint8_t send_buffer_idx;
+  uint8_t send_buffer_len;
 
   uint8_t active_command;
   KeyboardAction last_action;
@@ -64,6 +64,13 @@ class PS2Keyboard : public PS2Device {
    * This should be called periodically in the loop() function.
    */
   void task();
+
+  /**
+   * Triggers resending of data upon next clock cycle.
+   *
+   * This has no effect if no data is currently being sent.
+   */
+  void resend() override;
 
  private:
   void send_toHost(const uint8_t* data, uint8_t len);

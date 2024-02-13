@@ -1,13 +1,17 @@
 #include "PS2Mouse.h"
 
-PS2Mouse::PS2Mouse(PS2Port* port) : PS2Device(port) { set_defaults(); }
+PS2Mouse::PS2Mouse(PS2Port* port) : PS2Device(port) {
+  send_buffer_idx = 0;
+  send_buffer_len = 0;
+  set_defaults();
+}
 
 uint8_t PS2Mouse::get_device_id() { return device_id; }
 
 void PS2Mouse::set_defaults() {
   device_id = DEVICE_ID_MOUSE_STD;
-  streaming_mode = true;
   active_command = 0;
+  streaming_mode = true;
   data_reporting = false;
   sample_rate = DEFAULT_SAMPLE_RATE;
   resolution = DEFAULT_RESOLUTION;
@@ -50,11 +54,7 @@ void PS2Mouse::update_state(MouseState const* const new_state) {
 void PS2Mouse::task() {
   // wait until transmission is finished
   if (receiver.is_receiving() || sender.is_sending()) {
-    return;
-  }
-
-  // don't do anything if inhibited
-  if (port->clock_inhibited) {
+    sample_timer.reset();
     return;
   }
 
@@ -102,6 +102,8 @@ void PS2Mouse::task() {
   state_changed = false;
   sample_timer.reset();
 }
+
+void PS2Mouse::resend() { send_buffer_idx = 0; }
 
 void PS2Mouse::send_toHost(const uint8_t* data, uint8_t len) {
   for (uint8_t idx = 0; idx < len; idx++) {
@@ -198,7 +200,7 @@ void PS2Mouse::handle_new_command(uint8_t data_byte) {
       break;
     // Resend
     case 0xFE:
-      send_buffer_idx = 0;
+      resend();
       break;
     // Set defaults
     case 0xF6:

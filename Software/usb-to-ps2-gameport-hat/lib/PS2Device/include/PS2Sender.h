@@ -6,10 +6,10 @@
 class PS2Sender {
  private:
   PS2Port* const port;
-  volatile bool sending = false;
-  volatile uint8_t data_byte = 0;
-  volatile uint8_t bit_idx = 0;
-  volatile uint8_t parity = 0;
+  volatile bool sending;
+  volatile uint8_t data_byte;
+  volatile uint8_t bit_idx;
+  volatile uint8_t parity;
 
  public:
   PS2Sender(PS2Port* const port);
@@ -27,14 +27,7 @@ class PS2Sender {
   /**
    * Stops the clock on the port and transmission of data.
    */
-  void end_send();
-
-  /**
-   * Triggers resending of data upon next clock cycle.
-   *
-   * This has no effect if no data is currently being sent.
-   */
-  void resend();
+  bool end_send();
 
   /**
    * Writes one bit of data to the port.

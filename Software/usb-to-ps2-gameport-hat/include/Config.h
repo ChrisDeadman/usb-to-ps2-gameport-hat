@@ -6,7 +6,8 @@
 #define Serial Serial1  // use pins D0/D1
 #define SERIAL_SPEED 115200
 
-#define DEBUG  // print sent/received data
+#define DEBUG_PS2
+//#define DEBUG_USB
 
 #define PS2_1_DATA_PIN 2
 #define PS2_1_CLOCK_PIN 3

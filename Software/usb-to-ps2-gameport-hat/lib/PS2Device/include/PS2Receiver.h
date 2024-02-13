@@ -6,12 +6,12 @@
 class PS2Receiver {
  private:
   PS2Port* const port;
-  volatile bool receiving = false;
-  volatile bool data_present = false;
-  volatile bool data_valid = false;
-  volatile uint8_t data_byte = 0;
-  volatile uint8_t bit_idx = 0;
-  volatile uint8_t parity = 0;
+  volatile bool receiving;
+  volatile bool data_present;
+  volatile bool data_valid;
+  volatile uint8_t data_byte;
+  volatile uint8_t bit_idx;
+  volatile uint8_t parity;
 
  public:
   PS2Receiver(PS2Port* const port);
@@ -46,7 +46,7 @@ class PS2Receiver {
   /**
    * Stops the clock on the port and reception of data.
    */
-  void end_receive();
+  bool end_receive();
 
   /**
    * Reads one bit of data from the port.

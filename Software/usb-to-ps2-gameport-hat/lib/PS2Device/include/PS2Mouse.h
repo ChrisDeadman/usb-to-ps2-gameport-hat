@@ -18,8 +18,8 @@ class PS2Mouse : public PS2Device {
   const uint8_t DEVICE_ID_MOUSE_WHEEL_5BUTTONS = 0x04;
 
   uint8_t send_buffer[5];
-  uint8_t send_buffer_idx = 0;
-  uint8_t send_buffer_len = 0;
+  uint8_t send_buffer_idx;
+  uint8_t send_buffer_len;
 
   CircularBuffer<uint8_t, 3> sample_rate_history;
   SoftTimer sample_timer;
@@ -66,6 +66,13 @@ class PS2Mouse : public PS2Device {
    * This should be called periodically in the loop() function.
    */
   void task();
+
+  /**
+   * Triggers resending of data upon next clock cycle.
+   *
+   * This has no effect if no data is currently being sent.
+   */
+  void resend() override;
 
  private:
   void send_toHost(const uint8_t* data, uint8_t len);

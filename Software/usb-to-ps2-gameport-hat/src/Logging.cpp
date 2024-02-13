@@ -22,7 +22,7 @@ int get_free_memory() {
  */
 void usb_data_received(uint8_t const* const data, uint8_t length) {
   t_usb_last_received = t_current;
-#ifdef DEBUG
+#ifdef DEBUG_USB
   log_buffer->concat("U<");
   for (uint8_t i = 0; i < length; i++) {
     log_buffer->concat("%02X", data[i]);
@@ -36,7 +36,7 @@ void usb_data_received(uint8_t const* const data, uint8_t length) {
  */
 void usb_data_sent(uint8_t const* const data, uint8_t length) {
   t_usb_last_sent = t_current;
-#ifdef DEBUG
+#ifdef DEBUG_USB
   log_buffer->concat("U>");
   for (uint8_t i = 0; i < length; i++) {
     log_buffer->concat("%02X", data[i]);
@@ -50,7 +50,7 @@ void usb_data_sent(uint8_t const* const data, uint8_t length) {
  */
 void ps2_data_received(uint8_t pin, uint8_t data, bool valid) {
   t_ps2_last_received = t_current;
-#ifdef DEBUG
+#ifdef DEBUG_PS2
   log_buffer->concat("P%u< ", pin)
       ->concat("%02X", data)
       ->concatln(valid ? "" : "!!");
@@ -62,7 +62,7 @@ void ps2_data_received(uint8_t pin, uint8_t data, bool valid) {
  */
 void ps2_data_sent(uint8_t pin, uint8_t data) {
   t_ps2_last_sent = t_current;
-#ifdef DEBUG
+#ifdef DEBUG_PS2
   log_buffer->concat("P%u> ", pin)->concatln("%02X", data);
 #endif
 }
