@@ -1,14 +1,5 @@
 #include "PS2Receiver.h"
 
-extern "C" {
-void __ps2_dummy_received_callback(uint8_t pin, uint8_t data, bool valid) {}
-}
-/**
- * implement in your code if you want to capture packages.
- */
-void ps2_data_received(uint8_t pin, uint8_t data, bool valid)
-    __attribute__((weak, alias("__ps2_dummy_received_callback")));
-
 PS2Receiver::PS2Receiver(PS2Port* const port) : port(port) {
   busy = false;
   data_present = false;
@@ -84,7 +75,6 @@ volatile void PS2Receiver::on_clock() {
       break;
     case 11:  // transmission complete
       end_receive();
-      ps2_data_received(port->data_pin, data_byte, data_valid);
       return;
   }
   bit_idx++;

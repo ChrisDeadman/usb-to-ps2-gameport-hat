@@ -60,14 +60,17 @@ void PS2Mouse::task() {
 
   // data received
   if (receiver.has_data()) {
+    uint8_t data_byte = receiver.pop_data();
+    bool data_valid = receiver.is_data_valid();
+    ps2_data_received(port->data_pin, data_byte, data_valid);  // debug logging
     // stop sending in case we currently are
     send_buffer_idx = send_buffer_len;
     // invoke command handlers
-    if (receiver.is_data_valid()) {
+    if (data_valid) {
       if (active_command) {
-        handle_active_command(receiver.pop_data());
+        handle_active_command(data_byte);
       } else {
-        handle_new_command(receiver.pop_data());
+        handle_new_command(data_byte);
       }
     }
     return;
@@ -75,8 +78,9 @@ void PS2Mouse::task() {
 
   // check if we have anything to send
   if (send_buffer_idx < send_buffer_len) {
-    uint8_t dataByte = send_buffer[send_buffer_idx++];
-    sender.begin_send(dataByte);
+    uint8_t data_byte = send_buffer[send_buffer_idx++];
+    ps2_data_sent(port->data_pin, data_byte);  // debug logging
+    sender.begin_send(data_byte);
     return;
   }
 
@@ -105,12 +109,10 @@ void PS2Mouse::task() {
 
 void PS2Mouse::resend() { send_buffer_idx = 0; }
 
-void PS2Mouse::send_toHost(const uint8_t* data, uint8_t len) {
-  for (uint8_t idx = 0; idx < len; idx++) {
-    send_buffer[idx] = data[idx];
-  }
+void PS2Mouse::send_toHost(const uint8_t* data, uint8_t length) {
+  memcpy(send_buffer, data, length);
   send_buffer_idx = 0;
-  send_buffer_len = len;
+  send_buffer_len = length;
 }
 
 void PS2Mouse::handle_active_command(uint8_t data_byte) {

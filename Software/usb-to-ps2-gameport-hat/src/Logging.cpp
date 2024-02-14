@@ -17,55 +17,51 @@ int get_free_memory() {
   return &stack_top - reinterpret_cast<uint8_t*>(sbrk(0));
 }
 
+#ifdef DEBUG_USB
 /**
  * Callback, captures packets from USB IN.
  */
-void usb_data_received(uint8_t const* const data, uint8_t length) {
+void usb_data_received(const uint8_t* data, uint8_t length) {
   t_usb_last_received = t_current;
-#ifdef DEBUG_USB
   log_buffer->concat("U<");
   for (uint8_t i = 0; i < length; i++) {
     log_buffer->concat("%02X", data[i]);
   }
   log_buffer->concatln("");
-#endif
 }
 
 /**
  * Callback, captures packets from USB OUT.
  */
-void usb_data_sent(uint8_t const* const data, uint8_t length) {
+void usb_data_sent(const uint8_t* data, uint8_t length) {
   t_usb_last_sent = t_current;
-#ifdef DEBUG_USB
   log_buffer->concat("U>");
   for (uint8_t i = 0; i < length; i++) {
     log_buffer->concat("%02X", data[i]);
   }
   log_buffer->concatln("");
-#endif
 }
+#endif
 
+#ifdef DEBUG_PS2
 /**
  * Callback, captures packets from PS2Receiver.
  */
-void ps2_data_received(uint8_t pin, uint8_t data, bool valid) {
+void ps2_data_received(uint8_t pin, uint8_t data_byte, bool valid) {
   t_ps2_last_received = t_current;
-#ifdef DEBUG_PS2
   log_buffer->concat("P%u< ", pin)
-      ->concat("%02X", data)
+      ->concat("%02X", data_byte)
       ->concatln(valid ? "" : "!!");
-#endif
 }
 
 /**
  * Callback, captures packets from PS2Sender.
  */
-void ps2_data_sent(uint8_t pin, uint8_t data) {
+void ps2_data_sent(uint8_t pin, uint8_t data_byte) {
   t_ps2_last_sent = t_current;
-#ifdef DEBUG_PS2
-  log_buffer->concat("P%u> ", pin)->concatln("%02X", data);
-#endif
+  log_buffer->concat("P%u> ", pin)->concatln("%02X", data_byte);
 }
+#endif
 
 static void print_and_flush_buffer() {
   if (log_buffer->length() > 0) {

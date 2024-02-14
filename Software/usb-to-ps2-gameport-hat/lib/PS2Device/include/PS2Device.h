@@ -10,6 +10,16 @@ const uint8_t ACK_CODE = 0xFA;
 const uint8_t RESEND_CODE = 0xFE;
 const uint8_t BAT_OK = 0xAA;
 
+/**
+ * implement in your code if you want to capture packages.
+ */
+extern void ps2_data_received(uint8_t pin, uint8_t data_byte, bool valid);
+
+/**
+ * implement in your code if you want to capture packages.
+ */
+extern void ps2_data_sent(uint8_t pin, uint8_t data_byte);
+
 class PS2Device : PS2PortObserver {
  private:
   volatile unsigned long time_last_inhibit;

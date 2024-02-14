@@ -1,5 +1,19 @@
 #include "PS2Device.h"
 
+extern "C" {
+void __ps2_dummy_received_callback(uint8_t pin, uint8_t data_byte, bool valid) {}
+}
+
+void ps2_data_received(uint8_t pin, uint8_t data_byte, bool valid)
+    __attribute__((weak, alias("__ps2_dummy_received_callback")));
+
+extern "C" {
+void __ps2_data_sent_dummy_callback(uint8_t pin, uint8_t data_byte) {}
+}
+
+void ps2_data_sent(uint8_t pin, uint8_t data_byte)
+    __attribute__((weak, alias("__ps2_data_sent_dummy_callback")));
+
 PS2Device::PS2Device(PS2Port* const port)
     : sender(port), receiver(port), port(port) {}
 

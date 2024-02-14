@@ -73,7 +73,7 @@ class PS2Keyboard : public PS2Device {
   void resend() override;
 
  private:
-  void send_toHost(const uint8_t* data, uint8_t len);
+  void send_toHost(const uint8_t* data, uint8_t length);
   void handle_active_command(uint8_t data_byte);
   void handle_new_command(uint8_t data_byte);
 };

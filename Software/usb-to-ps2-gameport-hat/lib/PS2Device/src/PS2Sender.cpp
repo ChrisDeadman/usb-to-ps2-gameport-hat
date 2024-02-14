@@ -1,14 +1,5 @@
 #include "PS2Sender.h"
 
-extern "C" {
-void __ps2_data_sent_dummy_callback(uint8_t pin, uint8_t data) {}
-}
-/**
- * implement in your code if you want to capture packages.
- */
-void ps2_data_sent(uint8_t pin, uint8_t data)
-    __attribute__((weak, alias("__ps2_data_sent_dummy_callback")));
-
 PS2Sender::PS2Sender(PS2Port* const port) : port(port) {
   busy = false;
   bit_idx = 0;
@@ -64,7 +55,6 @@ volatile void PS2Sender::on_clock() {
       break;
     case 11:  // transmission complete
       end_send();
-      ps2_data_sent(port->data_pin, data_byte);
       return;
   }
   bit_idx++;
