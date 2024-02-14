@@ -36,12 +36,12 @@ void HIDMouseController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
   }
 
   if (len > 2) {
-    state.d_x = add_mouse_delta(state.d_x, (int8_t)buf[1]);
-    state.d_y = add_mouse_delta(state.d_y, (int8_t)buf[2]);
+    state.d_x = (int8_t)buf[1];
+    state.d_y = (int8_t)buf[2];
   }
 
   if (len > 3) {
-    state.d_wheel = add_mouse_delta(state.d_wheel, (int8_t)buf[3]);
+    state.d_wheel = (int8_t)buf[3];
   }
 };
 
