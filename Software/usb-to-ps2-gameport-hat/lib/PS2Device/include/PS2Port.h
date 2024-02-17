@@ -23,7 +23,7 @@ class PS2Port {
   /**
    *  ISR vars
    */
-  volatile uint8_t sub_clock;
+  volatile int8_t sub_clock;
   volatile bool clock_enabled;
   volatile bool clock_inhibited;
 
@@ -40,12 +40,12 @@ class PS2Port {
   /**
    * Read one bit from the data bus.
    */
-  volatile bool read();
+  volatile int read();
 
   /**
    * Write one bit to the data bus.
    */
-  volatile void write(bool bit);
+  volatile void write(uint32_t bit);
 
   /**
    * Called upon each clock cycle. This is the time to send or receive data.

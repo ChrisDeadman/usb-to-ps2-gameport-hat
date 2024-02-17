@@ -91,9 +91,9 @@ void setup() {
   pinMode(EXT_LED1_PIN, OUTPUT);
   pinMode(EXT_LED2_PIN, OUTPUT);
   usb.Init();
-  PS2Port::init();
   ps2_keyboard.init();
   ps2_mouse.init();
+  PS2Port::init();
   gameport.init();
   logging.init();
   watchdog.init();

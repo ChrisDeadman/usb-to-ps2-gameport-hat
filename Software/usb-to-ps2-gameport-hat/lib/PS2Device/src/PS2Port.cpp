@@ -12,6 +12,9 @@ static volatile TcCount16* const TC = (TcCount16*)TC5;
 static volatile const IRQn TCIRQn = TC5_IRQn;
 
 void TC5_Handler() {
+  // acknowledge the interrupt and re-arm
+  TC->INTFLAG.bit.MC0 = 1;
+
   for (uint8_t port_idx = 0; port_idx < num_ports; port_idx++) {
     PS2Port* port = ports[port_idx];
 
@@ -33,22 +36,9 @@ void TC5_Handler() {
       // 3: LOW
       uint8_t clk = HIGH;
       if (port->clock_enabled) {
-        switch (port->sub_clock++) {
-          case 0:
-            clk = HIGH;
-            break;
-          case 1:
-            port->on_clock();
-            clk = HIGH;
-            break;
-          case 2:
-            clk = LOW;
-            break;
-          case 3:
-            clk = LOW;
-            port->sub_clock = 0;
-            break;
-        }
+        if (port->sub_clock == 1) port->on_clock();
+        clk = (port->sub_clock < 2) ? HIGH : LOW;
+        if (++port->sub_clock > 3) port->sub_clock = 0;
       }
       digitalWrite(port->clock_pin, clk);
 
@@ -60,8 +50,6 @@ void TC5_Handler() {
       }
     }
   }
-  // set interrupt flag
-  TC->INTFLAG.bit.MC0 = 1;
 }
 
 PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin)
@@ -92,14 +80,11 @@ volatile void PS2Port::enable_clock() {
 volatile void PS2Port::disable_clock() {
   sub_clock = 0;
   clock_enabled = false;
-  digitalWrite(data_pin, HIGH);  // release data pin
 }
 
-volatile bool PS2Port::read() {
-  return (digitalRead(data_pin) == HIGH) ? true : false;
-}
+volatile int PS2Port::read() { return digitalRead(data_pin); }
 
-volatile void PS2Port::write(bool bit) { digitalWrite(data_pin, bit ? HIGH : LOW); }
+volatile void PS2Port::write(uint32_t bit) { digitalWrite(data_pin, bit); }
 
 volatile void PS2Port::on_clock() {
   if (observer != NULL) {
@@ -135,8 +120,8 @@ void PS2Port::init() {
   TC->CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;    // set TC mode as match frequency
   TC->CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1;  // set prescaler to 1
   TC->CTRLA.reg |= TC_CTRLA_ENABLE;          // enable TC
-  // set counter to 15kHz*4 (4 sub-clocks needed)
-  TC->CC[0].reg = (uint16_t)((SystemCoreClock / 15000 / 4) - 1);
+  // set counter to 13kHz*4 (4 sub-clocks needed)
+  TC->CC[0].reg = (uint16_t)((SystemCoreClock / 13000 / 4) - 1);
   while (TC->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
 

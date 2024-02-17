@@ -37,7 +37,7 @@ volatile void PS2Sender::on_clock() {
     return;
   }
 
-  uint8_t bit;
+  uint32_t bit;
   switch (bit_idx) {
     case 0:  // start bit
       bit = 0;

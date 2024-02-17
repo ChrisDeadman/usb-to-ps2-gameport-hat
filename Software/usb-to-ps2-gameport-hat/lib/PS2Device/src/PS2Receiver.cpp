@@ -48,11 +48,11 @@ volatile void PS2Receiver::on_clock() {
     return;
   }
 
-  uint8_t bit = port->read();
+  int bit = port->read();
 
   switch (bit_idx) {
     case 0:  // start bit
-      if (bit != 0) {
+      if (bit != LOW) {
         data_valid = false;
       }
       parity = 1;  // ODD parity
@@ -67,11 +67,11 @@ volatile void PS2Receiver::on_clock() {
       }
       break;
     case 10:  // stop bit
-      if (bit != 1) {
+      if (bit != HIGH) {
         data_valid = false;
       }
       data_present = true;
-      port->write(data_valid ? 0 : 1);  // ACK / NAK
+      port->write(data_valid ? LOW : HIGH);  // ACK / NAK
       break;
     case 11:  // transmission complete
       end_receive();
