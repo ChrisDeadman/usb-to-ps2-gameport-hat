@@ -80,6 +80,7 @@ volatile void PS2Port::enable_clock() {
 volatile void PS2Port::disable_clock() {
   sub_clock = 0;
   clock_enabled = false;
+  digitalWrite(data_pin, HIGH);  // release data pin
 }
 
 volatile int PS2Port::read() { return digitalRead(data_pin); }
