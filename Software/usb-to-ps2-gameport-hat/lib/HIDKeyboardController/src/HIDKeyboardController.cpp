@@ -251,7 +251,7 @@ HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
   modifier_state = ModNone;
   led_state = KbLedNone;
-  memset(prev_state, NoKey, USB_KEYBOARD_KRO);
+  memset(prev_state, NoKey, KEYBOARD_KRO);
 }
 
 bool HIDKeyboardController::is_connected() { return driver->isReady(); }
@@ -262,8 +262,8 @@ KeyboardModifierState HIDKeyboardController::get_modifier_state() {
 
 KeyboardAction HIDKeyboardController::deq() {
   KeyboardAction kb_action;
-  if (action_buffer.length() > 0) {
-    kb_action = action_buffer.deq();
+  if (key_buffer.length() > 0) {
+    kb_action = key_buffer.deq();
   } else {
     kb_action.type = KbActionNone;
   }
@@ -299,54 +299,54 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
     if ((old_modifier_state & ModLeftCtrl) != (modifier_state & ModLeftCtrl)) {
       kb_action.code = LeftControl;
       kb_action.type = (modifier_state & ModLeftCtrl) ? KbActionMake : KbActionBreak;
-      action_buffer.enq(kb_action);
+      key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModLeftShift) != (modifier_state & ModLeftShift)) {
       kb_action.code = LeftShift;
       kb_action.type =
           (modifier_state & ModLeftShift) ? KbActionMake : KbActionBreak;
-      action_buffer.enq(kb_action);
+      key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModLeftAlt) != (modifier_state & ModLeftAlt)) {
       kb_action.code = LeftAlt;
       kb_action.type = (modifier_state & ModLeftAlt) ? KbActionMake : KbActionBreak;
-      action_buffer.enq(kb_action);
+      key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModLeftGUI) != (modifier_state & ModLeftGUI)) {
       kb_action.code = LeftGUI;
       kb_action.type = (modifier_state & ModLeftGUI) ? KbActionMake : KbActionBreak;
-      action_buffer.enq(kb_action);
+      key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightCtrl) != (modifier_state & ModRightCtrl)) {
       kb_action.code = RightControl;
       kb_action.type =
           (modifier_state & ModRightCtrl) ? KbActionMake : KbActionBreak;
-      action_buffer.enq(kb_action);
+      key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightShift) != (modifier_state & ModRightShift)) {
       kb_action.code = RightShift;
       kb_action.type =
           (modifier_state & ModRightShift) ? KbActionMake : KbActionBreak;
-      action_buffer.enq(kb_action);
+      key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightAlt) != (modifier_state & ModRightAlt)) {
       kb_action.code = RightAlt;
       kb_action.type = (modifier_state & ModRightAlt) ? KbActionMake : KbActionBreak;
-      action_buffer.enq(kb_action);
+      key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightGUI) != (modifier_state & ModRightGUI)) {
       kb_action.code = RightGUI;
       kb_action.type = (modifier_state & ModRightGUI) ? KbActionMake : KbActionBreak;
-      action_buffer.enq(kb_action);
+      key_buffer.enq(kb_action);
     }
   }
 
   // handle keys
-  for (uint32_t i = 0; i < USB_KEYBOARD_KRO; i++) {
+  for (uint32_t i = 0; i < KEYBOARD_KRO; i++) {
     bool down = (len > 2 + i) && (buf[2 + i] > 0);
     bool up = prev_state[i] != NoKey;
 
-    for (uint32_t j = 0; j < USB_KEYBOARD_KRO; j++) {
+    for (uint32_t j = 0; j < KEYBOARD_KRO; j++) {
       if ((len > 2 + i) && (buf[2 + i] == prev_state[j])) down = false;
       if ((len > 2 + j) && (buf[2 + j] == prev_state[i])) up = false;
     }
@@ -361,7 +361,7 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
       if (key != NoKey) {
         kb_action.code = key;
         kb_action.type = KbActionMake;
-        action_buffer.enq(kb_action);
+        key_buffer.enq(kb_action);
       }
     }
 
@@ -371,13 +371,13 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
       if (key != NoKey) {
         kb_action.code = key;
         kb_action.type = KbActionBreak;
-        action_buffer.enq(kb_action);
+        key_buffer.enq(kb_action);
       }
     }
   }
 
   // update prev. state
-  for (uint32_t i = 0; i < USB_KEYBOARD_KRO; i++) {
+  for (uint32_t i = 0; i < KEYBOARD_KRO; i++) {
     // ignore overrun
     if (len > 2 + i) {
       prev_state[i] = buf[2 + i];

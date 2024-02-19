@@ -48,6 +48,11 @@ class CircularBuffer {
   T deq();
 
   /**
+   * Set the item at the given index, starting at the front.
+   */
+  void set(uint16_t idx, T value);
+
+  /**
    * Get the item at the given index, starting at the front.
    */
   T get(uint16_t idx);
@@ -97,6 +102,11 @@ T CircularBuffer<T, SIZE>::deq() {
     clear();
   }
   return value;
+}
+
+template <typename T, uint16_t SIZE>
+void CircularBuffer<T, SIZE>::set(uint16_t idx, T value) {
+  buffer[(uint16_t)(front_idx + idx) % SIZE] = value;
 }
 
 template <typename T, uint16_t SIZE>

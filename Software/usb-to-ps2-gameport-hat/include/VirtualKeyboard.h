@@ -1,18 +1,16 @@
 #ifndef _VIRTUAL_KEYBOARD_H_
 #define _VIRTUAL_KEYBOARD_H_
 
-#include "CircularBuffer.h"
+#include "KeyBuffer.h"
 #include "KeyboardAction.h"
 #include "KeyboardLeds.h"
 #include "KeyboardModifierState.h"
-
-#define VIRTUAL_KEYBOARD_KRO 6
 
 class VirtualKeyboard {
  private:
   KeyboardModifierState modifier_state;
   KeyboardLeds led_state;
-  CircularBuffer<KeyboardAction, VIRTUAL_KEYBOARD_KRO * 2> action_buffer;
+  KeyBuffer key_buffer;
 
  public:
   VirtualKeyboard();

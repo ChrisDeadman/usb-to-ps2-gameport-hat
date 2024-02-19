@@ -181,7 +181,7 @@ void PS2Keyboard::reset(bool send_ack) {
 
 void PS2Keyboard::enq(KeyboardAction kb_action) {
   if (kb_action.type != KbActionNone) {
-    action_buffer.enq(kb_action);
+    key_buffer.enq(kb_action);
   }
 }
 
@@ -231,8 +231,8 @@ void PS2Keyboard::task() {
 
   // get next action
   KeyboardAction kb_action;
-  if (action_buffer.length() > 0) {
-    kb_action = action_buffer.deq();
+  if (key_buffer.length() > 0) {
+    kb_action = key_buffer.deq();
   } else {
     kb_action.type = KbActionNone;
   }
@@ -343,7 +343,7 @@ void PS2Keyboard::handle_active_command(uint8_t data_byte) {
 
 void PS2Keyboard::handle_new_command(uint8_t data_byte) {
   // clear state after every command
-  action_buffer.clear();
+  key_buffer.clear();
 
   switch (data_byte) {
     // Reset

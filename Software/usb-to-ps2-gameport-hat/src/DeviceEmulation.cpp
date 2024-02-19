@@ -12,7 +12,7 @@
 
 #define MOUSE_DELTA_TO_JOY_AXIS(delta) (0x80 + (((delta) * MOUSE_EMU_SPEED) >> 1))
 
-static CircularBuffer<KeyboardAction, VIRTUAL_KEYBOARD_KRO * 2> kb_action_buffer;
+static KeyBuffer tmp_key_buffer;
 
 static void sync_kb_emu_keys(VirtualKeyboard* const keyboard, KeyboardCodes code,
                              bool key_down);
@@ -95,8 +95,10 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
                           VirtualKeyboard* const keyboard) {
   JoystickState new_joy_state = joystick->pop_state();
 
-  // For each keyboard action
-  kb_action_buffer.clear();
+  // prepare temporary key buffer
+  tmp_key_buffer.clear();
+
+  // for each keyboard action
   while (true) {
     KeyboardAction kb_action = keyboard->deq();
     if (kb_action.type == KbActionNone) {
@@ -111,7 +113,7 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
     }
     mapping_idx /= 2;
 
-    // Handle MAKE
+    // handle MAKE
     if (kb_action.type == KbActionMake) {
       switch (mapping_idx) {
         case 0:
@@ -151,11 +153,11 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
         }
         default:
           // put back what we don't consume
-          kb_action_buffer.enq(kb_action);
+          tmp_key_buffer.enq(kb_action);
           break;
       }
     }
-    // Handle BREAK
+    // handle BREAK
     else {
       switch (mapping_idx) {
         case 0:
@@ -188,15 +190,15 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick,
         }
         default:
           // put back what we don't consume
-          kb_action_buffer.enq(kb_action);
+          tmp_key_buffer.enq(kb_action);
           break;
       }
     }
   }
 
   // restore actions we did not consume
-  while (kb_action_buffer.length() > 0) {
-    keyboard->enq(kb_action_buffer.deq());
+  while (tmp_key_buffer.length() > 0) {
+    keyboard->enq(tmp_key_buffer.deq());
   }
 
   // push back updated state
@@ -207,8 +209,10 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
                             VirtualKeyboard* const keyboard) {
   MouseState new_mouse_state = mouse->pop_state();
 
-  // For each keyboard action
-  kb_action_buffer.clear();
+  // prepare temporary key buffer
+  tmp_key_buffer.clear();
+
+  // for each keyboard action
   while (true) {
     KeyboardAction kb_action = keyboard->deq();
     if (kb_action.type == KbActionNone) {
@@ -223,7 +227,7 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
     }
     mapping_idx /= 2;
 
-    // Handle MAKE
+    // handle MAKE
     if (kb_action.type == KbActionMake) {
       switch (mapping_idx) {
         case 0:  // Left
@@ -259,11 +263,11 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
         }
         default:
           // put back what we don't consume
-          kb_action_buffer.enq(kb_action);
+          tmp_key_buffer.enq(kb_action);
           break;
       }
     }
-    // Handle BREAK
+    // handle BREAK
     else {
       switch (mapping_idx) {
         case 0:  // Left
@@ -292,15 +296,15 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse,
           break;
         default:
           // put back what we don't consume
-          kb_action_buffer.enq(kb_action);
+          tmp_key_buffer.enq(kb_action);
           break;
       }
     }
   }
 
   // restore actions we did not consume
-  while (kb_action_buffer.length() > 0) {
-    keyboard->enq(kb_action_buffer.deq());
+  while (tmp_key_buffer.length() > 0) {
+    keyboard->enq(tmp_key_buffer.deq());
   }
 
   // push back updated state

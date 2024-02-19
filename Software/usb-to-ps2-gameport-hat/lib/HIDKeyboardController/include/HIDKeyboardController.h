@@ -4,21 +4,19 @@
 #include <Arduino.h>
 #include <hidboot.h>
 
-#include "CircularBuffer.h"
+#include "KeyBuffer.h"
 #include "KeyboardAction.h"
 #include "KeyboardLeds.h"
 #include "KeyboardModifierState.h"
-
-#define USB_KEYBOARD_KRO 6
 
 class HIDKeyboardController : virtual public HIDReportParser {
  private:
   HID *driver;
 
   KeyboardModifierState modifier_state;
-  uint8_t prev_state[USB_KEYBOARD_KRO];
+  uint8_t prev_state[KEYBOARD_KRO];
   KeyboardLeds led_state;
-  CircularBuffer<KeyboardAction, USB_KEYBOARD_KRO * 2> action_buffer;
+  KeyBuffer key_buffer;
 
  public:
   HIDKeyboardController(HID *driver);

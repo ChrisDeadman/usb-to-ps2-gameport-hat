@@ -1,13 +1,11 @@
 #ifndef _PS2_KEYBOARD_H_
 #define _PS2_KEYBOARD_H_
 
-#include "CircularBuffer.h"
+#include "KeyBuffer.h"
 #include "KeyboardAction.h"
 #include "KeyboardLeds.h"
 #include "PS2Device.h"
 #include "SoftTimer.h"
-
-#define PS2_KEYBOARD_KRO 6
 
 class PS2Keyboard : public PS2Device {
  private:
@@ -31,7 +29,7 @@ class PS2Keyboard : public PS2Device {
   uint8_t typematic_rate;
 
   KeyboardLeds led_state;
-  CircularBuffer<KeyboardAction, PS2_KEYBOARD_KRO * 2> action_buffer;
+  KeyBuffer key_buffer;
 
  public:
   PS2Keyboard(PS2Port* const port);
