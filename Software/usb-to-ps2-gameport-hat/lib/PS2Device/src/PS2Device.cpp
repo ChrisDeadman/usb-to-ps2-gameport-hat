@@ -17,10 +17,15 @@ void ps2_data_sent(uint8_t pin, uint8_t data_byte)
 PS2Device::PS2Device(PS2Port* const port)
     : sender(port), receiver(port), port(port) {}
 
-void PS2Device::init() { port->set_observer(this); }
+void PS2Device::init() {
+  send_buffer_idx = 0;
+  send_buffer_len = 0;
+  port->set_observer(this);
+}
 
 bool PS2Device::is_busy() {
-  return !port->clock_inhibited && (receiver.is_busy() || sender.is_busy());
+  return receiver.is_busy() || sender.is_busy() ||
+         (send_buffer_idx < send_buffer_len);
 }
 
 unsigned long PS2Device::get_time_last_inhibit() { return time_last_inhibit; }
@@ -49,4 +54,12 @@ volatile void PS2Device::on_host_rts() {
   sender.end_send();
   receiver.end_receive();
   receiver.begin_receive();
+}
+
+void PS2Device::resend() { send_buffer_idx = 0; }
+
+void PS2Device::send_toHost(const uint8_t* data, uint8_t length) {
+  memcpy(send_buffer, data, length);
+  send_buffer_idx = 0;
+  send_buffer_len = length;
 }

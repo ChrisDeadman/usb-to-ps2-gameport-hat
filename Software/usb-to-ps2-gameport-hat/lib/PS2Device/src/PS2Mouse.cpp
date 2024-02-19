@@ -1,10 +1,6 @@
 #include "PS2Mouse.h"
 
-PS2Mouse::PS2Mouse(PS2Port* port) : PS2Device(port) {
-  send_buffer_idx = 0;
-  send_buffer_len = 0;
-  set_defaults();
-}
+PS2Mouse::PS2Mouse(PS2Port* port) : PS2Device(port) { set_defaults(); }
 
 uint8_t PS2Mouse::get_device_id() { return device_id; }
 
@@ -105,14 +101,6 @@ void PS2Mouse::task() {
   send_toHost(packet, packet_len);
   state_changed = false;
   sample_timer.reset();
-}
-
-void PS2Mouse::resend() { send_buffer_idx = 0; }
-
-void PS2Mouse::send_toHost(const uint8_t* data, uint8_t length) {
-  memcpy(send_buffer, data, length);
-  send_buffer_idx = 0;
-  send_buffer_len = length;
 }
 
 void PS2Mouse::handle_active_command(uint8_t data_byte) {

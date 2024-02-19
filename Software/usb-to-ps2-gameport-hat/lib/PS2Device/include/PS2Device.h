@@ -28,6 +28,9 @@ class PS2Device : PS2PortObserver {
  protected:
   PS2Sender sender;
   PS2Receiver receiver;
+  uint8_t send_buffer[8];
+  uint8_t send_buffer_idx;
+  uint8_t send_buffer_len;
 
  public:
   PS2Device(PS2Port* const port);
@@ -55,13 +58,6 @@ class PS2Device : PS2PortObserver {
   unsigned long get_time_last_host_rts();
 
   /**
-   * Triggers resending of data upon next clock cycle.
-   *
-   * This has no effect if no data is currently being sent.
-   */
-  virtual void resend() = 0;
-
-  /**
    * Called upon each clock cycle. This is the time to send or receive data.
    */
   volatile void on_clock() override;
@@ -75,6 +71,19 @@ class PS2Device : PS2PortObserver {
    * Called when the host requests to send.
    */
   volatile void on_host_rts() override;
+
+ protected:
+  /**
+   * Triggers resending of data upon next clock cycle.
+   *
+   * This has no effect if no data is currently being sent.
+   */
+  void resend();
+
+  /**
+   * Queue data for sending.
+   */
+  void send_toHost(const uint8_t* data, uint8_t length);
 };
 
 #endif  //_PS2_DEVICE_H_
