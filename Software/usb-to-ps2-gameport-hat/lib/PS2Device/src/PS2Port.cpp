@@ -36,17 +36,18 @@ void TC5_Handler() {
       // 3: LOW
       uint8_t clk = HIGH;
       if (port->clock_enabled) {
-        if (port->sub_clock == 1) port->on_clock();
         clk = (port->sub_clock < 2) ? HIGH : LOW;
+        digitalWrite(port->clock_pin, clk);
+        pinMode(port->clock_pin, clk ? INPUT_PULLUP : OUTPUT);
         if (++port->sub_clock > 3) port->sub_clock = 0;
+        if (port->sub_clock == 2) port->on_clock();
       }
-      digitalWrite(port->clock_pin, clk);
 
       // check if host inhibits clock
       if ((clk == HIGH) && (digitalRead(port->clock_pin) == LOW)) {
         port->clock_inhibited = true;
         port->on_inhibit();
-        digitalWrite(port->data_pin, HIGH);  // release data pin
+        port->disable_clock();
       }
     }
   }
@@ -54,14 +55,9 @@ void TC5_Handler() {
 
 PS2Port::PS2Port(uint8_t clock_pin, uint8_t data_pin)
     : observer(NULL), clock_pin(clock_pin), data_pin(data_pin) {
-  sub_clock = 0;
-  clock_enabled = false;
   clock_inhibited = false;
 
-  digitalWrite(clock_pin, HIGH);
-  digitalWrite(data_pin, HIGH);
-  pinMode(clock_pin, OUTPUT);
-  pinMode(data_pin, OUTPUT);
+  disable_clock();
 
   assert(num_ports < MAX_PORTS);
   ports[num_ports] = this;
@@ -80,12 +76,19 @@ volatile void PS2Port::enable_clock() {
 volatile void PS2Port::disable_clock() {
   sub_clock = 0;
   clock_enabled = false;
-  digitalWrite(data_pin, HIGH);  // release data pin
+  // release pins
+  digitalWrite(clock_pin, HIGH);
+  digitalWrite(data_pin, HIGH);
+  pinMode(clock_pin, INPUT_PULLUP);
+  pinMode(data_pin, INPUT_PULLUP);
 }
 
 volatile int PS2Port::read() { return digitalRead(data_pin); }
 
-volatile void PS2Port::write(uint32_t bit) { digitalWrite(data_pin, bit); }
+volatile void PS2Port::write(uint32_t bit) {
+  digitalWrite(data_pin, bit);
+  pinMode(data_pin, bit ? INPUT_PULLUP : OUTPUT);
+}
 
 volatile void PS2Port::on_clock() {
   if (observer != NULL) {
@@ -121,8 +124,8 @@ void PS2Port::init() {
   TC->CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;    // set TC mode as match frequency
   TC->CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1;  // set prescaler to 1
   TC->CTRLA.reg |= TC_CTRLA_ENABLE;          // enable TC
-  // set counter to 13kHz*4 (4 sub-clocks needed)
-  TC->CC[0].reg = (uint16_t)((SystemCoreClock / 13000 / 4) - 1);
+  // set counter to 10kHz*4 (4 sub-clocks needed)
+  TC->CC[0].reg = (uint16_t)((SystemCoreClock / 10000 / 4) - 1);
   while (TC->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
 

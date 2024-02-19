@@ -90,12 +90,12 @@ void setup() {
   digitalWrite(EXT_LED2_PIN, HIGH);
   pinMode(EXT_LED1_PIN, OUTPUT);
   pinMode(EXT_LED2_PIN, OUTPUT);
+  logging.init();
   usb.Init();
   ps2_keyboard.init();
   ps2_mouse.init();
   PS2Port::init();
   gameport.init();
-  logging.init();
   watchdog.init();
   ps2_keyboard.reset();
   ps2_mouse.reset();
