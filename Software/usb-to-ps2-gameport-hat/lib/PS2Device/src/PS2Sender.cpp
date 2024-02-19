@@ -7,11 +7,11 @@ PS2Sender::PS2Sender(PS2Port* const port) : port(port) {
   parity = 0;
 }
 
-volatile bool PS2Sender::is_busy() { return busy; }
+bool PS2Sender::is_busy() { return busy; }
 
-volatile bool PS2Sender::is_sending() { return busy && (bit_idx > 1); }
+bool PS2Sender::is_sending() { return busy && (bit_idx > 1); }
 
-volatile void PS2Sender::begin_send(uint8_t data_byte) {
+void PS2Sender::begin_send(uint8_t data_byte) {
   if (busy) {
     end_send();
   }
@@ -22,7 +22,7 @@ volatile void PS2Sender::begin_send(uint8_t data_byte) {
   port->enable_clock();
 }
 
-volatile void PS2Sender::end_send() {
+void PS2Sender::end_send() {
   if (!busy) {
     return;
   }
@@ -32,7 +32,7 @@ volatile void PS2Sender::end_send() {
   port->disable_clock();
 }
 
-volatile void PS2Sender::on_clock() {
+void PS2Sender::on_clock() {
   if (!busy) {
     return;
   }

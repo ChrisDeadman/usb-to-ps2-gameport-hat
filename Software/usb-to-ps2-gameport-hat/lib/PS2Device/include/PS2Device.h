@@ -60,17 +60,17 @@ class PS2Device : PS2PortObserver {
   /**
    * Called upon each clock cycle. This is the time to send or receive data.
    */
-  volatile void on_clock() override;
+  void on_clock() override;
 
   /**
    * Called when the host inhibits communication.
    */
-  volatile void on_inhibit() override;
+  void on_inhibit() override;
 
   /**
    * Called when the host requests to send.
    */
-  volatile void on_host_rts() override;
+  void on_host_rts() override;
 
  protected:
   /**

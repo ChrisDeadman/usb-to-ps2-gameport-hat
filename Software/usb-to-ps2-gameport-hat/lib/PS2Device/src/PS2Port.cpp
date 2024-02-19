@@ -68,12 +68,12 @@ void PS2Port::set_observer(PS2PortObserver* const observer) {
   this->observer = observer;
 }
 
-volatile void PS2Port::enable_clock() {
+void PS2Port::enable_clock() {
   sub_clock = 0;
   clock_enabled = true;
 }
 
-volatile void PS2Port::disable_clock() {
+void PS2Port::disable_clock() {
   sub_clock = 0;
   clock_enabled = false;
   // release pins
@@ -83,26 +83,26 @@ volatile void PS2Port::disable_clock() {
   pinMode(data_pin, INPUT_PULLUP);
 }
 
-volatile int PS2Port::read() { return digitalRead(data_pin); }
+int PS2Port::read() { return digitalRead(data_pin); }
 
-volatile void PS2Port::write(uint32_t bit) {
+void PS2Port::write(uint32_t bit) {
   digitalWrite(data_pin, bit);
   pinMode(data_pin, bit ? INPUT_PULLUP : OUTPUT);
 }
 
-volatile void PS2Port::on_clock() {
+void PS2Port::on_clock() {
   if (observer != NULL) {
     observer->on_clock();
   }
 }
 
-volatile void PS2Port::on_inhibit() {
+void PS2Port::on_inhibit() {
   if (observer != NULL) {
     observer->on_inhibit();
   }
 }
 
-volatile void PS2Port::on_host_rts() {
+void PS2Port::on_host_rts() {
   if (observer != NULL) {
     observer->on_host_rts();
   }

@@ -9,18 +9,18 @@ PS2Receiver::PS2Receiver(PS2Port* const port) : port(port) {
   parity = 0;
 }
 
-volatile bool PS2Receiver::is_busy() { return busy; }
+bool PS2Receiver::is_busy() { return busy; }
 
-volatile bool PS2Receiver::has_data() { return data_present; }
+bool PS2Receiver::has_data() { return data_present; }
 
-volatile bool PS2Receiver::is_data_valid() { return data_valid; }
+bool PS2Receiver::is_data_valid() { return data_valid; }
 
-volatile uint8_t PS2Receiver::pop_data() {
+uint8_t PS2Receiver::pop_data() {
   data_present = false;
   return data_byte;
 }
 
-volatile void PS2Receiver::begin_receive() {
+void PS2Receiver::begin_receive() {
   if (busy) {
     end_receive();
   }
@@ -33,7 +33,7 @@ volatile void PS2Receiver::begin_receive() {
   port->enable_clock();
 }
 
-volatile void PS2Receiver::end_receive() {
+void PS2Receiver::end_receive() {
   if (!busy) {
     return;
   }
@@ -43,7 +43,7 @@ volatile void PS2Receiver::end_receive() {
   port->disable_clock();
 }
 
-volatile void PS2Receiver::on_clock() {
+void PS2Receiver::on_clock() {
   if (!busy) {
     return;
   }

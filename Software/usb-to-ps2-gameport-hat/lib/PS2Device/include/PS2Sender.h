@@ -18,22 +18,22 @@ class PS2Sender {
   /**
    * Returns whether the sender is busy.
    */
-  volatile bool is_busy();
+  bool is_busy();
 
   /**
    * Returns whether data is currently being sent.
    */
-  volatile bool is_sending();
+  bool is_sending();
 
   /**
    * Prepares to transmit data and starts the clock on the port.
    */
-  volatile void begin_send(uint8_t dataByte);
+  void begin_send(uint8_t dataByte);
 
   /**
    * Stops the clock on the port and transmission of data.
    */
-  volatile void end_send();
+  void end_send();
 
   /**
    * Writes one bit of data to the port.
@@ -41,7 +41,7 @@ class PS2Sender {
    * Does nothing if not in sending state (beginSend).
    * This should be called on every clock cycle during data transmission.
    */
-  volatile void on_clock();
+  void on_clock();
 };
 
 #endif  //_PS2_SENDER_H_

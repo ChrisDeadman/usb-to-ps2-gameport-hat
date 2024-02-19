@@ -11,17 +11,17 @@ class PS2PortObserver {
   /**
    * Called upon each clock cycle. This is the time to send or receive data.
    */
-  virtual volatile void on_clock() = 0;
+  virtual void on_clock() = 0;
 
   /**
    * Called when the host inhibits communication.
    */
-  virtual volatile void on_inhibit() = 0;
+  virtual void on_inhibit() = 0;
 
   /**
    * Called when the host requests to send.
    */
-  virtual volatile void on_host_rts() = 0;
+  virtual void on_host_rts() = 0;
 };
 
 #endif  //_PS2_PORT_OBSERVER_H_

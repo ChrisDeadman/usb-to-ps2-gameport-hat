@@ -30,37 +30,37 @@ class PS2Port {
   /**
    * Enable clock generation.
    */
-  volatile void enable_clock();
+  void enable_clock();
 
   /**
    * Disable clock generation.
    */
-  volatile void disable_clock();
+  void disable_clock();
 
   /**
    * Read one bit from the data bus.
    */
-  volatile int read();
+  int read();
 
   /**
    * Write one bit to the data bus.
    */
-  volatile void write(uint32_t bit);
+  void write(uint32_t bit);
 
   /**
    * Called upon each clock cycle. This is the time to send or receive data.
    */
-  volatile void on_clock();
+  void on_clock();
 
   /**
    * Called when the host inhibits communication.
    */
-  volatile void on_inhibit();
+  void on_inhibit();
 
   /**
    * Called when the host requests to send.
    */
-  volatile void on_host_rts();
+  void on_host_rts();
 
   /**
    * Initializes the PS/2 port interface.

@@ -32,12 +32,12 @@ unsigned long PS2Device::get_time_last_inhibit() { return time_last_inhibit; }
 
 unsigned long PS2Device::get_time_last_host_rts() { return time_last_host_rts; }
 
-volatile void PS2Device::on_clock() {
+void PS2Device::on_clock() {
   receiver.on_clock();
   sender.on_clock();
 }
 
-volatile void PS2Device::on_inhibit() {
+void PS2Device::on_inhibit() {
   time_last_inhibit = millis();
   receiver.end_receive();
   // If a transmission is inhibited after the 1st and before the 11th clock pulse,
@@ -49,7 +49,7 @@ volatile void PS2Device::on_inhibit() {
   }
 }
 
-volatile void PS2Device::on_host_rts() {
+void PS2Device::on_host_rts() {
   time_last_host_rts = millis();
   sender.end_send();
   receiver.end_receive();
