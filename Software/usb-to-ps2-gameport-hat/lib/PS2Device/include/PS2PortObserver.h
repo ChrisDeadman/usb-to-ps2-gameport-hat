@@ -14,11 +14,6 @@ class PS2PortObserver {
   virtual void on_clock() = 0;
 
   /**
-   * Called when the host inhibits communication.
-   */
-  virtual void on_inhibit() = 0;
-
-  /**
    * Called when the host requests to send.
    */
   virtual void on_host_rts() = 0;

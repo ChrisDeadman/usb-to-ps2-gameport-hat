@@ -63,11 +63,6 @@ class PS2Device : PS2PortObserver {
   void on_clock() override;
 
   /**
-   * Called when the host inhibits communication.
-   */
-  void on_inhibit() override;
-
-  /**
    * Called when the host requests to send.
    */
   void on_host_rts() override;

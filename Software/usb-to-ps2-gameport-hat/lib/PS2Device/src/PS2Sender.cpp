@@ -9,7 +9,7 @@ PS2Sender::PS2Sender(PS2Port* const port) : port(port) {
 
 bool PS2Sender::is_busy() { return busy; }
 
-bool PS2Sender::is_sending() { return busy && (bit_idx > 1); }
+uint8_t PS2Sender::bits_sent() { return bit_idx; }
 
 void PS2Sender::begin_send(uint8_t data_byte) {
   if (busy) {

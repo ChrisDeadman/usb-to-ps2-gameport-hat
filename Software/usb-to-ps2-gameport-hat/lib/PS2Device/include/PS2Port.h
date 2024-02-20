@@ -53,11 +53,6 @@ class PS2Port {
   void on_clock();
 
   /**
-   * Called when the host inhibits communication.
-   */
-  void on_inhibit();
-
-  /**
    * Called when the host requests to send.
    */
   void on_host_rts();

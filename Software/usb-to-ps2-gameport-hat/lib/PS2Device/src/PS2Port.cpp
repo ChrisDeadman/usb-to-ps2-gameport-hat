@@ -6,6 +6,7 @@
 
 static PS2Port* volatile ports[MAX_PORTS];
 static volatile uint8_t num_ports = 0;
+static volatile uint8_t port_idx = 0;
 
 // use TIMER/COUNTER#5
 static volatile TcCount16* const TC = (TcCount16*)TC5;
@@ -15,40 +16,50 @@ void TC5_Handler() {
   // acknowledge the interrupt and re-arm
   TC->INTFLAG.bit.MC0 = 1;
 
-  for (uint8_t port_idx = 0; port_idx < num_ports; port_idx++) {
-    PS2Port* port = ports[port_idx];
+  // service next port
+  if (++port_idx >= MAX_PORTS) {
+    port_idx = 0;
+  }
 
-    // wait until host releases the clock
-    if (port->clock_inhibited) {
-      if (digitalRead(port->clock_pin) == HIGH) {
-        port->clock_inhibited = false;
-        // Host requests to send
-        if (digitalRead(port->data_pin) == LOW) {
-          port->on_host_rts();
-        }
-      }
-    } else {
-      // Sub-Clock:
-      //<0: HIGH -> used for delay
-      // 0: HIGH
-      // 1: HIGH -> on_clock() is called here
-      // 2: LOW
-      // 3: LOW
-      uint8_t clk = HIGH;
-      if (port->clock_enabled) {
-        clk = (port->sub_clock < 2) ? HIGH : LOW;
-        digitalWrite(port->clock_pin, clk);
-        pinMode(port->clock_pin, clk ? INPUT_PULLUP : OUTPUT);
-        if (++port->sub_clock > 3) port->sub_clock = 0;
-        if (port->sub_clock == 2) port->on_clock();
-      }
+  // ignore disabled ports
+  if (port_idx >= num_ports) {
+    return;
+  }
 
-      // check if host inhibits clock
-      if ((clk == HIGH) && (digitalRead(port->clock_pin) == LOW)) {
-        port->clock_inhibited = true;
-        port->on_inhibit();
-        port->disable_clock();
+  PS2Port* port = ports[port_idx];
+
+  // wait until host releases the clock
+  if (port->clock_inhibited) {
+    if (digitalRead(port->clock_pin) == HIGH) {
+      port->clock_inhibited = false;
+      // Host requests to send
+      if (digitalRead(port->data_pin) == LOW) {
+        port->on_host_rts();
       }
+    }
+  } else {
+    // Sub-Clock:
+    //<0: HIGH -> used for delay
+    // 0: HIGH -> on_clock() is called here
+    // 1: LOW
+    uint8_t clk = (port->sub_clock < 1) ? HIGH : LOW;
+    digitalWrite(port->clock_pin, clk);
+    pinMode(port->clock_pin, clk ? INPUT_PULLUP : OUTPUT);
+
+    // according to https://www.burtonsys.com/ps2_chapweske.htm:
+    // The time from the rising edge of a clock pulse to a Data transition must
+    // be at least 5 microseconds.
+    if (clk == HIGH) {
+      delayMicroseconds(2);  // adjust depending on platform
+    }
+
+    // check if host inhibits clock
+    if ((clk == HIGH) && (digitalRead(port->clock_pin) == LOW)) {
+      port->clock_inhibited = true;
+      port->on_clock();
+    } else if (port->clock_enabled) {
+      if (++port->sub_clock > 1) port->sub_clock = 0;
+      if (port->sub_clock == 1) port->on_clock();
     }
   }
 }
@@ -96,12 +107,6 @@ void PS2Port::on_clock() {
   }
 }
 
-void PS2Port::on_inhibit() {
-  if (observer != NULL) {
-    observer->on_inhibit();
-  }
-}
-
 void PS2Port::on_host_rts() {
   if (observer != NULL) {
     observer->on_host_rts();
@@ -124,8 +129,8 @@ void PS2Port::init() {
   TC->CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;    // set TC mode as match frequency
   TC->CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1;  // set prescaler to 1
   TC->CTRLA.reg |= TC_CTRLA_ENABLE;          // enable TC
-  // set counter to 10kHz*4 (4 sub-clocks needed)
-  TC->CC[0].reg = (uint16_t)((SystemCoreClock / 10000 / 4) - 1);
+  // set counter to 10kHz * 2 sub-clocks per port
+  TC->CC[0].reg = (uint16_t)((SystemCoreClock / 10000 / MAX_PORTS / 2) - 1);
   while (TC->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
 

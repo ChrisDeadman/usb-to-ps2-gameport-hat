@@ -21,14 +21,14 @@ class PS2Sender {
   bool is_busy();
 
   /**
-   * Returns whether data is currently being sent.
+   * Returns how many bits have been sent already.
    */
-  bool is_sending();
+  uint8_t bits_sent();
 
   /**
    * Prepares to transmit data and starts the clock on the port.
    */
-  void begin_send(uint8_t dataByte);
+  void begin_send(uint8_t data_byte);
 
   /**
    * Stops the clock on the port and transmission of data.
