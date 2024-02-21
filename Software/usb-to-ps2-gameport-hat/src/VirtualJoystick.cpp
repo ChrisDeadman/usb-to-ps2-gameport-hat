@@ -29,8 +29,11 @@ void VirtualJoystick::update_state(JoystickState const* const new_state,
   else {
     state.axes[2] = combine_axis(state.axes[2], new_state->axes[0]);
     state.axes[3] = combine_axis(state.axes[3], new_state->axes[1]);
-    state.buttons[2] |= new_state->buttons[0];
-    state.buttons[3] |= new_state->buttons[1];
+    state.buttons[2] |= new_state->buttons[0] | new_state->buttons[2];
+    state.buttons[3] |= new_state->buttons[1] | new_state->buttons[3];
+    for (uint8_t button = 4; button < JoystickState::NUM_BUTTONS; button++) {
+      state.buttons[button] |= new_state->buttons[button];
+    }
   }
 
   state.changed = new_state->changed;
