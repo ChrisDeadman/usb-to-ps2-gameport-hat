@@ -1,6 +1,7 @@
 #ifndef _XBOXRECV_MAPPER_H_
 #define _XBOXRECV_MAPPER_H_
 
+#include <SoftTimer.h>
 #include <XBOXRECV.h>
 
 #include "JoystickDriverMapper.h"
@@ -9,7 +10,9 @@ class XBOXRECVMapper : public IJoystickDriverMapper {
  private:
   XBOXRECV* const driver;
   JoystickState state[4];
+
   JoystickLeds led_state;
+  SoftTimer led_timer;
   uint8_t current_led_idx;
 
  public:

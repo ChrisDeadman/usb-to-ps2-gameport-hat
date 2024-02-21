@@ -1,5 +1,7 @@
 #include "XBOXRECVMapper.h"
 
+#include "Config.h"
+
 #define CONVERT_AXIS_VALUE(x) \
   (uint8_t)(((uint32_t)((x)-INT16_MIN) * UINT8_MAX) / (UINT16_MAX))
 
@@ -74,6 +76,12 @@ void XBOXRECVMapper::update_led_state(uint8_t idx) {
   if (idx != 0) {
     return;
   }
+
+  led_timer.tick();
+  if (led_timer.getElapsedMillis() < XBOX_LED_FLASH_INTERVAL) {
+    return;
+  }
+  led_timer.reset();
 
   if ((current_led_idx == 0) && (led_state & JoyLed1)) {
     driver->setLedOn(LED3);
