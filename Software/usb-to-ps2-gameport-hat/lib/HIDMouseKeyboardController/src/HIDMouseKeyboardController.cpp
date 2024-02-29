@@ -8,17 +8,10 @@ HIDMouseKeyboardController::HIDMouseKeyboardController(HID *driver)
 }
 
 bool HIDMouseKeyboardController::is_connected() {
-  return HIDKeyboardController::is_connected() ||
-         HIDMouseController::is_connected();
+  return HIDKeyboardController::is_connected() || HIDMouseController::is_connected();
 }
 
-void HIDMouseKeyboardController::Parse(HID *hid, uint32_t is_rpt_id,
-                                       uint32_t len, uint8_t *buf) {
-  /*Serial1.print("USB ");
-  for (uint32_t i = 0; i < len; i++) {
-    Serial1.print(buf[i], 16);
-  }
-  Serial1.println("");*/
+void HIDMouseKeyboardController::Parse(HID *hid, uint32_t is_rpt_id, uint32_t len, uint8_t *buf) {
   if (len < 6) {
     HIDMouseController::Parse(hid, is_rpt_id, len, buf);
   } else {

@@ -7,8 +7,7 @@
 #include "HIDKeyboardController.h"
 #include "HIDMouseController.h"
 
-class HIDMouseKeyboardController : public HIDKeyboardController,
-                                   public HIDMouseController {
+class HIDMouseKeyboardController : public HIDKeyboardController, public HIDMouseController {
  public:
   HIDMouseKeyboardController(HID *driver);
 

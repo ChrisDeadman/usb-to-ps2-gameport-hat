@@ -22,8 +22,8 @@ MouseState HIDMouseController::pop_state() {
   return state_copy;
 }
 
-void HIDMouseController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
-                               uint32_t len, uint8_t *buf) {
+void HIDMouseController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */, uint32_t len,
+                               uint8_t *buf) {
   usb_data_received(buf, (uint8_t)len);
 
   if (len > 0) {

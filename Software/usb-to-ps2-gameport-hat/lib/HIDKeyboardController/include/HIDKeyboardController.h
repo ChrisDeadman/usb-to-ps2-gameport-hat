@@ -17,6 +17,7 @@ class HIDKeyboardController : virtual public HIDReportParser {
   uint8_t prev_state[KEYBOARD_KRO];
   KeyboardLeds led_state;
   KeyBuffer key_buffer;
+  uint8_t send_report_buffer[1] __attribute__((aligned(4)));
 
  public:
   HIDKeyboardController(HID *driver);

@@ -256,9 +256,7 @@ HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
 
 bool HIDKeyboardController::is_connected() { return driver->isReady(); }
 
-KeyboardModifierState HIDKeyboardController::get_modifier_state() {
-  return modifier_state;
-};
+KeyboardModifierState HIDKeyboardController::get_modifier_state() { return modifier_state; };
 
 KeyboardAction HIDKeyboardController::deq() {
   KeyboardAction kb_action;
@@ -276,17 +274,17 @@ void HIDKeyboardController::set_led_state(KeyboardLeds state) {
   }
   led_state = state;
 
-  uint8_t report_data = 0x0;
-  if (led_state & KbLedNumLock) report_data |= 0x1;
-  if (led_state & KbLedCapsLock) report_data |= 0x2;
-  if (led_state & KbLedScrollLock) report_data |= 0x4;
+  send_report_buffer[0] = 0;
+  if (led_state & KbLedNumLock) send_report_buffer[0] |= 0x1;
+  if (led_state & KbLedCapsLock) send_report_buffer[0] |= 0x2;
+  if (led_state & KbLedScrollLock) send_report_buffer[0] |= 0x4;
 
-  driver->SetReport(0, 0, 2, 0, 1, &report_data);
-  usb_data_sent(&report_data, 1);
+  driver->SetReport(0, 0, 2, 0, 1, send_report_buffer);
+  usb_data_sent(send_report_buffer, 1);
 }
 
-void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
-                                  uint32_t len, uint8_t *buf) {
+void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */, uint32_t len,
+                                  uint8_t *buf) {
   KeyboardAction kb_action;
 
   usb_data_received(buf, (uint8_t)len);
@@ -303,8 +301,7 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
     }
     if ((old_modifier_state & ModLeftShift) != (modifier_state & ModLeftShift)) {
       kb_action.code = LeftShift;
-      kb_action.type =
-          (modifier_state & ModLeftShift) ? KbActionMake : KbActionBreak;
+      kb_action.type = (modifier_state & ModLeftShift) ? KbActionMake : KbActionBreak;
       key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModLeftAlt) != (modifier_state & ModLeftAlt)) {
@@ -319,14 +316,12 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
     }
     if ((old_modifier_state & ModRightCtrl) != (modifier_state & ModRightCtrl)) {
       kb_action.code = RightControl;
-      kb_action.type =
-          (modifier_state & ModRightCtrl) ? KbActionMake : KbActionBreak;
+      kb_action.type = (modifier_state & ModRightCtrl) ? KbActionMake : KbActionBreak;
       key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightShift) != (modifier_state & ModRightShift)) {
       kb_action.code = RightShift;
-      kb_action.type =
-          (modifier_state & ModRightShift) ? KbActionMake : KbActionBreak;
+      kb_action.type = (modifier_state & ModRightShift) ? KbActionMake : KbActionBreak;
       key_buffer.enq(kb_action);
     }
     if ((old_modifier_state & ModRightAlt) != (modifier_state & ModRightAlt)) {
