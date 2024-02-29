@@ -25,10 +25,12 @@
 
 #define POT1_CS_PIN 10
 
-#define AXIS_TO_POT_VALUE(axis) (0xFF - (uint8_t)((axis) / 3))
-
 #define SETUP_ENTER_DELAY 1000
 #define SETUP_BLINK_WINDOW 1500
+
+#define JOY_AXIS_TEST(axis, positive)                \
+  ((positive) ? ((axis) >= (JOY_AXIS_CENTER + 0x30)) \
+              : ((axis) <= (JOY_AXIS_CENTER - 0x30)))
 
 #define XBOX_LED_FLASH_INTERVAL 10
 

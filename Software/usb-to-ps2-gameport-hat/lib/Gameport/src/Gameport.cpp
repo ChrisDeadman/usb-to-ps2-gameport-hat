@@ -1,9 +1,11 @@
 #include "Gameport.h"
 
+#define AXIS_TO_POT_VALUE(axis) (UINT8_MAX - (axis))
+
 static void spiTransfer(uint8_t csPin, uint8_t address, uint8_t data);
 
-Gameport::Gameport(uint8_t potCsPin, uint8_t button1Pin, uint8_t button2Pin,
-                   uint8_t button3Pin, uint8_t button4Pin)
+Gameport::Gameport(uint8_t potCsPin, uint8_t button1Pin, uint8_t button2Pin, uint8_t button3Pin,
+                   uint8_t button4Pin)
     : POT_CS_PIN(potCsPin),
       BUTTON1_PIN(button1Pin),
       BUTTON2_PIN(button2Pin),
@@ -29,8 +31,7 @@ void Gameport::init() {
   setAxes(0x80, 0x80, 0x80, 0x80);
 }
 
-void Gameport::setButtons(uint8_t button1, uint8_t button2, uint8_t button3,
-                          uint8_t button4) {
+void Gameport::setButtons(uint8_t button1, uint8_t button2, uint8_t button3, uint8_t button4) {
   digitalWrite(BUTTON1_PIN, button1 > 0 ? LOW : HIGH);
   digitalWrite(BUTTON2_PIN, button2 > 0 ? LOW : HIGH);
   digitalWrite(BUTTON3_PIN, button3 > 0 ? LOW : HIGH);
@@ -39,10 +40,10 @@ void Gameport::setButtons(uint8_t button1, uint8_t button2, uint8_t button3,
 
 void Gameport::setAxes(uint8_t axis1, uint8_t axis2, uint8_t axis3, uint8_t axis4) {
   SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
-  spiTransfer(POT_CS_PIN, W1_ADDRESS, axis1);
-  spiTransfer(POT_CS_PIN, W2_ADDRESS, axis2);
-  spiTransfer(POT_CS_PIN, W3_ADDRESS, axis3);
-  spiTransfer(POT_CS_PIN, W4_ADDRESS, axis4);
+  spiTransfer(POT_CS_PIN, W1_ADDRESS, AXIS_TO_POT_VALUE(axis1));
+  spiTransfer(POT_CS_PIN, W2_ADDRESS, AXIS_TO_POT_VALUE(axis2));
+  spiTransfer(POT_CS_PIN, W3_ADDRESS, AXIS_TO_POT_VALUE(axis3));
+  spiTransfer(POT_CS_PIN, W4_ADDRESS, AXIS_TO_POT_VALUE(axis4));
   SPI.endTransaction();
 }
 

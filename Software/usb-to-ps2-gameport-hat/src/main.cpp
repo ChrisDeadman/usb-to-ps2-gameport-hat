@@ -239,11 +239,12 @@ static void sync_ps2_mouse_state() {
 
 static void sync_gameport_state() {
   if (joy_state.changed) {
-    gameport.setAxes(
-        AXIS_TO_POT_VALUE(joy_state.axes[0]), AXIS_TO_POT_VALUE(joy_state.axes[1]),
-        AXIS_TO_POT_VALUE(joy_state.axes[2]), AXIS_TO_POT_VALUE(joy_state.axes[3]));
-    gameport.setButtons(joy_state.buttons[0], joy_state.buttons[1],
-                        joy_state.buttons[2], joy_state.buttons[3]);
+    gameport.setAxes(combine_axes(joy_state.axes[0], joy_state.axes[4]),
+                     combine_axes(joy_state.axes[1], joy_state.axes[5]),
+                     joy_state.axes[2], joy_state.axes[3]);
+    gameport.setButtons(
+        joy_state.buttons[0] | joy_state.buttons[6], joy_state.buttons[1] | joy_state.buttons[7],
+        joy_state.buttons[2] | joy_state.buttons[8], joy_state.buttons[3] | joy_state.buttons[9]);
   }
 }
 
