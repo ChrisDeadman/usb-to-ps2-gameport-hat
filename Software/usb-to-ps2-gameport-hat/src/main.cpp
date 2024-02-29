@@ -50,8 +50,7 @@ PS2Mouse ps2_mouse(&ps2_mouse_port);
 MouseState ps2_mouse_state;
 
 #include "Gameport.h"
-Gameport gameport(POT1_CS_PIN, JOY_BUTTON1_PIN, JOY_BUTTON2_PIN, JOY_BUTTON3_PIN,
-                  JOY_BUTTON4_PIN);
+Gameport gameport(POT1_CS_PIN, JOY_BUTTON1_PIN, JOY_BUTTON2_PIN, JOY_BUTTON3_PIN, JOY_BUTTON4_PIN);
 
 #include "VirtualJoystick.h"
 #include "VirtualKeyboard.h"
@@ -68,9 +67,8 @@ uint8_t num_joys_connected = 0;
 SetupMode setup_mode(&virtual_keyboard, &joy_state);
 
 #include "Logging.h"
-Logging logging(&usb_mouse_keyboard, &usb_keyboard, &usb_mouse, &mouse_state,
-                &joy_state, &num_joys_connected, &ps2_keyboard, &ps2_mouse,
-                &setup_mode);
+Logging logging(&usb_mouse_keyboard, &usb_keyboard, &usb_mouse, &mouse_state, &joy_state,
+                &num_joys_connected, &ps2_keyboard, &ps2_mouse, &setup_mode);
 
 static void sync_usb_keyboard_state();
 static void sync_usb_mouse_state();
@@ -205,8 +203,7 @@ static void sync_usb_joystick_state() {
       num_joys_connected += 1;
       bool is_player_1 = num_joys_connected < 2;
       device_state = joy_mappers[mapper_idx]->pop_state(device_idx);
-      virtual_joystick.update_state(&device_state, is_player_1,
-                                    setup_mode.swap_joy_axis_3_and_4);
+      virtual_joystick.update_state(&device_state, is_player_1, setup_mode.swap_joy_axis_3_and_4);
       // in setup-mode, set LEDs of supporting joysticks
       if (setup_mode.in_setup_mode) {
         joy_mappers[mapper_idx]->set_led_state(joy_leds);
@@ -240,8 +237,8 @@ static void sync_ps2_mouse_state() {
 static void sync_gameport_state() {
   if (joy_state.changed) {
     gameport.setAxes(combine_axes(joy_state.axes[0], joy_state.axes[4]),
-                     combine_axes(joy_state.axes[1], joy_state.axes[5]),
-                     joy_state.axes[2], joy_state.axes[3]);
+                     combine_axes(joy_state.axes[1], joy_state.axes[5]), joy_state.axes[2],
+                     joy_state.axes[3]);
     gameport.setButtons(
         joy_state.buttons[0] | joy_state.buttons[6], joy_state.buttons[1] | joy_state.buttons[7],
         joy_state.buttons[2] | joy_state.buttons[8], joy_state.buttons[3] | joy_state.buttons[9]);
@@ -290,12 +287,11 @@ static void handle_device_emulation() {
 
 static void update_debug_led_state() {
   // EXT_LED1 indicates PS/2 status
-  digitalWrite(
-      EXT_LED1_PIN,
-      (ps2_keyboard_port.clock_enabled || ps2_keyboard_port.clock_inhibited ||
-       ps2_mouse_port.clock_enabled || ps2_mouse_port.clock_inhibited)
-          ? LOW
-          : HIGH);
+  digitalWrite(EXT_LED1_PIN,
+               (ps2_keyboard_port.clock_enabled || ps2_keyboard_port.clock_inhibited ||
+                ps2_mouse_port.clock_enabled || ps2_mouse_port.clock_inhibited)
+                   ? LOW
+                   : HIGH);
 
   // EXT_LED2 indicates button press
   bool button_pressed = false;
@@ -308,7 +304,7 @@ static void update_debug_led_state() {
     // or highest axis value
     uint8_t highest_axis_value = 0;
     for (uint8_t axis = 0; axis < JoystickState::NUM_AXES; axis++) {
-      uint8_t axisValue = abs((int16_t)joy_state.axes[axis] - 0x80);
+      uint8_t axisValue = abs((int16_t)joy_state.axes[axis] - JOY_AXIS_CENTER);
       if (axisValue > highest_axis_value) {
         highest_axis_value = axisValue;
       }

@@ -25,35 +25,53 @@
 
 #define POT1_CS_PIN 10
 
-#define SETUP_ENTER_DELAY 1000
-#define SETUP_BLINK_WINDOW 1500
+#define AXIS_TO_POT_VALUE(axis) (0xFF - (uint8_t)((axis) / 3))
 
-#define JOY_AXIS_TEST(axis, positive)                \
-  ((positive) ? ((axis) >= (JOY_AXIS_CENTER + 0x30)) \
-              : ((axis) <= (JOY_AXIS_CENTER - 0x30)))
+#define JOY_AXIS_TEST(axis, positive) \
+  ((positive) ? ((axis) >= (JOY_AXIS_CENTER + 0x30)) : ((axis) <= (JOY_AXIS_CENTER - 0x30)))
 
-#define XBOX_LED_FLASH_INTERVAL 10
+#define JOY_AXIS_SET(axis, positive) \
+  ((positive) ? ((axis) = (JOY_AXIS_CENTER + 0x50)) : ((axis) = (JOY_AXIS_CENTER - 0x50)))
+
+#define SETUP_ENTER_DELAY 1500
+#define SETUP_BLINK_WINDOW 1750
+
+#define XBOX_LED_HACK_INTERVAL 10
 
 #define MOUSE_EMU_SPEED 5
 
-#define NUM_KB_EMU_MAPPINGS 16
+#define NUM_KB_EMU_AXIS_MAPPINGS 12
+#define NUM_KB_EMU_BTN_MAPPINGS 10
 
 // clang-format off
-static const KeyboardCodes KB_EMU_MAPPINGS[NUM_KB_EMU_MAPPINGS][2] = {
+static const KeyboardCodes KB_EMU_AXIS_MAPPINGS[NUM_KB_EMU_AXIS_MAPPINGS][2] = {
     {LeftArrow,     Keypad4Left},
     {RightArrow,    Keypad6Right},
     {UpArrow,       Keypad8Up},
     {DownArrow,     Keypad2Down},
+    //
     {aA,            NoKey},
     {dD,            NoKey},
     {wW,            NoKey},
     {sS,            NoKey},
+    //
+    {LeftArrow,     Keypad4Left},
+    {RightArrow,    Keypad6Right},
+    {UpArrow,       Keypad8Up},
+    {DownArrow,     Keypad2Down},
+};
+static const KeyboardCodes KB_EMU_BTN_MAPPINGS[NUM_KB_EMU_BTN_MAPPINGS][2] = {
     {LeftControl,   RightControl},
     {Space,         RightShift},
     {LeftAlt,       CapsLock},
     {LeftShift,     NoKey},
+    //
     {PeriodGreater, NoKey},
     {CommaLess,     NoKey},
+    //
+    {UpArrow,       Keypad8Up},
+    {DownArrow,     Keypad2Down},
+    //
     {Escape,        NoKey},
     {Tab,           NoKey},
 };

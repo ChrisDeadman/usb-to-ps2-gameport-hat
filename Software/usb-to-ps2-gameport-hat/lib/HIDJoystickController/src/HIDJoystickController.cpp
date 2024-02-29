@@ -22,11 +22,11 @@ HIDJoystickControllerState HIDJoystickController::pop_state() {
   return state_copy;
 }
 
-void HIDJoystickController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
-                                  uint32_t len, uint8_t *buf) {
+void HIDJoystickController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */, uint32_t len,
+                                  uint8_t *buf) {
   usb_data_received(buf, (uint8_t)len);
 
-  memset(state.axes, 0x80, HIDJoystickControllerState::NUM_AXES);
+  memset(state.axes, JOY_AXIS_CENTER, HIDJoystickControllerState::NUM_AXES);
   memset(state.buttons, 0, HIDJoystickControllerState::NUM_BUTTONS);
   memset(state.hats, 0, HIDJoystickControllerState::NUM_HATS);
 
@@ -43,20 +43,20 @@ void HIDJoystickController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
     // axes
     if (desc->usage >= 0x30 && desc->usage <= 0x38) {
       uint32_t outputSize = HIDJoystickControllerState::NUM_AXES - axisIdx;
-      axisIdx += hidParser.parseHidDataBlock(desc, buf, &bufIdx, &bitIdx,
-                                             &state.axes[axisIdx], outputSize);
+      axisIdx += hidParser.parseHidDataBlock(desc, buf, &bufIdx, &bitIdx, &state.axes[axisIdx],
+                                             outputSize);
     }
     // HAT
     else if (desc->usage == 0x39) {
       uint32_t outputSize = HIDJoystickControllerState::NUM_HATS - hatIdx;
-      hatIdx += hidParser.parseHidDataBlock(desc, buf, &bufIdx, &bitIdx,
-                                            &state.hats[hatIdx], outputSize);
+      hatIdx +=
+          hidParser.parseHidDataBlock(desc, buf, &bufIdx, &bitIdx, &state.hats[hatIdx], outputSize);
     }
     // buttons
     else if (desc->usagePage == 0x09) {
       uint32_t outputSize = HIDJoystickControllerState::NUM_BUTTONS - buttonIdx;
-      buttonIdx += hidParser.parseHidDataBlock(
-          desc, buf, &bufIdx, &bitIdx, &state.buttons[buttonIdx], outputSize);
+      buttonIdx += hidParser.parseHidDataBlock(desc, buf, &bufIdx, &bitIdx,
+                                               &state.buttons[buttonIdx], outputSize);
     }
     // parse but ignore other blocks
     else {
@@ -67,8 +67,7 @@ void HIDJoystickController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */,
   state.changed = true;
 };
 
-uint32_t HIDJoystickController::Init(uint32_t parent, uint32_t port,
-                                     uint32_t lowspeed) {
+uint32_t HIDJoystickController::Init(uint32_t parent, uint32_t port, uint32_t lowspeed) {
   uint32_t rcode = HIDUniversal::Init(parent, port, lowspeed);
   if (rcode) return rcode;
 

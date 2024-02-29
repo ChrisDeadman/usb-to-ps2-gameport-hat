@@ -6,12 +6,19 @@
 #include "SoftTimer.h"
 #include "VirtualKeyboard.h"
 
-enum SetupKeys : uint8_t {
+enum SetupKeys : uint16_t {
   SetupKeyNone = 0x0,
   SetupKeySetup = 0x01,
   SetupKeySelect = 0x02,
   SetupKeyLeft = 0x04,
   SetupKeyRight = 0x08,
+  SetupKeyQuick0 = 0x1000,
+  SetupKeyQuick1 = 0x1100,
+  SetupKeyQuick2 = 0x1200,
+  SetupKeyQuick3 = 0x1300,
+  SetupKeyQuick4 = 0x1400,
+  SetupKeyQuick5 = 0x1500,
+  SetupKeyQuick6 = 0x1600
 };
 
 enum EmuMode : uint8_t {
@@ -51,6 +58,7 @@ class SetupMode {
   void set_led_state(bool led1, bool led2);
   uint8_t get_item_value();
   void set_item_value(int8_t delta);
+  bool set_item_value_quick(SetupKeys keys);
 };
 
 #endif  // _SETUP_MODE_H_

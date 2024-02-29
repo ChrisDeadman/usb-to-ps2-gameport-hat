@@ -2,6 +2,7 @@
 #define HID_JOYSTICK_CONTROLLER_H
 
 #include <hiduniversal.h>
+
 #include "HIDDescriptionParser.h"
 #include "HIDJoystickControllerState.h"
 

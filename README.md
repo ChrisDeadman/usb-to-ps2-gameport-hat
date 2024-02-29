@@ -55,54 +55,62 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 
 | Setting               | LED1 Blinks | Values / LED2 Blinks                 | Default |
 |:----------------------|:-----------:|:-------------------------------------|:-------:|
-| Swap joy axis 3 and 4 | 1           | **ON** / **OFF**                     | OFF     |
-| Emulation Mode        | 2           | **OFF**                              | OFF     |
+| Emulation Mode        | 1           | **OFF**                              | OFF     |
 |                       |             | **1**  Joystick -> Keyboard          |         |
 |                       |             | **2**  Joystick -> Mouse             |         |
 |                       |             | **3**  Keyboard -> Joystick          |         |
 |                       |             | **4**  Keyboard -> Mouse             |         |
-|                       |             | **ON** Mouse    -> Joystick          |         |
+|                       |             | **5**  Mouse    -> Joystick          |         |
+| Swap joy axis 3 and 4 | 2           | **ON** / **OFF**                     | OFF     |
 
 ## Bindings
 
 ### Setup Mode
 
-| Keyboard        | Joystick / Gamepad            | Function                                   |
-|:----------------|:------------------------------|:-------------------------------------------|
-| CTRL+SHIFT+WIN  | Button 5 / R1 + Button 6 / L1 | Hold for 1s to enter/exit setup mode       |
-| Return          | Button 1 / A                  | Edit setting / exit edit mode              |
-| Right Arrow     | Button 5 / R1                 | Next setting / increase value (edit mode)  |
-| Left Arrow      | Button 6 / L1                 | Prev. setting / decrease value (edit mode) |
+| Keyboard        | Joystick / Gamepad            | Function                                          |
+|:----------------|:------------------------------|:--------------------------------------------------|
+| CTRL+SHIFT+WIN  | Button 5 / R1 + Button 6 / L1 | Hold for 1.5s to enter/exit setup mode            |
+| Return          | Button 1 / A                  | Edit setting / exit edit mode                     |
+| Right Arrow     | X-Axis 1 / D-PAD Right        | Next setting / increase value (edit mode)         |
+| Left Arrow      | X-Axis 1 / D-PAD Left         | Prev. setting / decrease value (edit mode)        |
+| ESC             | Button 9 / SELECT             | Apply Default Settings and exit setup mode        |
+| F1              | -                             | Set Emulation Mode #1 and exit setup mode         |
+| F2              | -                             | Set Emulation Mode #2 and exit setup mode         |
+| F3              | -                             | Set Emulation Mode #3 and exit setup mode         |
+| F4              | -                             | Set Emulation Mode #4 and exit setup mode         |
+| F5              | -                             | Set Emulation Mode #5 and exit setup mode         |
+| F6              | -                             | Set Emulation Mode #6 and exit setup mode         |
+| F7              | -                             | Toggle Swap joy axis 3 and 4 and exit setup mode  |
 
 ### Joystick / Gamepad Mappings
 
-| Joystick 1        | Joystick 2        | Gameport |
-|:------------------|:------------------|:---------|
-| X-Axis 1 / D-Pad  | -                 | X-Axis 1 |
-| Y-Axis 1 / D-Pad  | -                 | Y-Axis 1 |
-| X-Axis 2          | X-Axis 1 / D-Pad  | X-Axis 2 |
-| Y-Axis 2          | Y-Axis 2 / D-Pad  | Y-Axis 2 |
-| Button 1 / A / R2 | -                 | Button 1 |
-| Button 2 / B / L2 | -                 | Button 2 |
-| Button 3 / X      | Button 1 / A / R2 | Button 3 |
-| Button 4 / Y      | Button 2 / B / L2 | Button 4 |
+| Joystick 1            | Joystick 2        | Gameport |
+|:----------------------|:------------------|:---------|
+| X-Axis 1 / D-Pad      | -                 | X-Axis 1 |
+| Y-Axis 1 / D-Pad      | -                 | Y-Axis 1 |
+| X-Axis 2              | X-Axis 1 / D-Pad  | X-Axis 2 |
+| Y-Axis 2              | Y-Axis 2 / D-Pad  | Y-Axis 2 |
+| Button 1 / A / R2     | -                 | Button 1 |
+| Button 2 / B / L2     | -                 | Button 2 |
+| Button 3 / X / Select | Button 1 / A / R2 | Button 3 |
+| Button 4 / Y / Start  | Button 2 / B / L2 | Button 4 |
 
 ### Emulation Mode Mappings
 
-| Keyboard            | Mouse       | Joystick          | Gameport |
-|:--------------------|:------------|:------------------|:---------|
-| Left / Right Arrow  | X-Axis      | X-Axis 1 / D-Pad  | X-Axis 1 |
-| Up / Down Arrow     | Y-Axis      | Y-Axis 1 / D-Pad  | Y-Axis 1 |
-| A / D               | -           | X-Axis 2          | X-Axis 2 |
-| W / S               | ScrollWheel | Y-Axis 2          | Y-Axis 2 |
-| L-Ctrl / R-Ctrl     | Button 1    | Button 1 / A / R2 | Button 1 |
-| Space / R-Shift     | Button 2    | Button 2 / B / L2 | Button 2 |
-| L-Alt / CapsLock    | Button 3    | Button 3 / X      | Button 3 |
-| L-Shift             | Button 4    | Button 4 / Y      | Button 4 |
-| Period              | -           | Button 5 / R1     | -        |
-| Comma               | -           | Button 6 / L1     | -        |
-| Escape              | Button 5    | Button 7 / SELECT | -        |
-| Tab                 | -           | Button 8 / START  | -        |
+| Keyboard            | Mouse       | Joystick                      | Gameport |
+|:--------------------|:------------|:------------------------------|:---------|
+| Left / Right Arrow  | X-Axis      | X-Axis 1 / D-Pad              | X-Axis 1 |
+| Up / Down Arrow     | Y-Axis      | Y-Axis 1 / D-Pad / R2 / L2    | Y-Axis 1 |
+| A / D               | -           | X-Axis 2                      | X-Axis 2 |
+| W / S               | ScrollWheel | Y-Axis 2                      | Y-Axis 2 |
+| L-Ctrl / R-Ctrl     | Button 1    | Button 1 / A                  | Button 1 |
+| Space / R-Shift     | Button 2    | Button 2 / B                  | Button 2 |
+| L-Alt / CapsLock    | Button 3    | Button 3 / X                  | Button 3 |
+| L-Shift             | Button 4    | Button 4 / Y                  | Button 4 |
+| Period              | Button 5    | Button 5 / R1                 | -        |
+| Comma               | -           | Button 6 / L1                 | -        |
+| Escape              | -           | Button 9 / SELECT             | -        |
+| Tab                 | -           | Button 10 / START             | -        |
 
 ## Developer Notes
 
@@ -121,8 +129,9 @@ Release notes
 ### Usb => PS/2 & Gameport HAT v1.4 DRAFT
 * Add keyboard support
 * Add device emulation modes
+* @Ulfenknulfen: Fix Joy Axes hardware bug which limited axes range and fixes calibration issues
 * Rework and document setup mode
-* Rework device state combining
+* Rework device input combining
 * Always signal inhibited state with LED1
 * Improve serial logging
 

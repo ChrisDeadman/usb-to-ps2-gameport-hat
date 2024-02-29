@@ -1,7 +1,6 @@
 #include "HIDJoystickControllerMapper.h"
 
-HIDJoystickControllerMapper::HIDJoystickControllerMapper(
-    HIDJoystickController* driver)
+HIDJoystickControllerMapper::HIDJoystickControllerMapper(HIDJoystickController* driver)
     : driver(driver) {}
 
 uint8_t HIDJoystickControllerMapper::get_num_connected_devices() {
@@ -22,14 +21,16 @@ JoystickState HIDJoystickControllerMapper::pop_state(uint8_t /* idx */) {
   state.axes[3] = driver_state.axes[3 % NUM_AXES];
 
   // Digital axes
-  if ((driver_state.hats[0] >= 1) && (driver_state.hats[0] <= 3))  // LEFT
-    state.axes[0] = UINT8_MAX;
-  if ((driver_state.hats[0] >= 5) && (driver_state.hats[0] <= 7))  // RIGHT
-    state.axes[0] = 0;
-  if ((driver_state.hats[0] >= 3) && (driver_state.hats[0] <= 5))  // UP
-    state.axes[1] = UINT8_MAX;
-  if ((driver_state.hats[0] == 7) || (driver_state.hats[0] <= 1))  // DOWN
-    state.axes[1] = 0;
+  state.axes[4] = JOY_AXIS_CENTER;
+  state.axes[5] = JOY_AXIS_CENTER;
+  if ((driver_state.hats[0] >= 1) && (driver_state.hats[0] <= 3))  // RIGHT
+    state.axes[4] = UINT8_MAX;
+  if ((driver_state.hats[0] >= 5) && (driver_state.hats[0] <= 7))  // LEFT
+    state.axes[4] = 0;
+  if ((driver_state.hats[0] >= 3) && (driver_state.hats[0] <= 5))  // DOWN
+    state.axes[5] = UINT8_MAX;
+  if ((driver_state.hats[0] == 7) || (driver_state.hats[0] <= 1))  // UP
+    state.axes[5] = 0;
 
   // Buttons
   state.buttons[0] = driver_state.buttons[0 % NUM_BUTTONS];
@@ -40,6 +41,8 @@ JoystickState HIDJoystickControllerMapper::pop_state(uint8_t /* idx */) {
   state.buttons[5] = driver_state.buttons[5 % NUM_BUTTONS];
   state.buttons[6] = driver_state.buttons[6 % NUM_BUTTONS];
   state.buttons[7] = driver_state.buttons[7 % NUM_BUTTONS];
+  state.buttons[8] = driver_state.buttons[8 % NUM_BUTTONS];
+  state.buttons[9] = driver_state.buttons[9 % NUM_BUTTONS];
 
   state.changed = driver_state.changed;
 

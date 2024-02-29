@@ -49,9 +49,7 @@ void usb_data_sent(const uint8_t* data, uint8_t length) {
  */
 void ps2_data_received(uint8_t pin, uint8_t data_byte, bool valid) {
   t_ps2_last_received = t_current;
-  log_buffer->concat("P%u< ", pin)
-      ->concat("%02X", data_byte)
-      ->concatln(valid ? "" : "!!");
+  log_buffer->concat("P%u< ", pin)->concat("%02X", data_byte)->concatln(valid ? "" : "!!");
 }
 
 /**
@@ -71,9 +69,8 @@ static void print_and_flush_buffer() {
 }
 
 Logging::Logging(HIDMouseKeyboardController* const usb_mouse_keyboard,
-                 HIDKeyboardController* const usb_keyboard,
-                 HIDMouseController* const usb_mouse, MouseState* const mouse_state,
-                 JoystickState* const joystick_state,
+                 HIDKeyboardController* const usb_keyboard, HIDMouseController* const usb_mouse,
+                 MouseState* const mouse_state, JoystickState* const joystick_state,
                  uint8_t* const num_joys_connected, PS2Keyboard* const ps2_keyboard,
                  PS2Mouse* const ps2_mouse, SetupMode* const setup_mode)
     : usb_mouse_keyboard(usb_mouse_keyboard),
@@ -126,10 +123,8 @@ void Logging::log_status() {
   log_buffer->concatln("╠");
   log_buffer->concat("║time: ")->concatln("%lu", t_current);
   log_buffer->concatln("╠");
-  log_buffer->concat("║ext led1: ")
-      ->concatln("%u", digitalRead(EXT_LED1_PIN) == LOW);
-  log_buffer->concat("║ext led2: ")
-      ->concatln("%u", digitalRead(EXT_LED2_PIN) == LOW);
+  log_buffer->concat("║ext led1: ")->concatln("%u", digitalRead(EXT_LED1_PIN) == LOW);
+  log_buffer->concat("║ext led2: ")->concatln("%u", digitalRead(EXT_LED2_PIN) == LOW);
   log_buffer->concatln("╠══════════╗");
   log_buffer->concatln("║ Settings ║");
   log_buffer->concatln("╠══════════╝");
@@ -140,12 +135,9 @@ void Logging::log_status() {
   log_buffer->concatln("╠════════════╗");
   log_buffer->concatln("║ USB status ║");
   log_buffer->concatln("╠════════════╝");
-  log_buffer->concat("║kbd+mouse connected: ")
-      ->concatln("%u", usb_mouse_keyboard->is_connected());
-  log_buffer->concat("║keyboard connected:  ")
-      ->concatln("%u", usb_keyboard->is_connected());
-  log_buffer->concat("║mouse connected:     ")
-      ->concatln("%u", usb_mouse->is_connected());
+  log_buffer->concat("║kbd+mouse connected: ")->concatln("%u", usb_mouse_keyboard->is_connected());
+  log_buffer->concat("║keyboard connected:  ")->concatln("%u", usb_keyboard->is_connected());
+  log_buffer->concat("║mouse connected:     ")->concatln("%u", usb_mouse->is_connected());
   log_buffer->concat("║#joysticks/gamepads: ")->concatln("%u", *num_joys_connected);
   log_buffer->concatln("╠");
   log_buffer->concat("║last received time: ")->concatln("%lu", t_usb_last_received);
@@ -158,10 +150,8 @@ void Logging::log_status() {
   log_buffer->concatln("╠══════════════════════╗");
   log_buffer->concatln("║ PS/2 keyboard status ║");
   log_buffer->concatln("╠══════════════════════╝");
-  log_buffer->concat("║clock: ")
-      ->concatln("%u", digitalRead(ps2_keyboard->port->clock_pin));
-  log_buffer->concat("║data:  ")
-      ->concatln("%u", digitalRead(ps2_keyboard->port->data_pin));
+  log_buffer->concat("║clock: ")->concatln("%u", digitalRead(ps2_keyboard->port->clock_pin));
+  log_buffer->concat("║data:  ")->concatln("%u", digitalRead(ps2_keyboard->port->data_pin));
   log_buffer->concatln("╠");
   log_buffer->concat("║last inhibit time:  ")
       ->concatln("%lu", ps2_keyboard->get_time_last_inhibit());
@@ -172,15 +162,11 @@ void Logging::log_status() {
   log_buffer->concatln("╠═══════════════════╝");
   log_buffer->concat("║device id: ")->concatln("%d", ps2_mouse->get_device_id());
   log_buffer->concatln("╠");
-  log_buffer->concat("║clock: ")
-      ->concatln("%u", digitalRead(ps2_mouse->port->clock_pin));
-  log_buffer->concat("║data:  ")
-      ->concatln("%u", digitalRead(ps2_mouse->port->data_pin));
+  log_buffer->concat("║clock: ")->concatln("%u", digitalRead(ps2_mouse->port->clock_pin));
+  log_buffer->concat("║data:  ")->concatln("%u", digitalRead(ps2_mouse->port->data_pin));
   log_buffer->concatln("╠");
-  log_buffer->concat("║last inhibit time:  ")
-      ->concatln("%lu", ps2_mouse->get_time_last_inhibit());
-  log_buffer->concat("║last host RTS time: ")
-      ->concatln("%lu", ps2_mouse->get_time_last_host_rts());
+  log_buffer->concat("║last inhibit time:  ")->concatln("%lu", ps2_mouse->get_time_last_inhibit());
+  log_buffer->concat("║last host RTS time: ")->concatln("%lu", ps2_mouse->get_time_last_host_rts());
   log_buffer->concatln("╠");
   log_buffer->concat("║buttons: ");
   for (uint8_t button = 0; button < MouseState::NUM_BUTTONS; button++) {
@@ -200,5 +186,5 @@ void Logging::log_status() {
     log_buffer->concat("%02X ", joy_state->axes[axis]);
   }
   log_buffer->concatln("");
-  log_buffer->concatln("╚════════════════════╝");
+  log_buffer->concatln("╚══════════════════════════╝");
 }
