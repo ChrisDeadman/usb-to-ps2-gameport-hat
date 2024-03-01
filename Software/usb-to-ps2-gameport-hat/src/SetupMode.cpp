@@ -2,16 +2,11 @@
 
 #include "Config.h"
 
-#define PRESSED(key) (!(old_key_state & (key)) && (key_state & (key)))
-
 static bool get_led_blink(unsigned long t_delta, uint8_t count);
 
 SetupMode::SetupMode(VirtualKeyboard* const keyboard, JoystickState* const joystick_state)
     : keyboard(keyboard), joystick_state(joystick_state) {
-  key_state = SetupKeyNone;
-  item_idx = 0;
-  in_setup_mode = false;
-  in_edit_mode = false;
+  reset_state();
   swap_joy_axis_3_and_4 = false;
   emu_mode = EmuModeNone;
 }
@@ -21,21 +16,19 @@ void SetupMode::task() {
   blink_timer.tick();
 
   // menu buttons
-  SetupKeys old_key_state = key_state;
-  key_state = get_key_state();
+  SetupKeys new_key_state = get_key_state();
 
   // setup mode is triggered by holding down the setup key(s) for a duration
-  if (!(key_state & SetupKeySetup)) {
+  if (!(new_key_state & SetupKeySetup)) {
     setup_mode_timer.reset();
   }
   if (setup_mode_timer.getElapsedMillis() > SETUP_ENTER_DELAY) {
-    in_setup_mode = !in_setup_mode;
-    in_edit_mode = false;
-    key_state = SetupKeyNone;
-    set_led_state(in_setup_mode, in_setup_mode);
-    setup_mode_timer.reset();
-    blink_timer.reset();
-    return;
+    if (!in_setup_mode) {
+      reset_state();
+      in_setup_mode = true;
+    } else {
+      reset_state();
+    }
   }
 
   // do nothing if not in setup mode
@@ -43,22 +36,26 @@ void SetupMode::task() {
     return;
   }
 
+  // detect new key states and clear them immediately
+  SetupKeys key_state = (SetupKeys)((uint16_t)new_key_state & ~(uint16_t)prev_key_state);
+  prev_key_state = new_key_state;
+
+  // handle quick-keys
   if (set_item_value_quick(key_state)) {
-    in_setup_mode = false;
-    setup_mode_timer.reset();
+    reset_state();
     return;
   }
 
   // toggle edit mode
-  if (PRESSED(SetupKeySelect)) {
+  if (key_state & SetupKeySelect) {
     in_edit_mode = !in_edit_mode;
     return;
   }
 
   // left and right
   int8_t delta = 0;
-  delta -= PRESSED(SetupKeyLeft) ? 1 : 0;
-  delta += PRESSED(SetupKeyRight) ? 1 : 0;
+  delta -= (key_state & SetupKeyLeft) ? 1 : 0;
+  delta += (key_state & SetupKeyRight) ? 1 : 0;
 
   // switch through setup items
   if (!in_edit_mode) {
@@ -69,7 +66,7 @@ void SetupMode::task() {
   }
 
   // update item value
-  if (in_edit_mode && delta != 0) {
+  if (in_edit_mode && (delta != 0)) {
     set_item_value(delta);
   }
 
@@ -91,18 +88,33 @@ void SetupMode::task() {
   uint8_t item_value = get_item_value();
   bool led2 = get_led_blink(blink_elapsed, item_value);
 
-  // do not blink both leds simultaniously
-  if (!in_edit_mode && (item_value > 0)) {
-    led2 = true;
+  if (in_edit_mode) {
+    // LED1 is off in edit mode if LED2 is blinking
+    if (item_value) {
+      led1 = false;
+    }
+    // do not blink LED2 too fast
+    if (item_value > 5) {
+      led2 = true;
+    }
   }
-
-  // do not blink too fast
-  if (in_edit_mode && (item_value > 5)) {
-    led2 = true;
+  // LED2 is off if not in edit mode
+  else {
+    led2 = false;
   }
 
   // update led state
   set_led_state(led1, led2);
+}
+
+void SetupMode::reset_state() {
+  prev_key_state = SetupKeyNone;
+  item_idx = 0;
+  in_setup_mode = false;
+  in_edit_mode = false;
+  setup_mode_timer.reset();
+  blink_timer.reset();
+  set_led_state(false, false);
 }
 
 SetupKeys SetupMode::get_key_state() {
@@ -257,12 +269,13 @@ bool SetupMode::set_item_value_quick(SetupKeys key_state) {
 }
 
 static bool get_led_blink(unsigned long t_delta, uint8_t count) {
-  unsigned long window = SETUP_BLINK_WINDOW >> 1;
-  if ((count < 1) || (t_delta > window)) {
+  unsigned long window = SETUP_BLINK_WINDOW * 0.75;
+  unsigned long phase_count = count << 1;
+  if (phase_count < 2) {
     return false;
   }
 
-  unsigned long blink_duration = (window << 1) / count;
-  unsigned long blink_phase = (t_delta << 1) % blink_duration;
-  return blink_phase > (blink_duration >> 1);
+  unsigned long blink_period = window / phase_count;
+  unsigned long blink_phase = t_delta / blink_period;
+  return ((blink_phase % 2) == 0) && (blink_phase < phase_count);
 }

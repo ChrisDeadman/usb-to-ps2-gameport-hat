@@ -31,9 +31,9 @@
 #define JOY_AXIS_SET(axis, positive) \
   ((positive) ? ((axis) = (JOY_AXIS_CENTER + 0x50)) : ((axis) = (JOY_AXIS_CENTER - 0x50)))
 
-#define LED_UPDATE_INTERVAL 25
+#define LED_UPDATE_INTERVAL 10
 
-#define SETUP_ENTER_DELAY 1500
+#define SETUP_ENTER_DELAY 1250
 #define SETUP_BLINK_WINDOW 1750
 
 #define MOUSE_EMU_SPEED 5

@@ -50,7 +50,7 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 
 ### Setup Mode
 
-* **LED1/CapsLock** blink count indicates the current setting, on while in edit mode.
+* **LED1/CapsLock** blink count indicates the current setting.
 * **LED2/NumLock/ScrollLock** blink count indicates the value of the current setting, blinks only in edit mode.
 
 | Setting               | LED1 Blinks | Values / LED2 Blinks                 | Default |

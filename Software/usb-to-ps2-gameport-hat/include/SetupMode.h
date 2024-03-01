@@ -34,13 +34,13 @@ class SetupMode {
  private:
   VirtualKeyboard *const keyboard;
   JoystickState *const joystick_state;
-  SetupKeys key_state;
-
-  SoftTimer setup_mode_timer;
-  SoftTimer blink_timer;
 
   const uint8_t item_count = 2;
   uint8_t item_idx;
+  SetupKeys prev_key_state;
+
+  SoftTimer setup_mode_timer;
+  SoftTimer blink_timer;
 
  public:
   SetupMode(VirtualKeyboard *const keyboard, JoystickState *const joystick_state);
@@ -54,6 +54,7 @@ class SetupMode {
   void task();
 
  private:
+  void reset_state();
   SetupKeys get_key_state();
   void set_led_state(bool led1, bool led2);
   uint8_t get_item_value();
