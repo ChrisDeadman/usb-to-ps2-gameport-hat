@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 enum JoystickLeds : uint8_t {
+  JoyLedDefault = 0xFF,
   JoyLedNone = 0x0,
   JoyLed1 = 0x1,
   JoyLed2 = 0x2

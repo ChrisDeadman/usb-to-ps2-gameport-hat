@@ -70,6 +70,9 @@ SetupMode setup_mode(&virtual_keyboard, &joy_state);
 Logging logging(&usb_mouse_keyboard, &usb_keyboard, &usb_mouse, &mouse_state, &joy_state,
                 &num_joys_connected, &ps2_keyboard, &ps2_mouse, &setup_mode);
 
+#include "SoftTimer.h"
+SoftTimer led_timer;
+
 static void sync_usb_keyboard_state();
 static void sync_usb_mouse_state();
 static void sync_usb_joystick_state();
@@ -100,7 +103,9 @@ void setup() {
 }
 
 void loop() {
+  // update timers
   watchdog.reset();
+  led_timer.tick();
 
   // handle PS/2 tasks
   ps2_keyboard.task();
@@ -138,9 +143,13 @@ void loop() {
   sync_ps2_mouse_state();
   sync_gameport_state();
 
-  // update LED state if not in setup mode
-  if (!setup_mode.in_setup_mode) {
-    update_debug_led_state();
+  // don't update LEDs too frequently
+  if (led_timer.getElapsedMillis() > LED_UPDATE_INTERVAL) {
+    if (!setup_mode.in_setup_mode) {
+      // update debug LED state if not in setup mode
+      update_debug_led_state();
+    }
+    led_timer.reset();
   }
 
   // handle logging
@@ -163,9 +172,11 @@ static void sync_usb_keyboard_state() {
   virtual_keyboard.update_modifier_state(usb_keyboard.get_modifier_state());
   virtual_keyboard.update_modifier_state(usb_mouse_keyboard.get_modifier_state());
 
-  KeyboardLeds led_state = virtual_keyboard.get_led_state();
-  usb_keyboard.set_led_state(led_state);
-  usb_mouse_keyboard.set_led_state(led_state);
+  if (led_timer.getElapsedMillis() > LED_UPDATE_INTERVAL) {
+    KeyboardLeds led_state = virtual_keyboard.get_led_state();
+    usb_keyboard.set_led_state(led_state);
+    usb_mouse_keyboard.set_led_state(led_state);
+  }
 }
 
 static void sync_usb_mouse_state() {
@@ -204,11 +215,13 @@ static void sync_usb_joystick_state() {
       bool is_player_1 = num_joys_connected < 2;
       device_state = joy_mappers[mapper_idx]->pop_state(device_idx);
       virtual_joystick.update_state(&device_state, is_player_1, setup_mode.swap_joy_axis_3_and_4);
-      // in setup-mode, set LEDs of supporting joysticks
-      if (setup_mode.in_setup_mode) {
-        joy_mappers[mapper_idx]->set_led_state(joy_leds);
-      } else {
-        joy_mappers[mapper_idx]->set_led_state(JoyLedNone);
+      if (led_timer.getElapsedMillis() > LED_UPDATE_INTERVAL) {
+        // in setup-mode, set LEDs of supporting joysticks
+        if (setup_mode.in_setup_mode) {
+          joy_mappers[mapper_idx]->set_led_state(joy_leds);
+        } else {
+          joy_mappers[mapper_idx]->set_led_state(JoyLedDefault);
+        }
       }
     }
   }

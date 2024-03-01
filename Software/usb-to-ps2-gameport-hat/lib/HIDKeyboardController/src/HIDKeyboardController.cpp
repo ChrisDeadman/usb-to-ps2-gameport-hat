@@ -268,11 +268,11 @@ KeyboardAction HIDKeyboardController::deq() {
   return kb_action;
 }
 
-void HIDKeyboardController::set_led_state(KeyboardLeds state) {
-  if (!is_connected() || state == led_state) {
+void HIDKeyboardController::set_led_state(KeyboardLeds new_state) {
+  if (!is_connected() || new_state == led_state) {
     return;
   }
-  led_state = state;
+  led_state = new_state;
 
   send_report_buffer[0] = 0;
   if (led_state & KbLedNumLock) send_report_buffer[0] |= 0x1;

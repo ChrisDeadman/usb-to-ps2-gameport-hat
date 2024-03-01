@@ -5,7 +5,7 @@
 #define CONVERT_AXIS_VALUE(x) (uint8_t)(((uint32_t)((x)-INT16_MIN) * UINT8_MAX) / (UINT16_MAX))
 
 XBOXRECVMapper::XBOXRECVMapper(XBOXRECV* driver)
-    : driver(driver), led_state(JoyLedNone), current_led_idx(0) {}
+    : driver(driver), led_state(JoyLedDefault), current_led_idx(0) {}
 
 uint8_t XBOXRECVMapper::get_num_connected_devices() {
   uint8_t num_connected = 0;
@@ -19,9 +19,6 @@ uint8_t XBOXRECVMapper::get_num_connected_devices() {
 
 JoystickState XBOXRECVMapper::pop_state(uint8_t idx) {
   JoystickState old_state = state[idx];
-
-  // Update LED state
-  update_led_state(idx);
 
   // Analog axes
   state[idx].axes[0] = CONVERT_AXIS_VALUE(driver->getAnalogHat(LeftHatX, idx));
@@ -66,30 +63,22 @@ JoystickState XBOXRECVMapper::pop_state(uint8_t idx) {
 }
 
 void XBOXRECVMapper::set_led_state(JoystickLeds new_state) {
-  // restore default LED state
-  if ((new_state != led_state) && (new_state == JoyLedNone)) {
+  if (new_state == led_state) {
+    return;
+  }
+
+  if (new_state == JoyLedDefault) {
     driver->setLedOn(LED1);
-  }
-  led_state = new_state;
-}
-
-void XBOXRECVMapper::update_led_state(uint8_t idx) {
-  // Only set LEDs on controller 0
-  if (idx != 0) {
-    return;
-  }
-
-  led_timer.tick();
-  if (led_timer.getElapsedMillis() < XBOX_LED_HACK_INTERVAL) {
-    return;
-  }
-  led_timer.reset();
-
-  if ((current_led_idx == 0) && (led_state & JoyLed1)) {
+    led_state = JoyLedDefault;
+  } else if ((current_led_idx == 0) && (new_state & JoyLed1)) {
+    driver->setLedOn(LED1);
+    led_state = JoyLed1;
+  } else if ((current_led_idx == 1) && (new_state & JoyLed2)) {
     driver->setLedOn(LED3);
-  }
-  if ((current_led_idx == 1) && (led_state & JoyLed2)) {
-    driver->setLedOn(LED4);
+    led_state = JoyLed2;
+  } else {
+    driver->setLedOff();
+    led_state = JoyLedNone;
   }
   current_led_idx += 1;
   if (current_led_idx > 1) {
