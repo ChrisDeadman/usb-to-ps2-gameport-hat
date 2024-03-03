@@ -35,7 +35,7 @@ class SetupMode {
   VirtualKeyboard *const keyboard;
   JoystickState *const joystick_state;
 
-  const uint8_t item_count = 2;
+  const uint8_t item_count = 3;
   uint8_t item_idx;
   SetupKeys prev_key_state;
 
@@ -48,8 +48,9 @@ class SetupMode {
   bool in_setup_mode;
   bool in_edit_mode;
 
-  bool swap_joy_axis_3_and_4;
   EmuMode emu_mode;
+  bool swap_joy_axis_3_and_4;
+  uint8_t mouse_emu_speed;
 
   void task();
 

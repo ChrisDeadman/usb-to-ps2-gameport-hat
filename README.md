@@ -62,6 +62,7 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 |                       |             | **4**  Keyboard -> Mouse             |         |
 |                       |             | **5**  Mouse    -> Joystick          |         |
 | Swap joy axis 3 and 4 | 2           | **ON** / **OFF**                     | OFF     |
+| Mouse Emu Speed       | 3           | **0 < n < 256**                      | 2       |
 
 ## Bindings
 

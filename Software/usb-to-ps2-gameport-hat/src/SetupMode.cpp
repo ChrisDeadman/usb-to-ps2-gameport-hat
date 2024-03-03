@@ -7,8 +7,9 @@ static bool get_led_blink(unsigned long t_delta, uint8_t count);
 SetupMode::SetupMode(VirtualKeyboard* const keyboard, JoystickState* const joystick_state)
     : keyboard(keyboard), joystick_state(joystick_state) {
   reset_state();
-  swap_joy_axis_3_and_4 = false;
   emu_mode = EmuModeNone;
+  swap_joy_axis_3_and_4 = SWAP_JOY_AXIS_3_AND_4_DEFAULT;
+  mouse_emu_speed = MOUSE_EMU_SPEED_DEFAULT;
 }
 
 void SetupMode::task() {
@@ -215,6 +216,8 @@ uint8_t SetupMode::get_item_value() {
       return emu_mode;
     case 1:
       return swap_joy_axis_3_and_4 ? UINT8_MAX : 0;
+    case 2:
+      return mouse_emu_speed;
     default:
       return 0;
   }
@@ -234,6 +237,11 @@ void SetupMode::set_item_value(int8_t delta) {
     case 1:
       swap_joy_axis_3_and_4 = !swap_joy_axis_3_and_4;
       break;
+    case 2:
+      if (((int8_t)mouse_emu_speed + delta) > 0) {
+        mouse_emu_speed += delta;
+      }
+      break;
     default:
       break;
   }
@@ -243,7 +251,8 @@ bool SetupMode::set_item_value_quick(SetupKeys key_state) {
   switch (key_state) {
     case SetupKeyQuick0:
       emu_mode = EmuMode::EmuModeNone;
-      swap_joy_axis_3_and_4 = false;
+      swap_joy_axis_3_and_4 = SWAP_JOY_AXIS_3_AND_4_DEFAULT;
+      mouse_emu_speed = MOUSE_EMU_SPEED_DEFAULT;
       return true;
     case SetupKeyQuick1:
       emu_mode = EmuMode::EmuModeJoyKeyb;

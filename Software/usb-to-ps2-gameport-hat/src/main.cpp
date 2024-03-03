@@ -67,8 +67,15 @@ uint8_t num_joys_connected = 0;
 SetupMode setup_mode(&virtual_keyboard, &joy_state);
 
 #include "Logging.h"
-Logging logging(&usb_mouse_keyboard, &usb_keyboard, &usb_mouse, &mouse_state, &joy_state,
-                &num_joys_connected, &ps2_keyboard, &ps2_mouse, &setup_mode);
+Logging logging(&usb_mouse_keyboard,
+                &usb_keyboard,
+                &usb_mouse,
+                &mouse_state,
+                &joy_state,
+                &num_joys_connected,
+                &ps2_keyboard,
+                &ps2_mouse,
+                &setup_mode);
 
 #include "SoftTimer.h"
 SoftTimer led_timer;
@@ -282,16 +289,16 @@ static void handle_device_emulation() {
       joy_emulate_keyboard(&virtual_keyboard, &joy_state, &new_joy_state);
       break;
     case EmuModeJoyMouse:
-      joy_emulate_mouse(&virtual_mouse, &new_joy_state);
+      joy_emulate_mouse(&virtual_mouse, &new_joy_state, setup_mode.mouse_emu_speed);
       break;
     case EmuModeKeybJoy:
       keyboard_emulate_joy(&virtual_joystick, &virtual_keyboard);
       break;
     case EmuModeKeybMouse:
-      keyboard_emulate_mouse(&virtual_mouse, &virtual_keyboard);
+      keyboard_emulate_mouse(&virtual_mouse, &virtual_keyboard, setup_mode.mouse_emu_speed);
       break;
     case EmuModeMouseJoy:
-      mouse_emulate_joy(&virtual_joystick, &new_mouse_state);
+      mouse_emulate_joy(&virtual_joystick, &new_mouse_state, setup_mode.mouse_emu_speed);
       break;
     default:
       break;

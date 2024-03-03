@@ -3,17 +3,21 @@
 #include "Config.h"
 #include "KeyboardAction.h"
 
-#define JOY_AXIS_TO_MOUSE_DELTA(axis)                                                            \
-  (((axis) < JOY_AXIS_CENTER) ? -(((uint16_t)(JOY_AXIS_CENTER - (axis)) * MOUSE_EMU_SPEED) >> 6) \
-                              : +(((uint16_t)((axis)-JOY_AXIS_CENTER) * MOUSE_EMU_SPEED) >> 6))
+#define CLAMP(value, min, max) ((value) < (min) ? (min) : ((value) > (max) ? (max) : (value)))
 
-#define MOUSE_DELTA_TO_JOY_AXIS(delta) (JOY_AXIS_CENTER + (((delta) * MOUSE_EMU_SPEED) >> 1))
+#define JOY_AXIS_TO_MOUSE_DELTA(axis, speed)                                              \
+  (((axis) < JOY_AXIS_CENTER) ? -(((uint16_t)(JOY_AXIS_CENTER - (axis)) << (speed)) >> 6) \
+                              : +(((uint16_t)((axis)-JOY_AXIS_CENTER) << (speed)) >> 6))
+
+#define MOUSE_DELTA_TO_JOY_AXIS(delta, speed) \
+  (CLAMP(JOY_AXIS_CENTER + (((delta) << (speed)) >> 1), 0, 0xFF))
 
 static KeyBuffer tmp_key_buffer;
 
 static void sync_kb_emu_keys(VirtualKeyboard* const keyboard, KeyboardCodes code, bool key_down);
 
-void joy_emulate_keyboard(VirtualKeyboard* const keyboard, JoystickState const* const old_state,
+void joy_emulate_keyboard(VirtualKeyboard* const keyboard,
+                          JoystickState const* const old_state,
                           JoystickState const* const new_state) {
   bool key_down;
 
@@ -36,7 +40,9 @@ void joy_emulate_keyboard(VirtualKeyboard* const keyboard, JoystickState const* 
   }
 }
 
-void joy_emulate_mouse(VirtualMouse* const mouse, JoystickState const* const new_state) {
+void joy_emulate_mouse(VirtualMouse* const mouse,
+                       JoystickState const* const new_state,
+                       uint8_t mouse_emu_speed) {
   int16_t d_x;
   int16_t d_y;
   uint8_t button_state;
@@ -48,8 +54,8 @@ void joy_emulate_mouse(VirtualMouse* const mouse, JoystickState const* const new
   }
 
   // X- & Y-Axis 1
-  d_x = JOY_AXIS_TO_MOUSE_DELTA(new_state->axes[0]);
-  d_y = JOY_AXIS_TO_MOUSE_DELTA(new_state->axes[1]);
+  d_x = JOY_AXIS_TO_MOUSE_DELTA(new_state->axes[0], mouse_emu_speed);
+  d_y = JOY_AXIS_TO_MOUSE_DELTA(new_state->axes[1], mouse_emu_speed);
   if (d_x != 0 || d_y != 0) {
     new_mouse_state.d_x = d_x;
     new_mouse_state.d_y = d_y;
@@ -57,11 +63,11 @@ void joy_emulate_mouse(VirtualMouse* const mouse, JoystickState const* const new
   }
 
   // Y-Axis 2
-  if (JOY_AXIS_TEST(new_state->axes[3], true)) {
-    new_mouse_state.d_wheel = 1;
+  if (JOY_AXIS_TEST(new_state->axes[3], false)) {
+    new_mouse_state.d_wheel = CLAMP(mouse_emu_speed >> 1, 1, 7);;
     new_mouse_state.changed = true;
-  } else if (JOY_AXIS_TEST(new_state->axes[3], false)) {
-    new_mouse_state.d_wheel = -1;
+  } else if (JOY_AXIS_TEST(new_state->axes[3], true)) {
+    new_mouse_state.d_wheel = -CLAMP(mouse_emu_speed >> 1, 1, 7);;
     new_mouse_state.changed = true;
   }
 
@@ -163,7 +169,9 @@ void keyboard_emulate_joy(VirtualJoystick* const joystick, VirtualKeyboard* cons
   joystick->update_state(&new_joy_state, true, false);
 }
 
-void keyboard_emulate_mouse(VirtualMouse* const mouse, VirtualKeyboard* const keyboard) {
+void keyboard_emulate_mouse(VirtualMouse* const mouse,
+                            VirtualKeyboard* const keyboard,
+                            uint8_t mouse_emu_speed) {
   MouseState new_mouse_state = mouse->pop_state();
 
   // prepare temporary key buffer
@@ -194,27 +202,27 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse, VirtualKeyboard* const ke
     if (kb_action.type == KbActionMake) {
       switch (axis_mapping_idx) {
         case 0:  // Left
-          new_mouse_state.d_x = -MOUSE_EMU_SPEED;
+          new_mouse_state.d_x = -(1 << mouse_emu_speed);
           new_mouse_state.changed = true;
           break;
         case 1:  // Right
-          new_mouse_state.d_x = MOUSE_EMU_SPEED;
+          new_mouse_state.d_x = (1 << mouse_emu_speed);
           new_mouse_state.changed = true;
           break;
         case 2:  // Up
-          new_mouse_state.d_y = -MOUSE_EMU_SPEED;
+          new_mouse_state.d_y = -(1 << mouse_emu_speed);
           new_mouse_state.changed = true;
           break;
         case 3:  // Down
-          new_mouse_state.d_y = MOUSE_EMU_SPEED;
+          new_mouse_state.d_y = (1 << mouse_emu_speed);
           new_mouse_state.changed = true;
           break;
         case 6:  // Scroll Up
-          new_mouse_state.d_wheel = -1;
+          new_mouse_state.d_wheel = CLAMP(mouse_emu_speed >> 1, 1, 7);
           new_mouse_state.changed = true;
           break;
         case 7:  // Scroll Down
-          new_mouse_state.d_wheel = 1;
+          new_mouse_state.d_wheel = -CLAMP(mouse_emu_speed >> 1, 1, 7);
           new_mouse_state.changed = true;
           break;
       }
@@ -223,20 +231,40 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse, VirtualKeyboard* const ke
     else {
       switch (axis_mapping_idx) {
         case 0:  // Left
+          if (new_mouse_state.d_x < 0) {
+            new_mouse_state.d_x = 0;
+            new_mouse_state.changed = true;
+          }
+          break;
         case 1:  // Right
-          new_mouse_state.d_x = 0;
-          new_mouse_state.changed = true;
+          if (new_mouse_state.d_x > 0) {
+            new_mouse_state.d_x = 0;
+            new_mouse_state.changed = true;
+          }
           break;
         case 2:  // Up
-        case 3:  // Down
-          new_mouse_state.d_y = 0;
-          new_mouse_state.changed = true;
+          if (new_mouse_state.d_y < 0) {
+            new_mouse_state.d_y = 0;
+            new_mouse_state.changed = true;
+          }
           break;
+        case 3:  // Down
+          if (new_mouse_state.d_y > 0) {
+            new_mouse_state.d_y = 0;
+            new_mouse_state.changed = true;
+          }
           break;
         case 6:  // Scroll Up
+          if (new_mouse_state.d_wheel > 0) {
+            new_mouse_state.d_wheel = 0;
+            new_mouse_state.changed = true;
+          }
+          break;
         case 7:  // Scroll Down
-          new_mouse_state.d_wheel = 0;
-          new_mouse_state.changed = true;
+          if (new_mouse_state.d_wheel < 0) {
+            new_mouse_state.d_wheel = 0;
+            new_mouse_state.changed = true;
+          }
           break;
       }
     }
@@ -276,31 +304,38 @@ void keyboard_emulate_mouse(VirtualMouse* const mouse, VirtualKeyboard* const ke
     keyboard->enq(tmp_key_buffer.deq());
   }
 
+  // keep velocity
+  if ((new_mouse_state.d_x != 0) || (new_mouse_state.d_y != 0) || (new_mouse_state.d_wheel != 0)) {
+    new_mouse_state.changed = true;
+  }
+
   // push back updated state
   mouse->update_state(&new_mouse_state);
 }
 
-void mouse_emulate_joy(VirtualJoystick* const joystick, MouseState const* const new_state) {
+void mouse_emulate_joy(VirtualJoystick* const joystick,
+                       MouseState const* const new_state,
+                       uint8_t mouse_emu_speed) {
   uint8_t axis;
   uint8_t button_state;
   JoystickState new_joy_state = joystick->pop_state();
 
   // X-Axis 1
-  axis = MOUSE_DELTA_TO_JOY_AXIS(new_state->changed ? new_state->d_x : 0);
+  axis = MOUSE_DELTA_TO_JOY_AXIS(new_state->changed ? new_state->d_x : 0, mouse_emu_speed);
   if ((axis != JOY_AXIS_CENTER) && (axis != new_joy_state.axes[0])) {
     new_joy_state.axes[0] = axis;
     new_joy_state.changed = true;
   }
 
   // Y-Axis 1
-  axis = MOUSE_DELTA_TO_JOY_AXIS(new_state->changed ? new_state->d_y : 0);
+  axis = MOUSE_DELTA_TO_JOY_AXIS(new_state->changed ? new_state->d_y : 0, mouse_emu_speed);
   if ((axis != JOY_AXIS_CENTER) && (axis != new_joy_state.axes[1])) {
     new_joy_state.axes[1] = axis;
     new_joy_state.changed = true;
   }
 
   // Y-Axis 2
-  axis = MOUSE_DELTA_TO_JOY_AXIS(new_state->changed ? new_state->d_wheel : 0);
+  axis = MOUSE_DELTA_TO_JOY_AXIS(new_state->changed ? new_state->d_wheel : 0, mouse_emu_speed);
   axis = combine_axes(new_joy_state.axes[3], axis);
   if (axis != new_joy_state.axes[3]) {
     new_joy_state.axes[3] = axis;
