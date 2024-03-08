@@ -1,45 +1,195 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<export version="D">
+<export version="E">
   <design>
-    <source>C:\Users\deadman\OneDrive\documents\Projects\usb-to-ps2-gameport-hat-arduino-pro-mini\usb-to-ps2-gameport-hat-arduino-pro-mini.sch</source>
-    <date>15.08.2019 16:30:47</date>
-    <tool>Eeschema (5.1.4)-1</tool>
+    <source>/home/deadman/Projects/usb-to-ps2-gameport-hat/Hardware/usb-to-ps2-gameport-hat-arduino-pro-mini/usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch</source>
+    <date>Sa 09 Mär 2024 01:55:56</date>
+    <tool>Eeschema 7.0.9</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
         <title>USB to PS/2 &amp; Gameport HAT for Arduino Pro Mini</title>
-        <company>© 2019 by Deadman</company>
-        <rev>1.0</rev>
-        <date>2019-08-15</date>
-        <source>usb-to-ps2-gameport-hat-arduino-pro-mini.sch</source>
-        <comment number="1" value=""/>
+        <company>© 2024 by Deadman</company>
+        <rev>1.4</rev>
+        <date>2024-02-21</date>
+        <source>usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch</source>
+        <comment number="1" value="Thanks to Paddy"/>
         <comment number="2" value=""/>
         <comment number="3" value=""/>
         <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
       </title_block>
     </sheet>
   </design>
   <components>
-    <comp ref="P1">
-      <value>Digital</value>
-      <footprint>Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x12</footprint>
-      <libsource lib="Connector_Generic" part="Conn_01x12" description="Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+    <comp ref="5V Select1">
+      <value>Jumper 3-pin</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical</footprint>
+      <libsource lib="Jumper" part="Jumper_3_Bridged12" description="Jumper, 3-pole, pins 1+2 closed/bridged"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Jumper, 3-pole, pins 1+2 closed/bridged"/>
+      <property name="ki_keywords" value="Jumper SPDT"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>56D754D1</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d56da27</tstamps>
     </comp>
-    <comp ref="P2">
-      <value>Analog</value>
-      <footprint>Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x12</footprint>
-      <libsource lib="Connector_Generic" part="Conn_01x12" description="Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+    <comp ref="C1">
+      <value>10nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>56D755F3</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d5491fe</tstamps>
     </comp>
-    <comp ref="J_GAMEPORT1">
+    <comp ref="C2">
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d54a868</tstamps>
+    </comp>
+    <comp ref="C3">
+      <value>10uF</value>
+      <footprint>Capacitor_SMD:CP_Elec_4x5.4</footprint>
+      <libsource lib="Device" part="C_Polarized" description="Polarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Polarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d54d427</tstamps>
+    </comp>
+    <comp ref="C4">
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d9ab87b</tstamps>
+    </comp>
+    <comp ref="C5">
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005da7c540</tstamps>
+    </comp>
+    <comp ref="C6">
+      <value>10nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d6f39b1</tstamps>
+    </comp>
+    <comp ref="C7">
+      <value>15nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d6cccfc</tstamps>
+    </comp>
+    <comp ref="C8">
+      <value>15nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d6d4b84</tstamps>
+    </comp>
+    <comp ref="C9">
+      <value>15nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d6e411b</tstamps>
+    </comp>
+    <comp ref="C10">
+      <value>15nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d6dc6b6</tstamps>
+    </comp>
+    <comp ref="Debug Conn1">
+      <value>3-pin header</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical</footprint>
+      <libsource lib="Connector" part="Conn_01x03_Male" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005dc5aeac</tstamps>
+    </comp>
+    <comp ref="FB1">
+      <value>Ferrite_Bead</value>
+      <footprint>Inductor_SMD:L_0603_1608Metric</footprint>
+      <libsource lib="Device" part="FerriteBead" description="Ferrite bead"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Ferrite bead"/>
+      <property name="ki_keywords" value="L ferrite bead inductor filter"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d546c23</tstamps>
+    </comp>
+    <comp ref="Gameport1">
       <value>DB15 (Male)</value>
-      <footprint>Connector_Dsub:DSUB-15_Male_Horizontal_P2.77x2.84mm_EdgePinOffset4.94mm_Housed_MountingHolesOffset7.48mm</footprint>
+      <footprint>Connector_Dsub:DSUB-15_Male_Horizontal_P2.77x2.84mm_EdgePinOffset7.70mm_Housed_MountingHolesOffset9.12mm</footprint>
       <datasheet> ~</datasheet>
       <libsource lib="Connector" part="DB15_Male_MountingHoles" description="15-pin male D-SUB connector (low-density/2 columns), Mounting Hole"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="15-pin male D-SUB connector (low-density/2 columns), Mounting Hole"/>
+      <property name="ki_keywords" value="male D-SUB connector"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D536AEE</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d536aee</tstamps>
+    </comp>
+    <comp ref="IC_LC1">
+      <value>PI4ULS5V108</value>
+      <footprint>Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm</footprint>
+      <datasheet>https://www.diodes.com/assets/Datasheets/PI4ULS5V108.pdf</datasheet>
+      <libsource lib="SymacSys_Parts" part="PI4ULS5V108" description="8-Bit Bi-directional Level Shifter for Open-Drain and Push-Pull Application"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="8-Bit Bi-directional Level Shifter for Open-Drain and Push-Pull Application"/>
+      <property name="ki_keywords" value="level shifter bidirectional"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005d6f3995</tstamps>
     </comp>
     <comp ref="IC_POT1">
       <value>AD8403ARUZ100</value>
@@ -54,83 +204,20 @@
         <field name="Mouser Price/Stock">https://www.mouser.com/Search/Refine.aspx?Keyword=584-AD8403ARUZ100</field>
       </fields>
       <libsource lib="SymacSys_Parts" part="AD8403ARUZ100" description="AD8403ARUZ100, Digital Potentiometer 100k 256-Position Linear 4-channel Serial-3 Wire, Serial-SPI 24-Pin TSSOP"/>
+      <property name="Description" value="AD8403ARUZ100, Digital Potentiometer 100k 256-Position Linear 4-channel Serial-3 Wire, Serial-SPI 24-Pin TSSOP"/>
+      <property name="Height" value="1.2"/>
+      <property name="Mouser Part Number" value="584-AD8403ARUZ100"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.com/Search/Refine.aspx?Keyword=584-AD8403ARUZ100"/>
+      <property name="Manufacturer_Name" value="Analog Devices"/>
+      <property name="Manufacturer_Part_Number" value="AD8403ARUZ100"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="AD8403ARUZ100, Digital Potentiometer 100k 256-Position Linear 4-channel Serial-3 Wire, Serial-SPI 24-Pin TSSOP"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D53EA20</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d53ea20</tstamps>
     </comp>
-    <comp ref="JP_5V_SEL1">
-      <value>Jumper 3-pin</value>
-      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Jumper" part="Jumper_3_Bridged12" description="Jumper, 3-pole, pins 1+2 closed/bridged"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D56DA27</tstamp>
-    </comp>
-    <comp ref="FB1">
-      <value>Ferrite_Bead</value>
-      <footprint>Inductor_SMD:L_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Device" part="Ferrite_Bead" description="Ferrite bead"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D546C23</tstamp>
-    </comp>
-    <comp ref="C1">
-      <value>10nF</value>
-      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D5491FE</tstamp>
-    </comp>
-    <comp ref="C2">
-      <value>100nF</value>
-      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D54A868</tstamp>
-    </comp>
-    <comp ref="C3">
-      <value>4.7uF</value>
-      <footprint>Capacitor_SMD:CP_Elec_4x5.4</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Device" part="CP" description="Polarized capacitor"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D54D427</tstamp>
-    </comp>
-    <comp ref="IC_LC1">
-      <value>PI4ULS5V108</value>
-      <footprint>Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm</footprint>
-      <datasheet>https://www.diodes.com/assets/Datasheets/PI4ULS5V108.pdf</datasheet>
-      <libsource lib="SymacSys_Parts" part="PI4ULS5V108" description="8-Bit Bi-directional Level Shifter for Open-Drain and Push-Pull Application"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D6F3995</tstamp>
-    </comp>
-    <comp ref="C4">
-      <value>10nF</value>
-      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D6F39B1</tstamp>
-    </comp>
-    <comp ref="C5">
-      <value>100nF</value>
-      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D9AB87B</tstamp>
-    </comp>
-    <comp ref="C6">
-      <value>100nF</value>
-      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5DA7C540</tstamp>
-    </comp>
-    <comp ref="J_PS/2">
-      <value>KMDGX-6S-BS</value>
+    <comp ref="J_PS/2_1">
+      <value>Mouse</value>
       <footprint>SamacSys_Parts:KMDGX6SBS</footprint>
       <datasheet>http://www.kycon.com/Pub_Eng_Draw/KMDGX-XS-BS%20SERIES.pdf</datasheet>
       <fields>
@@ -142,72 +229,141 @@
         <field name="Mouser Price/Stock">https://www.mouser.com/Search/Refine.aspx?Keyword=806-KMDGX-6S-BS</field>
       </fields>
       <libsource lib="SymacSys_Parts" part="KMDGX-6S-BS" description="Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED"/>
+      <property name="Description" value="Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED"/>
+      <property name="Height" value="13"/>
+      <property name="Mouser Part Number" value="806-KMDGX-6S-BS"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.com/Search/Refine.aspx?Keyword=806-KMDGX-6S-BS"/>
+      <property name="Manufacturer_Name" value="Kycon"/>
+      <property name="Manufacturer_Part_Number" value="KMDGX-6S-BS"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D535161</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d6b0f53</tstamps>
     </comp>
-    <comp ref="R3">
-      <value>200k</value>
-      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Device" part="R" description="Resistor"/>
+    <comp ref="J_PS/2_2">
+      <value>Keyboard / Mouse</value>
+      <footprint>SamacSys_Parts:KMDGX6SBS</footprint>
+      <datasheet>http://www.kycon.com/Pub_Eng_Draw/KMDGX-XS-BS%20SERIES.pdf</datasheet>
+      <fields>
+        <field name="Description">Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED</field>
+        <field name="Height">13</field>
+        <field name="Manufacturer_Name">Kycon</field>
+        <field name="Manufacturer_Part_Number">KMDGX-6S-BS</field>
+        <field name="Mouser Part Number">806-KMDGX-6S-BS</field>
+        <field name="Mouser Price/Stock">https://www.mouser.com/Search/Refine.aspx?Keyword=806-KMDGX-6S-BS</field>
+      </fields>
+      <libsource lib="SymacSys_Parts" part="KMDGX-6S-BS" description="Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED"/>
+      <property name="Description" value="Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED"/>
+      <property name="Height" value="13"/>
+      <property name="Mouser Part Number" value="806-KMDGX-6S-BS"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.com/Search/Refine.aspx?Keyword=806-KMDGX-6S-BS"/>
+      <property name="Manufacturer_Name" value="Kycon"/>
+      <property name="Manufacturer_Part_Number" value="KMDGX-6S-BS"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D6F39C5</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d7cfb6f</tstamps>
+    </comp>
+    <comp ref="LED1">
+      <value>2-pin header</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</footprint>
+      <libsource lib="Connector" part="Conn_01x02_Male" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005db75eaa</tstamps>
+    </comp>
+    <comp ref="LED2">
+      <value>2-pin header</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</footprint>
+      <libsource lib="Connector" part="Conn_01x02_Male" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-00005db7adc2</tstamps>
+    </comp>
+    <comp ref="P1">
+      <value>Digital</value>
+      <footprint>Connector_PinSocket_2.54mm:PinSocket_1x12_P2.54mm_Vertical</footprint>
+      <libsource lib="Connector_Generic" part="Conn_01x12" description="Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-000056d754d1</tstamps>
+    </comp>
+    <comp ref="P2">
+      <value>Analog</value>
+      <footprint>Connector_PinSocket_2.54mm:PinSocket_1x12_P2.54mm_Vertical</footprint>
+      <libsource lib="Connector_Generic" part="Conn_01x12" description="Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>00000000-0000-0000-0000-000056d755f3</tstamps>
     </comp>
     <comp ref="R1">
       <value>330R</value>
       <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Resistor"/>
+      <property name="ki_keywords" value="R res resistor"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5DB6303D</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005db6303d</tstamps>
     </comp>
     <comp ref="R2">
       <value>330R</value>
       <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
-      <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Resistor"/>
+      <property name="ki_keywords" value="R res resistor"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5DB6A8D1</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005db6a8d1</tstamps>
     </comp>
-    <comp ref="J_EXT_LED1">
-      <value>2-pin header</value>
-      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Connector" part="Conn_01x02_Male" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+    <comp ref="R3">
+      <value>200k</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Resistor"/>
+      <property name="ki_keywords" value="R res resistor"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5DB75EAA</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d6f39c5</tstamps>
     </comp>
-    <comp ref="J_EXT_LED2">
-      <value>2-pin header</value>
-      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Connector" part="Conn_01x02_Male" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+    <comp ref="Shield GND1">
+      <value>SolderJumper_2_Open</value>
+      <footprint>Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm</footprint>
+      <libsource lib="Jumper" part="SolderJumper_2_Open" description="Solder Jumper, 2-pole, open"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="Solder Jumper, 2-pole, open"/>
+      <property name="ki_keywords" value="solder jumper SPST"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5DB7ADC2</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d63b67d</tstamps>
     </comp>
-    <comp ref="J_SER1">
-      <value>3-pin header</value>
-      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Connector" part="Conn_01x03_Male" description="Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5DC5AEAC</tstamp>
-    </comp>
-    <comp ref="J_USB_PWR1">
+    <comp ref="USB Power1">
       <value>USB_B_Micro</value>
       <footprint>Connector_USB:USB_Micro-B_Molex-105017-0001</footprint>
-      <datasheet>~</datasheet>
       <libsource lib="Connector" part="USB_B_Micro" description="USB Micro Type B connector"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="usb-to-ps2-gameport-hat-arduino-pro-mini.kicad_sch"/>
+      <property name="ki_description" value="USB Micro Type B connector"/>
+      <property name="ki_keywords" value="connector USB micro"/>
       <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D544FB6</tstamp>
-    </comp>
-    <comp ref="JP_SHIELD1">
-      <value>SolderJumper_2_Open</value>
-      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
-      <datasheet>~</datasheet>
-      <libsource lib="Jumper" part="SolderJumper_2_Open" description="Solder Jumper, 2-pole, open"/>
-      <sheetpath names="/" tstamps="/"/>
-      <tstamp>5D63B67D</tstamp>
+      <tstamps>00000000-0000-0000-0000-00005d544fb6</tstamps>
     </comp>
   </components>
   <libparts>
@@ -220,6 +376,7 @@
       <fields>
         <field name="Reference">J</field>
         <field name="Value">Conn_01x02_Male</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
         <pin num="1" name="Pin_1" type="passive"/>
@@ -235,6 +392,7 @@
       <fields>
         <field name="Reference">J</field>
         <field name="Value">Conn_01x03_Male</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
         <pin num="1" name="Pin_1" type="passive"/>
@@ -251,6 +409,7 @@
       <fields>
         <field name="Reference">J</field>
         <field name="Value">DB15_Male_MountingHoles</field>
+        <field name="Datasheet"> ~</field>
       </fields>
       <pins>
         <pin num="0" name="PAD" type="passive"/>
@@ -272,9 +431,6 @@
       </pins>
     </libpart>
     <libpart lib="Connector" part="USB_B_Micro">
-      <aliases>
-        <alias>USB_B_Mini</alias>
-      </aliases>
       <description>USB Micro Type B connector</description>
       <docs>~</docs>
       <footprints>
@@ -283,11 +439,12 @@
       <fields>
         <field name="Reference">J</field>
         <field name="Value">USB_B_Micro</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
         <pin num="1" name="VBUS" type="power_out"/>
-        <pin num="2" name="D-" type="passive"/>
-        <pin num="3" name="D+" type="passive"/>
+        <pin num="2" name="D-" type="bidirectional"/>
+        <pin num="3" name="D+" type="bidirectional"/>
         <pin num="4" name="ID" type="passive"/>
         <pin num="5" name="GND" type="power_out"/>
         <pin num="6" name="Shield" type="passive"/>
@@ -302,6 +459,7 @@
       <fields>
         <field name="Reference">J</field>
         <field name="Value">Conn_01x12</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
         <pin num="1" name="Pin_1" type="passive"/>
@@ -327,13 +485,14 @@
       <fields>
         <field name="Reference">C</field>
         <field name="Value">C</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
-        <pin num="1" name="~" type="passive"/>
-        <pin num="2" name="~" type="passive"/>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
       </pins>
     </libpart>
-    <libpart lib="Device" part="CP">
+    <libpart lib="Device" part="C_Polarized">
       <description>Polarized capacitor</description>
       <docs>~</docs>
       <footprints>
@@ -341,14 +500,15 @@
       </footprints>
       <fields>
         <field name="Reference">C</field>
-        <field name="Value">CP</field>
+        <field name="Value">C_Polarized</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
-        <pin num="1" name="~" type="passive"/>
-        <pin num="2" name="~" type="passive"/>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
       </pins>
     </libpart>
-    <libpart lib="Device" part="Ferrite_Bead">
+    <libpart lib="Device" part="FerriteBead">
       <description>Ferrite bead</description>
       <docs>~</docs>
       <footprints>
@@ -358,11 +518,12 @@
       </footprints>
       <fields>
         <field name="Reference">FB</field>
-        <field name="Value">Ferrite_Bead</field>
+        <field name="Value">FerriteBead</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
-        <pin num="1" name="~" type="passive"/>
-        <pin num="2" name="~" type="passive"/>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
       </pins>
     </libpart>
     <libpart lib="Device" part="R">
@@ -374,21 +535,25 @@
       <fields>
         <field name="Reference">R</field>
         <field name="Value">R</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
-        <pin num="1" name="~" type="passive"/>
-        <pin num="2" name="~" type="passive"/>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
       </pins>
     </libpart>
     <libpart lib="Jumper" part="Jumper_3_Bridged12">
       <description>Jumper, 3-pole, pins 1+2 closed/bridged</description>
       <docs>~</docs>
       <footprints>
-        <fp>SolderJumper*Bridged12*</fp>
+        <fp>Jumper*</fp>
+        <fp>TestPoint*3Pads*</fp>
+        <fp>TestPoint*Bridge*</fp>
       </footprints>
       <fields>
         <field name="Reference">JP</field>
         <field name="Value">Jumper_3_Bridged12</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
         <pin num="1" name="A" type="passive"/>
@@ -405,6 +570,7 @@
       <fields>
         <field name="Reference">JP</field>
         <field name="Value">SolderJumper_2_Open</field>
+        <field name="Datasheet">~</field>
       </fields>
       <pins>
         <pin num="1" name="A" type="passive"/>
@@ -427,30 +593,30 @@
         <field name="Manufacturer_Part_Number">AD8403ARUZ100</field>
       </fields>
       <pins>
-        <pin num="1" name="AGND2" type="BiDi"/>
-        <pin num="2" name="B2" type="BiDi"/>
-        <pin num="3" name="A2" type="BiDi"/>
-        <pin num="4" name="W2" type="BiDi"/>
-        <pin num="5" name="AGND4" type="BiDi"/>
-        <pin num="6" name="B4" type="BiDi"/>
-        <pin num="7" name="A4" type="BiDi"/>
-        <pin num="8" name="W4" type="BiDi"/>
-        <pin num="9" name="DGND" type="BiDi"/>
-        <pin num="10" name="~SHDN" type="BiDi"/>
-        <pin num="11" name="~CS" type="BiDi"/>
-        <pin num="12" name="SDI" type="BiDi"/>
-        <pin num="13" name="SDO" type="BiDi"/>
-        <pin num="14" name="CLK" type="BiDi"/>
-        <pin num="15" name="~RS" type="BiDi"/>
-        <pin num="16" name="VDD" type="BiDi"/>
-        <pin num="17" name="AGND3" type="BiDi"/>
-        <pin num="18" name="W3" type="BiDi"/>
-        <pin num="19" name="A3" type="BiDi"/>
-        <pin num="20" name="B3" type="BiDi"/>
-        <pin num="21" name="AGND1" type="BiDi"/>
-        <pin num="22" name="W1" type="BiDi"/>
-        <pin num="23" name="A1" type="BiDi"/>
-        <pin num="24" name="B1" type="BiDi"/>
+        <pin num="1" name="AGND2" type="bidirectional"/>
+        <pin num="2" name="B2" type="bidirectional"/>
+        <pin num="3" name="A2" type="bidirectional"/>
+        <pin num="4" name="W2" type="bidirectional"/>
+        <pin num="5" name="AGND4" type="bidirectional"/>
+        <pin num="6" name="B4" type="bidirectional"/>
+        <pin num="7" name="A4" type="bidirectional"/>
+        <pin num="8" name="W4" type="bidirectional"/>
+        <pin num="9" name="DGND" type="bidirectional"/>
+        <pin num="10" name="~{SHDN}" type="bidirectional"/>
+        <pin num="11" name="~{CS}" type="bidirectional"/>
+        <pin num="12" name="SDI" type="bidirectional"/>
+        <pin num="13" name="SDO" type="bidirectional"/>
+        <pin num="14" name="CLK" type="bidirectional"/>
+        <pin num="15" name="~{RS}" type="bidirectional"/>
+        <pin num="16" name="VDD" type="bidirectional"/>
+        <pin num="17" name="AGND3" type="bidirectional"/>
+        <pin num="18" name="W3" type="bidirectional"/>
+        <pin num="19" name="A3" type="bidirectional"/>
+        <pin num="20" name="B3" type="bidirectional"/>
+        <pin num="21" name="AGND1" type="bidirectional"/>
+        <pin num="22" name="W1" type="bidirectional"/>
+        <pin num="23" name="A1" type="bidirectional"/>
+        <pin num="24" name="B1" type="bidirectional"/>
       </pins>
     </libpart>
     <libpart lib="SymacSys_Parts" part="KMDGX-6S-BS">
@@ -460,7 +626,7 @@
         <field name="Reference">J</field>
         <field name="Value">KMDGX-6S-BS</field>
         <field name="Footprint">KMDGX6SBS</field>
-        <field name="Datasheet">https://componentsearchengine.com/Datasheets/1/KMDGX-6S-BS.pdf</field>
+        <field name="Datasheet">http://www.kycon.com/Pub_Eng_Draw/KMDGX-XS-BS%20SERIES.pdf</field>
         <field name="Description">Circular DIN Connectors 6P R/A FULL SHIELD GOLD PLANTED</field>
         <field name="Height">13</field>
         <field name="Mouser Part Number">806-KMDGX-6S-BS</field>
@@ -469,15 +635,15 @@
         <field name="Manufacturer_Part_Number">KMDGX-6S-BS</field>
       </fields>
       <pins>
-        <pin num="1" name="2" type="BiDi"/>
-        <pin num="2" name="1" type="BiDi"/>
-        <pin num="3" name="4" type="BiDi"/>
-        <pin num="5" name="3" type="BiDi"/>
-        <pin num="6" name="6" type="BiDi"/>
-        <pin num="8" name="5" type="BiDi"/>
-        <pin num="MH1" name="MH1" type="BiDi"/>
-        <pin num="MH2" name="MH2" type="BiDi"/>
-        <pin num="MH3" name="MH3" type="BiDi"/>
+        <pin num="1" name="1" type="bidirectional"/>
+        <pin num="2" name="2" type="bidirectional"/>
+        <pin num="3" name="3" type="bidirectional"/>
+        <pin num="4" name="5" type="bidirectional"/>
+        <pin num="5" name="6" type="bidirectional"/>
+        <pin num="6" name="8" type="bidirectional"/>
+        <pin num="MH1" name="MH1" type="bidirectional"/>
+        <pin num="MH2" name="MH2" type="bidirectional"/>
+        <pin num="MH3" name="MH3" type="bidirectional"/>
       </pins>
     </libpart>
     <libpart lib="SymacSys_Parts" part="PI4ULS5V108">
@@ -487,285 +653,303 @@
         <field name="Reference">IC</field>
         <field name="Value">PI4ULS5V108</field>
         <field name="Footprint">Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm</field>
+        <field name="Datasheet">https://www.diodes.com/assets/Datasheets/PI4ULS5V108.pdf</field>
       </fields>
       <pins>
-        <pin num="1" name="GND" type="BiDi"/>
-        <pin num="2" name="VREFA" type="BiDi"/>
-        <pin num="3" name="A1" type="BiDi"/>
-        <pin num="4" name="A2" type="BiDi"/>
-        <pin num="5" name="A3" type="BiDi"/>
-        <pin num="6" name="A4" type="BiDi"/>
-        <pin num="7" name="A5" type="BiDi"/>
-        <pin num="8" name="A6" type="BiDi"/>
-        <pin num="9" name="A7" type="BiDi"/>
-        <pin num="10" name="A8" type="BiDi"/>
-        <pin num="11" name="B8" type="BiDi"/>
-        <pin num="12" name="B7" type="BiDi"/>
-        <pin num="13" name="B6" type="BiDi"/>
-        <pin num="14" name="B5" type="BiDi"/>
-        <pin num="15" name="B4" type="BiDi"/>
-        <pin num="16" name="B3" type="BiDi"/>
-        <pin num="17" name="B2" type="BiDi"/>
-        <pin num="18" name="B1" type="BiDi"/>
-        <pin num="19" name="VREFB" type="BiDi"/>
-        <pin num="20" name="EN" type="BiDi"/>
+        <pin num="1" name="GND" type="bidirectional"/>
+        <pin num="2" name="VREFA" type="bidirectional"/>
+        <pin num="3" name="A1" type="bidirectional"/>
+        <pin num="4" name="A2" type="bidirectional"/>
+        <pin num="5" name="A3" type="bidirectional"/>
+        <pin num="6" name="A4" type="bidirectional"/>
+        <pin num="7" name="A5" type="bidirectional"/>
+        <pin num="8" name="A6" type="bidirectional"/>
+        <pin num="9" name="A7" type="bidirectional"/>
+        <pin num="10" name="A8" type="bidirectional"/>
+        <pin num="11" name="B8" type="bidirectional"/>
+        <pin num="12" name="B7" type="bidirectional"/>
+        <pin num="13" name="B6" type="bidirectional"/>
+        <pin num="14" name="B5" type="bidirectional"/>
+        <pin num="15" name="B4" type="bidirectional"/>
+        <pin num="16" name="B3" type="bidirectional"/>
+        <pin num="17" name="B2" type="bidirectional"/>
+        <pin num="18" name="B1" type="bidirectional"/>
+        <pin num="19" name="VREFB" type="bidirectional"/>
+        <pin num="20" name="EN" type="bidirectional"/>
       </pins>
     </libpart>
   </libparts>
   <libraries>
     <library logical="Connector">
-      <uri>C:\Program Files\KiCad\share\kicad\library/Connector.lib</uri>
+      <uri>/nix/store/4f44dm67phl5ig1s70fjmkdfyrmnc3j5-kicad-symbols-1ed4ed6c06/share/kicad/symbols/Connector.kicad_sym</uri>
     </library>
     <library logical="Connector_Generic">
-      <uri>C:\Program Files\KiCad\share\kicad\library/Connector_Generic.lib</uri>
+      <uri>/nix/store/4f44dm67phl5ig1s70fjmkdfyrmnc3j5-kicad-symbols-1ed4ed6c06/share/kicad/symbols/Connector_Generic.kicad_sym</uri>
     </library>
     <library logical="Device">
-      <uri>C:\Program Files\KiCad\share\kicad\library/Device.lib</uri>
+      <uri>/nix/store/4f44dm67phl5ig1s70fjmkdfyrmnc3j5-kicad-symbols-1ed4ed6c06/share/kicad/symbols/Device.kicad_sym</uri>
     </library>
     <library logical="Jumper">
-      <uri>C:\Program Files\KiCad\share\kicad\library/Jumper.lib</uri>
+      <uri>/nix/store/4f44dm67phl5ig1s70fjmkdfyrmnc3j5-kicad-symbols-1ed4ed6c06/share/kicad/symbols/Jumper.kicad_sym</uri>
     </library>
     <library logical="SymacSys_Parts">
-      <uri>C:\Users\deadman\OneDrive\documents\Projects\usb-to-ps2-gameport-hat-arduino-pro-mini/SamacSys_Parts.lib</uri>
+      <uri>/home/deadman/Projects/usb-to-ps2-gameport-hat/Hardware/usb-to-ps2-gameport-hat-arduino-pro-mini/SamacSys_Parts.lib</uri>
     </library>
   </libraries>
   <nets>
-    <net code="1" name="/D5(JoyButton2)">
-      <node ref="P1" pin="8"/>
-      <node ref="IC_LC1" pin="4"/>
+    <net code="1" name="+5V">
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="C3" pin="1" pintype="passive"/>
+      <node ref="C4" pin="1" pintype="passive"/>
+      <node ref="C5" pin="1" pintype="passive"/>
+      <node ref="FB1" pin="1" pintype="passive"/>
+      <node ref="IC_POT1" pin="10" pinfunction="~{SHDN}" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="16" pinfunction="VDD" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="19" pinfunction="A3" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="23" pinfunction="A1" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="3" pinfunction="A2" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="7" pinfunction="A4" pintype="bidirectional"/>
+      <node ref="P2" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="R3" pin="1" pintype="passive"/>
     </net>
-    <net code="2" name="/D6(JoyButton3)">
-      <node ref="P1" pin="9"/>
-      <node ref="IC_LC1" pin="5"/>
+    <net code="2" name="/+5V(Gameport)">
+      <node ref="5V Select1" pin="1" pinfunction="A" pintype="passive"/>
+      <node ref="Gameport1" pin="1" pinfunction="1" pintype="passive"/>
+      <node ref="Gameport1" pin="8" pinfunction="8" pintype="passive"/>
+      <node ref="Gameport1" pin="9" pinfunction="P9" pintype="passive"/>
     </net>
-    <net code="3" name="/D7(JoyButton4)">
-      <node ref="IC_LC1" pin="6"/>
-      <node ref="P1" pin="10"/>
+    <net code="3" name="/+5V(USB)">
+      <node ref="5V Select1" pin="3" pinfunction="B" pintype="passive"/>
+      <node ref="USB Power1" pin="1" pinfunction="VBUS" pintype="power_out"/>
     </net>
-    <net code="4" name="/D8(EXT_LED1)">
-      <node ref="P1" pin="11"/>
-      <node ref="J_EXT_LED1" pin="2"/>
+    <net code="4" name="/A2(PS2_CLOCK2)">
+      <node ref="IC_LC1" pin="7" pinfunction="A5" pintype="bidirectional"/>
+      <node ref="P2" pin="6" pinfunction="Pin_6" pintype="passive"/>
     </net>
-    <net code="5" name="/D9(EXT_LED2)">
-      <node ref="P1" pin="12"/>
-      <node ref="J_EXT_LED2" pin="2"/>
+    <net code="5" name="/A3(PS2_DATA2)">
+      <node ref="IC_LC1" pin="8" pinfunction="A6" pintype="bidirectional"/>
+      <node ref="P2" pin="5" pinfunction="Pin_5" pintype="passive"/>
     </net>
-    <net code="6" name="Net-(IC_LC1-Pad17)">
-      <node ref="IC_LC1" pin="17"/>
-      <node ref="J_GAMEPORT1" pin="7"/>
+    <net code="6" name="/D0(Rx)">
+      <node ref="Debug Conn1" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="P1" pin="2" pinfunction="Pin_2" pintype="passive"/>
     </net>
-    <net code="7" name="Net-(IC_LC1-Pad16)">
-      <node ref="IC_LC1" pin="16"/>
-      <node ref="J_GAMEPORT1" pin="10"/>
+    <net code="7" name="/D1(Tx)">
+      <node ref="Debug Conn1" pin="3" pinfunction="Pin_3" pintype="passive"/>
+      <node ref="P1" pin="1" pinfunction="Pin_1" pintype="passive"/>
     </net>
-    <net code="8" name="Net-(IC_LC1-Pad15)">
-      <node ref="IC_LC1" pin="15"/>
-      <node ref="J_GAMEPORT1" pin="14"/>
+    <net code="8" name="/D2(PS2_DATA1)">
+      <node ref="IC_LC1" pin="10" pinfunction="A8" pintype="bidirectional"/>
+      <node ref="P1" pin="5" pinfunction="Pin_5" pintype="passive"/>
     </net>
-    <net code="9" name="/D4(JoyButton1)">
-      <node ref="IC_LC1" pin="3"/>
-      <node ref="P1" pin="7"/>
+    <net code="9" name="/D3(PS2_CLOCK1)">
+      <node ref="IC_LC1" pin="9" pinfunction="A7" pintype="bidirectional"/>
+      <node ref="P1" pin="6" pinfunction="Pin_6" pintype="passive"/>
     </net>
-    <net code="10" name="Net-(IC_LC1-Pad11)">
-      <node ref="J_PS/2" pin="2"/>
-      <node ref="IC_LC1" pin="11"/>
+    <net code="10" name="/D4(JoyButton1)">
+      <node ref="IC_LC1" pin="3" pinfunction="A1" pintype="bidirectional"/>
+      <node ref="P1" pin="7" pinfunction="Pin_7" pintype="passive"/>
     </net>
-    <net code="11" name="Net-(IC_LC1-Pad12)">
-      <node ref="J_PS/2" pin="8"/>
-      <node ref="IC_LC1" pin="12"/>
+    <net code="11" name="/D5(JoyButton2)">
+      <node ref="IC_LC1" pin="4" pinfunction="A2" pintype="bidirectional"/>
+      <node ref="P1" pin="8" pinfunction="Pin_8" pintype="passive"/>
     </net>
-    <net code="12" name="Net-(IC_LC1-Pad8)">
-      <node ref="IC_LC1" pin="8"/>
+    <net code="12" name="/D6(JoyButton3)">
+      <node ref="IC_LC1" pin="5" pinfunction="A3" pintype="bidirectional"/>
+      <node ref="P1" pin="9" pinfunction="Pin_9" pintype="passive"/>
     </net>
-    <net code="13" name="Net-(IC_LC1-Pad7)">
-      <node ref="IC_LC1" pin="7"/>
+    <net code="13" name="/D7(JoyButton4)">
+      <node ref="IC_LC1" pin="6" pinfunction="A4" pintype="bidirectional"/>
+      <node ref="P1" pin="10" pinfunction="Pin_10" pintype="passive"/>
     </net>
-    <net code="14" name="Net-(IC_LC1-Pad14)">
-      <node ref="IC_LC1" pin="14"/>
+    <net code="14" name="/D8(EXT_LED1)">
+      <node ref="LED1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="P1" pin="11" pinfunction="Pin_11" pintype="passive"/>
     </net>
-    <net code="15" name="Net-(IC_LC1-Pad13)">
-      <node ref="IC_LC1" pin="13"/>
+    <net code="15" name="/D9(EXT_LED2)">
+      <node ref="LED2" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="P1" pin="12" pinfunction="Pin_12" pintype="passive"/>
     </net>
-    <net code="16" name="/D11(MOSI)">
-      <node ref="IC_POT1" pin="12"/>
-      <node ref="P2" pin="11"/>
+    <net code="16" name="/D10(SS)">
+      <node ref="IC_POT1" pin="11" pinfunction="~{CS}" pintype="bidirectional"/>
+      <node ref="P2" pin="12" pinfunction="Pin_12" pintype="passive"/>
     </net>
-    <net code="17" name="/W4(Joy2Y)">
-      <node ref="IC_POT1" pin="8"/>
-      <node ref="J_GAMEPORT1" pin="13"/>
+    <net code="17" name="/D11(MOSI)">
+      <node ref="IC_POT1" pin="12" pinfunction="SDI" pintype="bidirectional"/>
+      <node ref="P2" pin="11" pinfunction="Pin_11" pintype="passive"/>
     </net>
-    <net code="18" name="/D1(Tx)">
-      <node ref="P1" pin="1"/>
-      <node ref="J_SER1" pin="3"/>
+    <net code="18" name="/D12(MISO)">
+      <node ref="P2" pin="10" pinfunction="Pin_10" pintype="passive"/>
     </net>
-    <net code="19" name="/Reset">
-      <node ref="P1" pin="3"/>
-      <node ref="IC_POT1" pin="15"/>
+    <net code="19" name="/D13(SCK)">
+      <node ref="IC_POT1" pin="14" pinfunction="CLK" pintype="bidirectional"/>
+      <node ref="P2" pin="9" pinfunction="Pin_9" pintype="passive"/>
     </net>
-    <net code="20" name="/D2(PS2_DATA)">
-      <node ref="P1" pin="5"/>
-      <node ref="IC_LC1" pin="10"/>
+    <net code="20" name="/Reset">
+      <node ref="IC_POT1" pin="15" pinfunction="~{RS}" pintype="bidirectional"/>
+      <node ref="P1" pin="3" pinfunction="Pin_3" pintype="passive"/>
     </net>
-    <net code="21" name="/D3(PS2_CLOCK)">
-      <node ref="P1" pin="6"/>
-      <node ref="IC_LC1" pin="9"/>
+    <net code="21" name="/W1(Joy1X)">
+      <node ref="C9" pin="1" pintype="passive"/>
+      <node ref="Gameport1" pin="3" pinfunction="3" pintype="passive"/>
+      <node ref="IC_POT1" pin="22" pinfunction="W1" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="24" pinfunction="B1" pintype="bidirectional"/>
     </net>
-    <net code="22" name="/+5V(USB)">
-      <node ref="JP_5V_SEL1" pin="1"/>
-      <node ref="J_USB_PWR1" pin="1"/>
+    <net code="22" name="/W2(Joy1Y)">
+      <node ref="C7" pin="2" pintype="passive"/>
+      <node ref="Gameport1" pin="6" pinfunction="6" pintype="passive"/>
+      <node ref="IC_POT1" pin="2" pinfunction="B2" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="4" pinfunction="W2" pintype="bidirectional"/>
     </net>
-    <net code="23" name="VCC">
-      <node ref="IC_LC1" pin="2"/>
-      <node ref="R2" pin="1"/>
-      <node ref="R1" pin="1"/>
-      <node ref="P2" pin="4"/>
+    <net code="23" name="/W3(Joy2X)">
+      <node ref="C10" pin="1" pintype="passive"/>
+      <node ref="Gameport1" pin="11" pinfunction="P111" pintype="passive"/>
+      <node ref="IC_POT1" pin="18" pinfunction="W3" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="20" pinfunction="B3" pintype="bidirectional"/>
     </net>
-    <net code="24" name="Net-(IC_LC1-Pad18)">
-      <node ref="J_GAMEPORT1" pin="2"/>
-      <node ref="IC_LC1" pin="18"/>
+    <net code="24" name="/W4(Joy2Y)">
+      <node ref="C8" pin="2" pintype="passive"/>
+      <node ref="Gameport1" pin="13" pinfunction="P13" pintype="passive"/>
+      <node ref="IC_POT1" pin="6" pinfunction="B4" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="8" pinfunction="W4" pintype="bidirectional"/>
     </net>
-    <net code="25" name="Net-(C1-Pad1)">
-      <node ref="FB1" pin="2"/>
-      <node ref="C1" pin="1"/>
-      <node ref="JP_5V_SEL1" pin="2"/>
+    <net code="25" name="GND">
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="C10" pin="2" pintype="passive"/>
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="C3" pin="2" pintype="passive"/>
+      <node ref="C4" pin="2" pintype="passive"/>
+      <node ref="C5" pin="2" pintype="passive"/>
+      <node ref="C6" pin="2" pintype="passive"/>
+      <node ref="C7" pin="1" pintype="passive"/>
+      <node ref="C8" pin="1" pintype="passive"/>
+      <node ref="C9" pin="2" pintype="passive"/>
+      <node ref="Debug Conn1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="Gameport1" pin="0" pinfunction="PAD" pintype="passive"/>
+      <node ref="Gameport1" pin="4" pinfunction="4" pintype="passive"/>
+      <node ref="Gameport1" pin="5" pinfunction="5" pintype="passive"/>
+      <node ref="IC_LC1" pin="1" pinfunction="GND" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="1" pinfunction="AGND2" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="17" pinfunction="AGND3" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="21" pinfunction="AGND1" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="5" pinfunction="AGND4" pintype="bidirectional"/>
+      <node ref="IC_POT1" pin="9" pinfunction="DGND" pintype="bidirectional"/>
+      <node ref="J_PS/2_1" pin="3" pinfunction="3" pintype="bidirectional"/>
+      <node ref="J_PS/2_1" pin="MH1" pinfunction="MH1" pintype="bidirectional"/>
+      <node ref="J_PS/2_1" pin="MH2" pinfunction="MH2" pintype="bidirectional"/>
+      <node ref="J_PS/2_1" pin="MH3" pinfunction="MH3" pintype="bidirectional"/>
+      <node ref="J_PS/2_2" pin="3" pinfunction="3" pintype="bidirectional"/>
+      <node ref="J_PS/2_2" pin="MH1" pinfunction="MH1" pintype="bidirectional"/>
+      <node ref="J_PS/2_2" pin="MH2" pinfunction="MH2" pintype="bidirectional"/>
+      <node ref="J_PS/2_2" pin="MH3" pinfunction="MH3" pintype="bidirectional"/>
+      <node ref="P1" pin="4" pinfunction="Pin_4" pintype="passive"/>
+      <node ref="P2" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="Shield GND1" pin="2" pinfunction="B" pintype="passive"/>
+      <node ref="USB Power1" pin="5" pinfunction="GND" pintype="power_out"/>
     </net>
-    <net code="26" name="/+5V(Gameport)">
-      <node ref="J_GAMEPORT1" pin="9"/>
-      <node ref="J_GAMEPORT1" pin="8"/>
-      <node ref="JP_5V_SEL1" pin="3"/>
-      <node ref="J_GAMEPORT1" pin="1"/>
+    <net code="26" name="Net-(C1-Pad1)">
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="FB1" pin="2" pintype="passive"/>
     </net>
-    <net code="27" name="GND">
-      <node ref="IC_POT1" pin="20"/>
-      <node ref="IC_POT1" pin="24"/>
-      <node ref="IC_POT1" pin="2"/>
-      <node ref="IC_POT1" pin="21"/>
-      <node ref="IC_LC1" pin="1"/>
-      <node ref="J_GAMEPORT1" pin="4"/>
-      <node ref="J_GAMEPORT1" pin="0"/>
-      <node ref="IC_POT1" pin="5"/>
-      <node ref="IC_POT1" pin="9"/>
-      <node ref="IC_POT1" pin="6"/>
-      <node ref="P1" pin="4"/>
-      <node ref="P2" pin="2"/>
-      <node ref="C1" pin="2"/>
-      <node ref="C2" pin="2"/>
-      <node ref="C3" pin="2"/>
-      <node ref="J_GAMEPORT1" pin="5"/>
-      <node ref="C6" pin="2"/>
-      <node ref="IC_POT1" pin="1"/>
-      <node ref="J_USB_PWR1" pin="5"/>
-      <node ref="J_SER1" pin="1"/>
-      <node ref="C4" pin="2"/>
-      <node ref="JP_SHIELD1" pin="2"/>
-      <node ref="C5" pin="2"/>
-      <node ref="IC_POT1" pin="17"/>
-      <node ref="J_PS/2" pin="5"/>
-      <node ref="J_PS/2" pin="MH1"/>
-      <node ref="J_PS/2" pin="MH2"/>
-      <node ref="IC_POT1" pin="11"/>
-      <node ref="J_PS/2" pin="MH3"/>
+    <net code="27" name="Net-(Gameport1-P10)">
+      <node ref="Gameport1" pin="10" pinfunction="P10" pintype="passive"/>
+      <node ref="IC_LC1" pin="16" pinfunction="B3" pintype="bidirectional"/>
     </net>
-    <net code="28" name="Net-(C4-Pad1)">
-      <node ref="IC_LC1" pin="19"/>
-      <node ref="R3" pin="2"/>
-      <node ref="IC_LC1" pin="20"/>
-      <node ref="C4" pin="1"/>
+    <net code="28" name="Net-(Gameport1-P14)">
+      <node ref="Gameport1" pin="14" pinfunction="P14" pintype="passive"/>
+      <node ref="IC_LC1" pin="15" pinfunction="B4" pintype="bidirectional"/>
     </net>
-    <net code="29" name="Net-(J_EXT_LED2-Pad1)">
-      <node ref="R2" pin="2"/>
-      <node ref="J_EXT_LED2" pin="1"/>
+    <net code="29" name="Net-(IC_LC1-B1)">
+      <node ref="Gameport1" pin="2" pinfunction="2" pintype="passive"/>
+      <node ref="IC_LC1" pin="18" pinfunction="B1" pintype="bidirectional"/>
     </net>
-    <net code="30" name="Net-(J_EXT_LED1-Pad1)">
-      <node ref="R1" pin="2"/>
-      <node ref="J_EXT_LED1" pin="1"/>
+    <net code="30" name="Net-(IC_LC1-B2)">
+      <node ref="Gameport1" pin="7" pinfunction="7" pintype="passive"/>
+      <node ref="IC_LC1" pin="17" pinfunction="B2" pintype="bidirectional"/>
     </net>
-    <net code="31" name="Net-(J_USB_PWR1-Pad4)">
-      <node ref="J_USB_PWR1" pin="4"/>
+    <net code="31" name="Net-(IC_LC1-B5)">
+      <node ref="IC_LC1" pin="14" pinfunction="B5" pintype="bidirectional"/>
+      <node ref="J_PS/2_2" pin="5" pinfunction="6" pintype="bidirectional"/>
     </net>
-    <net code="32" name="Net-(JP_SHIELD1-Pad1)">
-      <node ref="JP_SHIELD1" pin="1"/>
-      <node ref="J_USB_PWR1" pin="6"/>
+    <net code="32" name="Net-(IC_LC1-B6)">
+      <node ref="IC_LC1" pin="13" pinfunction="B6" pintype="bidirectional"/>
+      <node ref="J_PS/2_2" pin="1" pinfunction="1" pintype="bidirectional"/>
     </net>
-    <net code="33" name="Net-(J_USB_PWR1-Pad3)">
-      <node ref="J_USB_PWR1" pin="3"/>
+    <net code="33" name="Net-(IC_LC1-B7)">
+      <node ref="IC_LC1" pin="12" pinfunction="B7" pintype="bidirectional"/>
+      <node ref="J_PS/2_1" pin="5" pinfunction="6" pintype="bidirectional"/>
+      <node ref="J_PS/2_2" pin="6" pinfunction="8" pintype="bidirectional"/>
     </net>
-    <net code="34" name="Net-(J_USB_PWR1-Pad2)">
-      <node ref="J_USB_PWR1" pin="2"/>
+    <net code="34" name="Net-(IC_LC1-B8)">
+      <node ref="IC_LC1" pin="11" pinfunction="B8" pintype="bidirectional"/>
+      <node ref="J_PS/2_1" pin="1" pinfunction="1" pintype="bidirectional"/>
+      <node ref="J_PS/2_2" pin="2" pinfunction="2" pintype="bidirectional"/>
     </net>
-    <net code="35" name="/ARef">
-      <node ref="P2" pin="3"/>
+    <net code="35" name="Net-(IC_LC1-EN)">
+      <node ref="C6" pin="1" pintype="passive"/>
+      <node ref="IC_LC1" pin="19" pinfunction="VREFB" pintype="bidirectional"/>
+      <node ref="IC_LC1" pin="20" pinfunction="EN" pintype="bidirectional"/>
+      <node ref="R3" pin="2" pintype="passive"/>
     </net>
-    <net code="36" name="/D0(Rx)">
-      <node ref="P1" pin="2"/>
-      <node ref="J_SER1" pin="2"/>
+    <net code="36" name="Net-(LED1-Pin_2)">
+      <node ref="LED1" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="R1" pin="2" pintype="passive"/>
     </net>
-    <net code="37" name="/D13(SCK)">
-      <node ref="P2" pin="9"/>
-      <node ref="IC_POT1" pin="14"/>
+    <net code="37" name="Net-(LED2-Pin_2)">
+      <node ref="LED2" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
     </net>
-    <net code="38" name="Net-(J_PS/2-Pad6)">
-      <node ref="J_PS/2" pin="6"/>
+    <net code="38" name="Net-(Shield GND1-A)">
+      <node ref="Shield GND1" pin="1" pinfunction="A" pintype="passive"/>
+      <node ref="USB Power1" pin="6" pinfunction="Shield" pintype="passive"/>
     </net>
-    <net code="39" name="Net-(J_PS/2-Pad3)">
-      <node ref="J_PS/2" pin="3"/>
+    <net code="39" name="VCC">
+      <node ref="IC_LC1" pin="2" pinfunction="VREFA" pintype="bidirectional"/>
+      <node ref="P2" pin="4" pinfunction="Pin_4" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
     </net>
-    <net code="40" name="Net-(J_PS/2-Pad1)">
-      <node ref="J_PS/2" pin="1"/>
+    <net code="40" name="unconnected-(5V Select1-C-Pad2)">
+      <node ref="5V Select1" pin="2" pinfunction="C" pintype="input"/>
     </net>
-    <net code="41" name="Net-(IC_POT1-Pad13)">
-      <node ref="IC_POT1" pin="13"/>
+    <net code="41" name="unconnected-(Gameport1-P12-Pad12)">
+      <node ref="Gameport1" pin="12" pinfunction="P12" pintype="passive+no_connect"/>
     </net>
-    <net code="42" name="/W2(Joy1Y)">
-      <node ref="IC_POT1" pin="4"/>
-      <node ref="J_GAMEPORT1" pin="6"/>
+    <net code="42" name="unconnected-(Gameport1-P15-Pad15)">
+      <node ref="Gameport1" pin="15" pinfunction="P15" pintype="passive+no_connect"/>
     </net>
-    <net code="43" name="/W1(Joy1X)">
-      <node ref="IC_POT1" pin="22"/>
-      <node ref="J_GAMEPORT1" pin="3"/>
+    <net code="43" name="unconnected-(IC_POT1-SDO-Pad13)">
+      <node ref="IC_POT1" pin="13" pinfunction="SDO" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="44" name="Net-(J_GAMEPORT1-Pad15)">
-      <node ref="J_GAMEPORT1" pin="15"/>
+    <net code="44" name="unconnected-(J_PS/2_1-5-Pad4)">
+      <node ref="J_PS/2_1" pin="4" pinfunction="5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="45" name="Net-(J_GAMEPORT1-Pad12)">
-      <node ref="J_GAMEPORT1" pin="12"/>
+    <net code="45" name="unconnected-(J_PS/2_1-8-Pad6)">
+      <node ref="J_PS/2_1" pin="6" pinfunction="8" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="46" name="/W3(Joy2X)">
-      <node ref="J_GAMEPORT1" pin="11"/>
-      <node ref="IC_POT1" pin="18"/>
+    <net code="46" name="unconnected-(J_PS/2_1-Pad2)">
+      <node ref="J_PS/2_1" pin="2" pinfunction="2" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="47" name="/D10(SS)">
-      <node ref="P2" pin="12"/>
+    <net code="47" name="unconnected-(J_PS/2_2-5-Pad4)">
+      <node ref="J_PS/2_2" pin="4" pinfunction="5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="48" name="+5V">
-      <node ref="IC_POT1" pin="10"/>
-      <node ref="IC_POT1" pin="16"/>
-      <node ref="C6" pin="1"/>
-      <node ref="C5" pin="1"/>
-      <node ref="R3" pin="1"/>
-      <node ref="C3" pin="1"/>
-      <node ref="C2" pin="1"/>
-      <node ref="P2" pin="1"/>
-      <node ref="FB1" pin="1"/>
-      <node ref="IC_POT1" pin="7"/>
-      <node ref="IC_POT1" pin="3"/>
-      <node ref="IC_POT1" pin="23"/>
-      <node ref="IC_POT1" pin="19"/>
+    <net code="48" name="unconnected-(P2-Pin_3-Pad3)">
+      <node ref="P2" pin="3" pinfunction="Pin_3" pintype="passive+no_connect"/>
     </net>
-    <net code="49" name="/A3">
-      <node ref="P2" pin="5"/>
+    <net code="49" name="unconnected-(P2-Pin_7-Pad7)">
+      <node ref="P2" pin="7" pinfunction="Pin_7" pintype="passive+no_connect"/>
     </net>
-    <net code="50" name="/A2">
-      <node ref="P2" pin="6"/>
+    <net code="50" name="unconnected-(P2-Pin_8-Pad8)">
+      <node ref="P2" pin="8" pinfunction="Pin_8" pintype="passive+no_connect"/>
     </net>
-    <net code="51" name="/A1">
-      <node ref="P2" pin="7"/>
+    <net code="51" name="unconnected-(USB Power1-D+-Pad3)">
+      <node ref="USB Power1" pin="3" pinfunction="D+" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="52" name="/A0">
-      <node ref="P2" pin="8"/>
+    <net code="52" name="unconnected-(USB Power1-D--Pad2)">
+      <node ref="USB Power1" pin="2" pinfunction="D-" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="53" name="/D12(MISO)">
-      <node ref="P2" pin="10"/>
+    <net code="53" name="unconnected-(USB Power1-ID-Pad4)">
+      <node ref="USB Power1" pin="4" pinfunction="ID" pintype="passive+no_connect"/>
     </net>
   </nets>
 </export>

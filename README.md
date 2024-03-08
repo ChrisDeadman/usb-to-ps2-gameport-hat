@@ -1,5 +1,5 @@
-Usb => PS/2 & Gameport HAT v1.4 DRAFT
-=====================================
+Usb => PS/2 & Gameport HAT v1.4
+===============================
 
 Author: ChrisDeadman
 
@@ -22,7 +22,7 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 * PS/2 Keyboard**/Mouse port (combined)
 * Gameport
 
-**All types are supported, including IntelliMouse (5 Buttons + Scroll Wheel).*  
+**All types are supported, including IntelliMouse (5 Buttons + Scroll wheel).*  
 ***Scancode Set 2*
 
 ## Supported Arduino Boards
@@ -58,7 +58,7 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 |                       |             | **4**  Keyboard -> Mouse             |         |
 |                       |             | **5**  Mouse    -> Joystick          |         |
 | Swap joy axis 3 and 4 | 2           | **ON** / **OFF**                     | OFF     |
-| Mouse Emu Speed       | 3           | **0 < n < 256**                      | 2       |
+| Mouse Emu Speed       | 3           | **1 <= n <= 255**                    | 2       |
 
 ## Bindings
 
@@ -95,22 +95,22 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 
 ### Emulation Mode Mappings
 
-| Keyboard            | Mouse       | Joystick                      | Gameport |
-|:--------------------|:------------|:------------------------------|:---------|
-| Left / Right Arrow  | X-Axis      | X-Axis 1 / D-Pad              | X-Axis 1 |
-| Up / Down Arrow     | Y-Axis      | Y-Axis 1 / D-Pad              | Y-Axis 1 |
-| A / D               | -           | X-Axis 2                      | X-Axis 2 |
-| W / S               | ScrollWheel | Y-Axis 2                      | Y-Axis 2 |
-| L-Ctrl / R-Ctrl     | Button 1    | Button 1 / A                  | Button 1 |
-| Space / R-Shift     | Button 2    | Button 2 / B                  | Button 2 |
-| L-Alt / CapsLock    | Button 3    | Button 3 / X                  | Button 3 |
-| L-Shift             | Button 4    | Button 4 / Y                  | Button 4 |
-| Period              | Button 5    | Button 5 / R1                 | -        |
-| Comma               | -           | Button 6 / L1                 | -        |
-| Up Arrow            | -           | Button 7 / R2                 | -        |
-| Down Arrow          | -           | Button 8 / L2                 | -        |
-| Escape              | -           | Button 9 / SELECT             | -        |
-| Tab                 | -           | Button 10 / START             | -        |
+| Keyboard            | Mouse        | Joystick                      | Gameport |
+|:--------------------|:-------------|:------------------------------|:---------|
+| Left / Right Arrow  | X-Axis       | X-Axis 1 / D-Pad              | X-Axis 1 |
+| Up / Down Arrow     | Y-Axis       | Y-Axis 1 / D-Pad              | Y-Axis 1 |
+| A / D               | -            | X-Axis 2                      | X-Axis 2 |
+| W / S               | Scroll wheel | Y-Axis 2                      | Y-Axis 2 |
+| L-Ctrl / R-Ctrl     | Button 1     | Button 1 / A                  | Button 1 |
+| Space / R-Shift     | Button 2     | Button 2 / B                  | Button 2 |
+| L-Alt / CapsLock    | Button 3     | Button 3 / X                  | Button 3 |
+| L-Shift             | Button 4     | Button 4 / Y                  | Button 4 |
+| Period              | Button 5     | Button 5 / R1                 | -        |
+| Comma               | -            | Button 6 / L1                 | -        |
+| Up Arrow            | -            | Button 7 / R2                 | -        |
+| Down Arrow          | -            | Button 8 / L2                 | -        |
+| Escape              | -            | Button 9 / SELECT             | -        |
+| Tab                 | -            | Button 10 / START             | -        |
 
 ## Developer Notes
 
@@ -146,7 +146,7 @@ Backside
 Release notes
 =============
 
-### Usb => PS/2 & Gameport HAT v1.4 DRAFT
+### Usb => PS/2 & Gameport HAT v1.4
 * Add keyboard support
 * Add device emulation modes
 * @Ulfenknulfen: Fix Joy Axes hardware bug which limited axes range and fixes calibration issues

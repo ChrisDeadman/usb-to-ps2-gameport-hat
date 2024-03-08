@@ -9,7 +9,7 @@
     (title "USB to PS/2 & Gameport HAT for Arduino Pro Mini")
     (date "2024-02-21")
     (rev "1.4")
-    (company "© 2019 by Deadman")
+    (company "© 2024 by Deadman")
     (comment 1 "Thanks to Paddy")
   )
 
