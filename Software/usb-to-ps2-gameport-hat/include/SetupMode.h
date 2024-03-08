@@ -18,7 +18,9 @@ enum SetupKeys : uint16_t {
   SetupKeyQuick3 = 0x1300,
   SetupKeyQuick4 = 0x1400,
   SetupKeyQuick5 = 0x1500,
-  SetupKeyQuick6 = 0x1600
+  SetupKeyQuick6 = 0x1600,
+  SetupKeyQuick7 = 0x1700,
+  SetupKeyQuick8 = 0x1800
 };
 
 enum EmuMode : uint8_t {

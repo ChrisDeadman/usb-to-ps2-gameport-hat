@@ -76,8 +76,9 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 | F3              | -                             | Set Emulation Mode #3 and exit setup mode         |
 | F4              | -                             | Set Emulation Mode #4 and exit setup mode         |
 | F5              | -                             | Set Emulation Mode #5 and exit setup mode         |
-| F6              | -                             | Set Emulation Mode #6 and exit setup mode         |
-| F7              | -                             | Toggle Swap joy axis 3 and 4 and exit setup mode  |
+| F6              | -                             | Toggle Swap joy axis 3 and 4 and exit setup mode  |
+| F7              | -                             | Decrease Mouse Emu Speed and exit setup mode      |
+| F8              | -                             | Increase Mouse Emu Speed and exit setup mode      |
 
 ### Joystick / Gamepad Mappings
 
@@ -97,7 +98,7 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 | Keyboard            | Mouse       | Joystick                      | Gameport |
 |:--------------------|:------------|:------------------------------|:---------|
 | Left / Right Arrow  | X-Axis      | X-Axis 1 / D-Pad              | X-Axis 1 |
-| Up / Down Arrow     | Y-Axis      | Y-Axis 1 / D-Pad / R2 / L2    | Y-Axis 1 |
+| Up / Down Arrow     | Y-Axis      | Y-Axis 1 / D-Pad              | Y-Axis 1 |
 | A / D               | -           | X-Axis 2                      | X-Axis 2 |
 | W / S               | ScrollWheel | Y-Axis 2                      | Y-Axis 2 |
 | L-Ctrl / R-Ctrl     | Button 1    | Button 1 / A                  | Button 1 |
@@ -106,6 +107,8 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 | L-Shift             | Button 4    | Button 4 / Y                  | Button 4 |
 | Period              | Button 5    | Button 5 / R1                 | -        |
 | Comma               | -           | Button 6 / L1                 | -        |
+| Up Arrow            | -           | Button 7 / R2                 | -        |
+| Down Arrow          | -           | Button 8 / L2                 | -        |
 | Escape              | -           | Button 9 / SELECT             | -        |
 | Tab                 | -           | Button 10 / START             | -        |
 

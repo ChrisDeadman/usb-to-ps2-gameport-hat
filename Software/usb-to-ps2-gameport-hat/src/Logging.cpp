@@ -132,6 +132,8 @@ void Logging::log_status() {
   log_buffer->concatln("%u", (uint8_t)setup_mode->swap_joy_axis_3_and_4);
   log_buffer->concat("║emu mode: ");
   log_buffer->concatln("%u", (uint8_t)setup_mode->emu_mode);
+  log_buffer->concat("║mouse emu speed: ");
+  log_buffer->concatln("%u", (uint8_t)setup_mode->mouse_emu_speed);
   log_buffer->concatln("╠════════════╗");
   log_buffer->concatln("║ USB status ║");
   log_buffer->concatln("╠════════════╝");

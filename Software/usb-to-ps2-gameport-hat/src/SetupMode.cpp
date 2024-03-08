@@ -172,6 +172,12 @@ SetupKeys SetupMode::get_key_state() {
       case F6:
         key_state = (SetupKeys)(key_state | SetupKeyQuick6);
         break;
+      case F7:
+        key_state = (SetupKeys)(key_state | SetupKeyQuick7);
+        break;
+      case F8:
+        key_state = (SetupKeys)(key_state | SetupKeyQuick8);
+        break;
       default:
         // put back what we don't consume
         keyboard->enq(kb_action);
@@ -270,7 +276,16 @@ bool SetupMode::set_item_value_quick(SetupKeys key_state) {
       emu_mode = EmuMode::EmuModeMouseJoy;
       return true;
     case SetupKeyQuick6:
-      swap_joy_axis_3_and_4 = !swap_joy_axis_3_and_4;
+      item_idx = 1;
+      set_item_value(1);
+      return true;
+    case SetupKeyQuick7:
+      item_idx = 2;
+      set_item_value(-1);
+      return true;
+    case SetupKeyQuick8:
+      item_idx = 2;
+      set_item_value(1);
       return true;
     default:
       return false;
