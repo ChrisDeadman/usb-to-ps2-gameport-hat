@@ -5,10 +5,6 @@ Author: ChrisDeadman
 
 Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 
-![Schematic](Schematic.png)
-
-![Layout](Layout.png)
-
 ![3D render](3DRender.png)
 
 ## Supported input devices
@@ -123,6 +119,26 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 * You can change pins in `include/Config.h`.
 
 * You can add support for additional USB devices by implementing a `JoystickDriverMapper` and adding it to `joy_mappers` in `main.cpp`.
+
+Schematic
+=========
+
+![Schematic](Schematic.png)
+
+Layout
+======
+
+![Layout](Layout.png)
+
+Upside
+======
+
+![Upside](Upside.png)
+
+Backside
+========
+
+![Backside](Backside.png)
 
 Release notes
 =============
