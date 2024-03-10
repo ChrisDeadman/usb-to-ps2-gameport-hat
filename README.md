@@ -10,25 +10,25 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 ## Supported input devices
 * HID Mouse
 * HID Keyboard
-* HID Mouse/Keyboard Combo
-* HID Joystick/Gamepad*
-* Xbox 360 Controller**
+* HID Mouse / Keyboard Combo
+* HID Joystick / Gamepad\*
+* Xbox 360 Controller\*\*
 
-**Descriptor parsing is a work in progress and may not work for all devices.*  
-***Currently, only the Xbox 360 Wireless Receiver is supported.*
+\* *Descriptor parsing is a work in progress and may not work for all devices.*  
+\*\* *Currently, only the Xbox 360 Wireless Receiver is supported.*
 
 ## Outputs
-* PS/2 Mouse* port
-* PS/2 Keyboard**/Mouse port (combined)
+* PS/2 Mouse\* port
+* PS/2 Keyboard\*\* / Mouse combined port
 * Gameport
 
-**All types are supported, including IntelliMouse (5 Buttons + Scroll wheel).*  
-***Scancode Set 2*
+\* *All types are supported, including IntelliMouse (5 Buttons + Scroll wheel).*  
+\*\* *Scancode Set 2*
 
 ## Supported Arduino Boards
-* [SparkFun SAMD21 Mini Breakout](https://www.sparkfun.com/products/13664)*
+* [SparkFun SAMD21 Mini Breakout](https://www.sparkfun.com/products/13664)\*
 
-**Other ATSAMD21G18 boards should also work well, provided they have the same pinout.*
+\* *Other ATSAMD21G18 boards should also work well, provided they have the same pinout.*
 
 ## Usage
 
@@ -38,49 +38,17 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 * Use a USB OTG cable to connect your USB device to the Arduino.  
   **Recommendation:** Connect a USB hub to the Arduino if you want to use multiple USB devices.
 
-### LEDs
+## LEDs
 
 * **LED1** is **ON** if the host inhibits any PS/2 port.
 * **LED1** is **FLASHING** if data transfer occurs over any PS/2 port.
 * **LED2** indicates **Joy Button** press or the highest **Axis Value**.
 
-### Setup Mode
+## Input Mappings
 
-* **LED1/CapsLock** blink count indicates the current setting.
-* **LED2/NumLock/ScrollLock** blink count indicates the value of the current setting, blinks only in edit mode.
+### USB -> Gameport
 
-| Setting               | LED1 Blinks | Values / LED2 Blinks                 | Default |
-|:----------------------|:-----------:|:-------------------------------------|:-------:|
-| Emulation Mode        | 1           | **OFF**                              | OFF     |
-|                       |             | **1**  Joystick -> Keyboard          |         |
-|                       |             | **2**  Joystick -> Mouse             |         |
-|                       |             | **3**  Keyboard -> Joystick          |         |
-|                       |             | **4**  Keyboard -> Mouse             |         |
-|                       |             | **5**  Mouse    -> Joystick          |         |
-| Swap joy axis 3 and 4 | 2           | **ON** / **OFF**                     | OFF     |
-| Mouse Emu Speed       | 3           | **1 <= n <= 255**                    | 2       |
-
-## Bindings
-
-### Setup Mode
-
-| Keyboard        | Joystick / Gamepad            | Function                                          |
-|:----------------|:------------------------------|:--------------------------------------------------|
-| CTRL+SHIFT+WIN  | Button 5 / R1 + Button 6 / L1 | Hold for 1.5s to enter/exit setup mode            |
-| Return          | Button 1 / A                  | Edit setting / exit edit mode                     |
-| Right Arrow     | X-Axis 1 / D-PAD Right        | Next setting / increase value (edit mode)         |
-| Left Arrow      | X-Axis 1 / D-PAD Left         | Prev. setting / decrease value (edit mode)        |
-| ESC             | Button 9 / SELECT             | Apply Default Settings and exit setup mode        |
-| F1              | -                             | Set Emulation Mode #1 and exit setup mode         |
-| F2              | -                             | Set Emulation Mode #2 and exit setup mode         |
-| F3              | -                             | Set Emulation Mode #3 and exit setup mode         |
-| F4              | -                             | Set Emulation Mode #4 and exit setup mode         |
-| F5              | -                             | Set Emulation Mode #5 and exit setup mode         |
-| F6              | -                             | Toggle Swap joy axis 3 and 4 and exit setup mode  |
-| F7              | -                             | Decrease Mouse Emu Speed and exit setup mode      |
-| F8              | -                             | Increase Mouse Emu Speed and exit setup mode      |
-
-### Joystick / Gamepad Mappings
+This is how USB Joysticks / Gamepads are mapped to the Gameport:
 
 | Joystick 1            | Joystick 2        | Gameport |
 |:----------------------|:------------------|:---------|
@@ -94,6 +62,8 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 | Button 4 / Y / Start  | Button 2 / B / L2 | Button 4 |
 
 ### Emulation Mode Mappings
+
+Consult the table below to understand the mapping between various device inputs when an emulation mode is enabled:
 
 | Keyboard            | Mouse        | Joystick                      | Gameport |
 |:--------------------|:-------------|:------------------------------|:---------|
@@ -111,6 +81,76 @@ Convert USB devices to PS/2 & Gameport devices with the power of Arduino 🙂
 | Down Arrow          | -            | Button 8 / L2                 | -        |
 | Escape              | -            | Button 9 / SELECT             | -        |
 | Tab                 | -            | Button 10 / START             | -        |
+
+#### Here are a few examples:
+
+* **Joystick -> Keyboard** Emulation Mode:  
+  Moving the joystick along X-Axis 1 *(or D-Pad left and right)* acts as if you pressed the Left / Right Arrow keys on the keyboard.
+
+* **Joystick -> Mouse** Emulation Mode:  
+  Moving the joystick along X-Axis 1 *(or D-Pad left and right)* move the mouse cursor along the X-Axis.
+
+* **Keyboard -> Joystick** Emulation Mode:  
+  If **L-CTRL** or **R-CTRL** is pressed, it acts as if you pressed Button 1 on the joystick.
+
+* **Keyboard -> Mouse** Emulation Mode:  
+  The Left / Right Arrow keys on your keyboard move the mouse cursor along the X-Axis.
+
+* **Mouse -> Joystick** Emulation Mode:  
+  Moving the mouse left and right corresponds to moving the joystick along the X-Axis 1.
+
+## Setup Mode
+
+Enter this mode to enable special features. Note that those settings are reset to default when the device is reset.
+
+#### Feedback
+
+* **LED1** blink count indicates the current setting.
+* **LED2** blink count indicates the value of the current setting, blinks only in edit mode.
+* Keyboard LEDs will also blink accordingly (**LED1**=**CapsLock**, **LED2**=**NumLock** and **ScrollLock**).
+* LEDs of supported controllers (e.g. Xbox 360) will also blink accordingly.
+
+#### Settings
+
+| Setting               | LED1 Blinks | Values / LED2 Blinks                 | Default |
+|:----------------------|:-----------:|:-------------------------------------|:-------:|
+| Emulation Mode        | 1           | **OFF**                              | **OFF** |
+|                       |             | **1**  Joystick -> Keyboard          |         |
+|                       |             | **2**  Joystick -> Mouse             |         |
+|                       |             | **3**  Keyboard -> Joystick          |         |
+|                       |             | **4**  Keyboard -> Mouse             |         |
+|                       |             | **5**  Mouse    -> Joystick          |         |
+| Swap joy axis 3 and 4 | 2           | **ON** / **OFF**                     | **OFF** |
+| Mouse Emu Speed       | 3           | **1 <= n <= 255**                    | **2**   |
+
+#### Key bindings
+
+| Keyboard        | Joystick / Gamepad            | Function                                          |
+|:----------------|:------------------------------|:--------------------------------------------------|
+| CTRL+SHIFT+WIN  | Button 5 / R1 + Button 6 / L1 | Hold for ~1s to enter/exit setup mode             |
+| Return          | Button 1 / A                  | Edit setting / exit edit mode                     |
+| Right Arrow     | X-Axis 1 / D-PAD Right        | Next setting / increase value (edit mode)         |
+| Left Arrow      | X-Axis 1 / D-PAD Left         | Prev. setting / decrease value (edit mode)        |
+| ESC             | Button 9 / SELECT             | Apply Default Settings and exit setup mode        |
+| F1              | -                             | Set Emulation Mode #1 and exit setup mode         |
+| F2              | -                             | Set Emulation Mode #2 and exit setup mode         |
+| F3              | -                             | Set Emulation Mode #3 and exit setup mode         |
+| F4              | -                             | Set Emulation Mode #4 and exit setup mode         |
+| F5              | -                             | Set Emulation Mode #5 and exit setup mode         |
+| F6              | -                             | Toggle Swap joy axis 3 and 4 and exit setup mode  |
+| F7              | -                             | Decrease Mouse Emu Speed and exit setup mode      |
+| F8              | -                             | Increase Mouse Emu Speed and exit setup mode      |
+
+## Flashing the firmware
+
+* [Download latest firmware.bin](https://github.com/ChrisDeadman/usb-to-ps2-gameport-hat/releases/latest)
+* [Download Bossa](https://www.shumatech.com/web/products/bossa)
+* Connect the **SAMD21 Mini Breakout** to your computer  
+*(either via USB OTG cable or via the Debug Conn. pins using a USB<->Serial converter)*
+* Double-Tap the reset button on the board to enter bootloader mode
+* Flash with `bossac --port=/dev/ttyUSB0 -U -i --offset=0x2000 -e -w firmware.bin -R`
+
+*Ensure you change `--port` to match your system's actual port. The example provided is for Linux systems.*
 
 ## Developer Notes
 
