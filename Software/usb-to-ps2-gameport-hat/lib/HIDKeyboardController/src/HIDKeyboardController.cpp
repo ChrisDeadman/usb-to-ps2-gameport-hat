@@ -251,7 +251,7 @@ HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
   modifier_state = ModNone;
   led_state = KbLedNone;
-  memset(prev_state, NoKey, KEYBOARD_KRO);
+  memset(prev_state, NoKey, sizeof(prev_state));
 }
 
 bool HIDKeyboardController::is_connected() { return driver->isReady(); }
@@ -283,7 +283,9 @@ void HIDKeyboardController::set_led_state(KeyboardLeds new_state) {
   usb_data_sent(send_report_buffer, 1);
 }
 
-void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */, uint32_t len,
+void HIDKeyboardController::Parse(HID * /* hid */,
+                                  uint32_t /* is_rpt_id */,
+                                  uint32_t len,
                                   uint8_t *buf) {
   KeyboardAction kb_action;
 
@@ -337,11 +339,11 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */, uin
   }
 
   // handle keys
-  for (uint32_t i = 0; i < KEYBOARD_KRO; i++) {
+  for (uint32_t i = 0; i < sizeof(prev_state); i++) {
     bool down = (len > 2 + i) && (buf[2 + i] > 0);
     bool up = prev_state[i] != NoKey;
 
-    for (uint32_t j = 0; j < KEYBOARD_KRO; j++) {
+    for (uint32_t j = 0; j < sizeof(prev_state); j++) {
       if ((len > 2 + i) && (buf[2 + i] == prev_state[j])) down = false;
       if ((len > 2 + j) && (buf[2 + j] == prev_state[i])) up = false;
     }
@@ -372,7 +374,7 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */, uin
   }
 
   // update prev. state
-  for (uint32_t i = 0; i < KEYBOARD_KRO; i++) {
+  for (uint32_t i = 0; i < sizeof(prev_state); i++) {
     // ignore overrun
     if (len > 2 + i) {
       prev_state[i] = buf[2 + i];

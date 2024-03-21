@@ -9,7 +9,7 @@
 
 class KeyBuffer {
  private:
-  CircularBuffer<KeyboardAction, KEYBOARD_KRO> buffer;
+  CircularBuffer<KeyboardAction, (KEYBOARD_KRO * 2)> buffer;
 
  public:
   /**
