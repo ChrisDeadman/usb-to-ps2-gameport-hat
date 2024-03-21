@@ -143,11 +143,19 @@ Enter this mode to enable special features. Note that those settings are reset t
 
 ## Flashing the firmware
 
-* [Download latest firmware.bin](https://github.com/ChrisDeadman/usb-to-ps2-gameport-hat/releases/latest)
-* [Download Bossa](https://www.shumatech.com/web/products/bossa)
+* Install drivers for you serial adapter
 * Connect the **SAMD21 Mini Breakout** to your computer  
 *(either via USB OTG cable or via the Debug Conn. pins using a USB<->Serial converter)*
 * Double-Tap the reset button on the board to enter bootloader mode
+
+### Automatically
+
+* [Download and run latest firmware_flash.bat](https://github.com/ChrisDeadman/usb-to-ps2-gameport-hat/releases/latest)
+
+### Manually
+
+* [Download latest firmware.bin](https://github.com/ChrisDeadman/usb-to-ps2-gameport-hat/releases/latest)
+* [Download Bossa](https://www.shumatech.com/web/products/bossa)
 * Flash with `bossac --port=/dev/ttyUSB0 -U -i --offset=0x2000 -e -w firmware.bin -R`
 
 *Ensure you change `--port` to match your system's actual port. The example provided is for Linux systems.*
