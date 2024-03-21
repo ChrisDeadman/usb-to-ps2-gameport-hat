@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "SetupMode.h"
 
 #include "Config.h"

@@ -5,11 +5,11 @@
 #include "KeyboardAction.h"
 #include "KeyboardCodes.h"
 
-#define KEYBOARD_KRO 3
+#define KEYBOARD_KRO 12
 
 class KeyBuffer {
  private:
-  CircularBuffer<KeyboardAction, KEYBOARD_KRO> buffer;
+  CircularBuffer<KeyboardAction, (KEYBOARD_KRO)> buffer;
 
  public:
   /**

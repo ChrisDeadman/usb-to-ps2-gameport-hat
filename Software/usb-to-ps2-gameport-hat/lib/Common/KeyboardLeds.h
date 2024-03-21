@@ -1,8 +1,6 @@
 #ifndef _KEYBOARD_LEDS_H_
 #define _KEYBOARD_LEDS_H_
 
-#include <Arduino.h>
-
 enum KeyboardLeds : uint8_t {
   KbLedNone = 0x0,
   KbLedScrollLock = 0x1,

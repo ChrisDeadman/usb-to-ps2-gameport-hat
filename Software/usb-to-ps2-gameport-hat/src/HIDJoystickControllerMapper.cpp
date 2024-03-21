@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "HIDJoystickControllerMapper.h"
 
 HIDJoystickControllerMapper::HIDJoystickControllerMapper(HIDJoystickController* driver)

@@ -1,9 +1,9 @@
 #ifndef HID_KEYBOARD_CONTROLLER_H
 #define HID_KEYBOARD_CONTROLLER_H
 
-#include <Arduino.h>
 #include <hidboot.h>
 
+#include "HIDKeyboardParser.h"
 #include "KeyBuffer.h"
 #include "KeyboardAction.h"
 #include "KeyboardLeds.h"
@@ -13,10 +13,8 @@ class HIDKeyboardController : virtual public HIDReportParser {
  private:
   HID *driver;
 
-  KeyboardModifierState modifier_state;
-  uint8_t prev_state[KEYBOARD_KRO];
+  HIDKeyboardParser kb_parser;
   KeyboardLeds led_state;
-  KeyBuffer key_buffer;
   uint8_t send_report_buffer[1] __attribute__((aligned(4)));
 
  public:

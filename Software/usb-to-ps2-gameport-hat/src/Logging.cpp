@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "Logging.h"
 
 #include "Config.h"

@@ -4,12 +4,9 @@
 
 CircularBuffer<uint8_t, 3> buffer;
 
-void setUp(void) {
-  buffer.clear();
-}
+void setUp(void) { buffer.clear(); }
 
-void tearDown(void) {
-}
+void tearDown(void) {}
 
 void test_simple(void) {
   TEST_ASSERT_EQUAL_UINT16(0, buffer.length());

@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "DeviceEmulation.h"
 
 #include "Config.h"

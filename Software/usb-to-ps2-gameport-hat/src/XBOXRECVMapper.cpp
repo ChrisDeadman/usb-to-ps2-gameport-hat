@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "XBOXRECVMapper.h"
 
 #include "Config.h"

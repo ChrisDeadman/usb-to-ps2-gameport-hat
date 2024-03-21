@@ -1,8 +1,6 @@
 #ifndef _JOYSTICK_LEDS_H_
 #define _JOYSTICK_LEDS_H_
 
-#include <Arduino.h>
-
 enum JoystickLeds : uint8_t {
   JoyLedDefault = 0xFF,
   JoyLedNone = 0x0,

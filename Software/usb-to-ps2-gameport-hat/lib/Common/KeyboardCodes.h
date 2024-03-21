@@ -1,8 +1,6 @@
 #ifndef _KEYBOARD_CODES_H_
 #define _KEYBOARD_CODES_H_
 
-#include <Arduino.h>
-
 enum KeyboardCodes : uint8_t {
   OverrunError = 0,
   POSTFail,

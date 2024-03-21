@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "VirtualKeyboard.h"
 
 VirtualKeyboard::VirtualKeyboard() {}

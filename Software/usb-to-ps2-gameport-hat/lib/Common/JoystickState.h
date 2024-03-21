@@ -1,8 +1,6 @@
 #ifndef _JOYSTICK_STATE_H_
 #define _JOYSTICK_STATE_H_
 
-#include <Arduino.h>
-
 #define JOY_AXIS_CENTER 0x80
 
 struct JoystickState {

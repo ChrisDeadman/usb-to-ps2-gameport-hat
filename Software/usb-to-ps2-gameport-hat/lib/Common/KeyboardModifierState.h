@@ -1,8 +1,6 @@
 #ifndef _KEYBOARD_MODIFIER_STATE_H_
 #define _KEYBOARD_MODIFIER_STATE_H_
 
-#include <Arduino.h>
-
 enum KeyboardModifierState : uint8_t {
   ModNone = 0,
   ModLeftCtrl = 0x01,

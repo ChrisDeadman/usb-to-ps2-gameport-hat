@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #include "VirtualMouse.h"
 
 inline int16_t add_mouse_delta(int16_t value, int8_t delta) {
