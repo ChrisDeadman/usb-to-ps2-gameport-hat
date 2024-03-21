@@ -151,7 +151,7 @@ void PS2Port::enable_clock_irq() {
 
 void PS2Port::disable_clock_irq() {
   NVIC_DisableIRQ(TCIRQn);
-  TC->INTENSET.bit.MC0 = 0;
+  TC->INTENCLR.bit.MC0 = 1;
   while (TC->STATUS.bit.SYNCBUSY)
     ;  // wait for synchronization
 }
