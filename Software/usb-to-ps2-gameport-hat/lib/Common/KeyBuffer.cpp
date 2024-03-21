@@ -4,7 +4,7 @@ uint16_t KeyBuffer::length() { return buffer.length(); }
 
 void KeyBuffer::enq(KeyboardAction kb_action) {
   uint16_t make_count = 0;
-  uint16_t overwrite_idx = buffer.length() - 1;
+  uint16_t overwrite_idx = 0;
 
   // buffer not full -> we can enqueue
   if (!buffer.is_filled()) {
@@ -17,7 +17,7 @@ void KeyBuffer::enq(KeyboardAction kb_action) {
     return;
   }
 
-  // search for MAKE actions we can replace
+  // search for MAKE actions that can be replaced
   for (uint16_t idx = 0; idx < buffer.length(); idx++) {
     if (buffer.get(idx).type == KbActionMake) {
       overwrite_idx = idx;
@@ -25,7 +25,7 @@ void KeyBuffer::enq(KeyboardAction kb_action) {
     }
   }
 
-  // replace a MAKE action with the BREAK action
+  // If there's at least one MAKE action, replace it with the BREAK action
   if (make_count > 0) {
     buffer.set(overwrite_idx, kb_action);
   }

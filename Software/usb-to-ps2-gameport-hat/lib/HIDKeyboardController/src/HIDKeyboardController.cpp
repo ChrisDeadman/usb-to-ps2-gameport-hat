@@ -1,5 +1,7 @@
 #include "HIDKeyboardController.h"
 
+#define KEY_START_INDEX (2)  // Starting index for key data in the HID buffer
+
 static const KeyboardCodes keycode_table[] = {
     NoKey,
     OverrunError,
@@ -247,11 +249,26 @@ void usb_data_received(uint8_t const *const data, uint8_t length)
 void usb_data_sent(uint8_t const *const data, uint8_t length)
     __attribute__((weak, alias("__usb_kbd_dummy_callback")));
 
+static KeyboardCodes hid_value_to_keyboard_code(uint8_t *buf,
+                                                uint32_t len,
+                                                uint32_t index,
+                                                KeyboardModifierState modifier_state) {
+  uint8_t hid_value = (len > (KEY_START_INDEX + index)) ? buf[KEY_START_INDEX + index] : 0;
+  KeyboardCodes key = (hid_value < sizeof(keycode_table)) ? keycode_table[hid_value] : NoKey;
+
+  // Handle Pause/Break key combination
+  if (key == Pause && (modifier_state & (ModLeftCtrl | ModRightCtrl))) {
+    key = Break;
+  }
+
+  return key;
+}
+
 HIDKeyboardController::HIDKeyboardController(HID *driver) : driver(driver) {
   driver->SetReportParser(0, this);
   modifier_state = ModNone;
   led_state = KbLedNone;
-  memset(prev_state, NoKey, KEYBOARD_KRO);
+  memset(prev_state, NoKey, sizeof(prev_state));
 }
 
 bool HIDKeyboardController::is_connected() { return driver->isReady(); }
@@ -283,15 +300,19 @@ void HIDKeyboardController::set_led_state(KeyboardLeds new_state) {
   usb_data_sent(send_report_buffer, 1);
 }
 
-void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */, uint32_t len,
+void HIDKeyboardController::Parse(HID * /* hid */,
+                                  uint32_t /* is_rpt_id */,
+                                  uint32_t len,
                                   uint8_t *buf) {
   KeyboardAction kb_action;
+  KeyboardCodes key_pressed;
+  KeyboardCodes key_pressed_prev;
+  KeyboardModifierState old_modifier_state = modifier_state;
 
   usb_data_received(buf, (uint8_t)len);
 
   // handle modifier keys
   if (len > 0) {
-    KeyboardModifierState old_modifier_state = modifier_state;
     modifier_state = static_cast<KeyboardModifierState>(buf[0]);
 
     if ((old_modifier_state & ModLeftCtrl) != (modifier_state & ModLeftCtrl)) {
@@ -336,47 +357,53 @@ void HIDKeyboardController::Parse(HID * /* hid */, uint32_t /* is_rpt_id */, uin
     }
   }
 
-  // handle keys
-  for (uint32_t i = 0; i < KEYBOARD_KRO; i++) {
-    bool down = (len > 2 + i) && (buf[2 + i] > 0);
-    bool up = prev_state[i] != NoKey;
-
-    for (uint32_t j = 0; j < KEYBOARD_KRO; j++) {
-      if ((len > 2 + i) && (buf[2 + i] == prev_state[j])) down = false;
-      if ((len > 2 + j) && (buf[2 + j] == prev_state[i])) up = false;
-    }
-
-    if (down) {
-      KeyboardCodes key = keycode_table[buf[2 + i]];
-      // handle Pause / Break
-      if ((key == Pause) && (modifier_state | (ModLeftCtrl | ModRightCtrl))) {
-        key = Break;
+  for (uint32_t idx = 0; idx < sizeof(prev_state); idx++) {
+    // Detect if a key was released (BREAK)
+    key_pressed_prev = prev_state[idx];
+    if (key_pressed_prev != NoKey) {
+      // Ignore if still pressed
+      for (uint32_t idx_now = 0; idx_now < sizeof(prev_state); idx_now++) {
+        key_pressed = hid_value_to_keyboard_code(buf, len, idx_now, modifier_state);
+        if (key_pressed_prev == key_pressed) {
+          key_pressed_prev = NoKey;
+        }
       }
-      // enqueue MAKE
-      if (key != NoKey) {
-        kb_action.code = key;
-        kb_action.type = KbActionMake;
+
+      // No BREAK code for "Break" key
+      if (key_pressed_prev == Break) {
+        key_pressed_prev = NoKey;
+      }
+
+      // Enqueue BREAK
+      if (key_pressed_prev != NoKey) {
+        kb_action.code = key_pressed_prev;
+        kb_action.type = KbActionBreak;
         key_buffer.enq(kb_action);
       }
     }
 
-    if (up) {
-      KeyboardCodes key = keycode_table[prev_state[i]];
-      // enqueue BREAK
-      if (key != NoKey) {
-        kb_action.code = key;
-        kb_action.type = KbActionBreak;
+    // Detect new key presses (MAKE actions)
+    key_pressed = hid_value_to_keyboard_code(buf, len, idx, modifier_state);
+    if (key_pressed != NoKey) {
+      // Ignore if still pressed
+      for (uint32_t idx_prev = 0; idx_prev < sizeof(prev_state); idx_prev++) {
+        key_pressed_prev = prev_state[idx_prev];
+        if (key_pressed == key_pressed_prev) {
+          key_pressed = NoKey;
+        }
+      }
+
+      // Enqueue MAKE
+      if (key_pressed != NoKey) {
+        kb_action.code = key_pressed;
+        kb_action.type = KbActionMake;
         key_buffer.enq(kb_action);
       }
     }
   }
 
-  // update prev. state
-  for (uint32_t i = 0; i < KEYBOARD_KRO; i++) {
-    // ignore overrun
-    if (len > 2 + i) {
-      prev_state[i] = buf[2 + i];
-    } else
-      prev_state[i] = NoKey;
+  // Update the previous state with the current buffer
+  for (uint32_t idx = 0; idx < sizeof(prev_state); idx++) {
+    prev_state[idx] = hid_value_to_keyboard_code(buf, len, idx, modifier_state);
   }
 };
