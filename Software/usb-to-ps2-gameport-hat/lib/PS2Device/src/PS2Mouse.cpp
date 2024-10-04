@@ -1,5 +1,22 @@
 #include "PS2Mouse.h"
 
+#define PS_MOUSE_CMD_RESET (0xFF)
+#define PS_MOUSE_CMD_RESEND (0xFE)
+#define PS_MOUSE_CMD_SET_DEFAULTS (0xF6)
+#define PS_MOUSE_CMD_DISABLE_DATA_REPORTING (0xF5)
+#define PS_MOUSE_CMD_ENABLE_DATA_REPORTING (0xF4)
+#define PS_MOUSE_CMD_SET_SAMPLE_RATE (0xF3)
+#define PS_MOUSE_CMD_GET_DEVICE_ID (0xF2)
+#define PS_MOUSE_CMD_SET_REMOTE_MODE (0xF0)
+#define PS_MOUSE_CMD_WRAP_MODE (0xEE)
+#define PS_MOUSE_CMD_RESET_WRAP_MODE (0xEC)
+#define PS_MOUSE_CMD_READ_DATA (0xEB)
+#define PS_MOUSE_CMD_SET_STREAM_MODE (0xEA)
+#define PS_MOUSE_CMD_STATUS_REQUEST (0xE9)
+#define PS_MOUSE_CMD_SET_RESOLUTION (0xE8)
+#define PS_MOUSE_CMD_SET_SCALING_2_TO_1 (0xE7)
+#define PS_MOUSE_CMD_SET_SCALING_1_TO_1 (0xE6)
+
 PS2Mouse::PS2Mouse(PS2Port* port) : PS2Device(port) { set_defaults(); }
 
 uint8_t PS2Mouse::get_device_id() { return device_id; }
@@ -44,7 +61,7 @@ void PS2Mouse::update_state(MouseState const* const new_state) {
   state.d_y = (new_state->d_y < 0) ? -d_y_scaled : d_y_scaled;
   state.d_wheel = new_state->d_wheel;
   memcpy(state.buttons, new_state->buttons, MouseState::NUM_BUTTONS);
-  state_changed = true;
+  state_changed = new_state->changed;
 }
 
 void PS2Mouse::task() {
@@ -106,15 +123,15 @@ void PS2Mouse::task() {
 void PS2Mouse::handle_active_command(uint8_t data_byte) {
   switch (active_command) {
     // Wrap Mode
-    case (0xEE):
+    case (PS_MOUSE_CMD_WRAP_MODE):
       switch (data_byte) {
         // Reset
-        case 0xFF:
+        case PS_MOUSE_CMD_RESET:
           reset(true);
           active_command = 0;
           break;
         // Reset Wrap Mode
-        case 0xEC:
+        case PS_MOUSE_CMD_RESET_WRAP_MODE:
           send_toHost(&ACK_CODE, 1);
           active_command = 0;
           break;
@@ -125,10 +142,10 @@ void PS2Mouse::handle_active_command(uint8_t data_byte) {
       }
       break;
     // Set resolution
-    case (0xE8):
+    case (PS_MOUSE_CMD_SET_RESOLUTION):
       switch (data_byte) {
         // Reset
-        case 0xFF:
+        case PS_MOUSE_CMD_RESET:
           reset(true);
           active_command = 0;
           break;
@@ -141,10 +158,10 @@ void PS2Mouse::handle_active_command(uint8_t data_byte) {
       }
       break;
     // Set sample rate
-    case (0xF3):
+    case (PS_MOUSE_CMD_SET_SAMPLE_RATE):
       switch (data_byte) {
         // Reset
-        case 0xFF:
+        case PS_MOUSE_CMD_RESET:
           reset(true);
           active_command = 0;
           break;
@@ -183,79 +200,84 @@ void PS2Mouse::handle_new_command(uint8_t data_byte) {
   uint8_t packet[5];  // prepare packet buffer
   uint8_t packet_len;
 
+  // Reset sample rate buffer
+  if (data_byte != PS_MOUSE_CMD_SET_SAMPLE_RATE) {
+    sample_rate_history.clear();
+  }
+
   switch (data_byte) {
     // Reset
-    case 0xFF:
+    case PS_MOUSE_CMD_RESET:
       reset(true);
       break;
     // Resend
-    case 0xFE:
+    case PS_MOUSE_CMD_RESEND:
       resend();
       break;
     // Set defaults
-    case 0xF6:
+    case PS_MOUSE_CMD_SET_DEFAULTS:
       set_defaults();
       send_toHost(&ACK_CODE, 1);
       break;
     // Get Device ID
-    case 0xF2:
+    case PS_MOUSE_CMD_GET_DEVICE_ID:
       packet[0] = ACK_CODE;
       packet[1] = device_id;
       send_toHost(packet, 2);
       break;
     // Set Stream Mode
-    case 0xEA:
+    case PS_MOUSE_CMD_SET_STREAM_MODE:
       streaming_mode = true;
       send_toHost(&ACK_CODE, 1);
       break;
     // Set Remote Mode
-    case 0xF0:
+    case PS_MOUSE_CMD_SET_REMOTE_MODE:
       streaming_mode = false;
       send_toHost(&ACK_CODE, 1);
       break;
     // Set Wrap Mode
-    case 0xEE:
+    case PS_MOUSE_CMD_WRAP_MODE:
       active_command = data_byte;
       send_toHost(&ACK_CODE, 1);
       break;
     // Set scaling 1:1
-    case 0xE6:
+    case PS_MOUSE_CMD_SET_SCALING_1_TO_1:
       scaling_2x1 = false;
       send_toHost(&ACK_CODE, 1);
       break;
     // Set scaling 2:1
-    case 0xE7:
+    case PS_MOUSE_CMD_SET_SCALING_2_TO_1:
       scaling_2x1 = true;
       send_toHost(&ACK_CODE, 1);
       break;
     // Set resolution
-    case 0xE8:
+    case PS_MOUSE_CMD_SET_RESOLUTION:
       active_command = data_byte;
       send_toHost(&ACK_CODE, 1);
       break;
     // Set sample rate
-    case 0xF3:
+    case PS_MOUSE_CMD_SET_SAMPLE_RATE:
       active_command = data_byte;
       send_toHost(&ACK_CODE, 1);
       break;
     // Enable Data Reporting
-    case 0xF4:
+    case PS_MOUSE_CMD_ENABLE_DATA_REPORTING:
       data_reporting = true;
       send_toHost(&ACK_CODE, 1);
       break;
     // Disable Data Reporting
-    case 0xF5:
+    case PS_MOUSE_CMD_DISABLE_DATA_REPORTING:
       data_reporting = false;
       send_toHost(&ACK_CODE, 1);
       break;
     // Status request
-    case 0xE9:
+    case PS_MOUSE_CMD_STATUS_REQUEST:
       packet[0] = ACK_CODE;
       packet_len = build_status_packet(&packet[1]);
       send_toHost(packet, packet_len + 1);
       break;
     // Read Data
-    case 0xEB:
+    case PS_MOUSE_CMD_READ_DATA:
       packet[0] = ACK_CODE;
       packet_len = build_movement_packet(false, &packet[1]);
       send_toHost(packet, packet_len + 1);
@@ -296,8 +318,8 @@ uint8_t PS2Mouse::build_movement_packet(boolean use_2x1_scaling, uint8_t* packet
   packet[1] = (uint8_t)(d_x & 0xFF);
   packet[2] = (uint8_t)(d_y & 0xFF);
 
-  if (abs(d_x) > UINT8_MAX) packet[0] |= (1 << 7);
-  if (abs(d_y) > UINT8_MAX) packet[0] |= (1 << 6);
+  if (abs(d_y) > UINT8_MAX) packet[0] |= (1 << 7);
+  if (abs(d_x) > UINT8_MAX) packet[0] |= (1 << 6);
   if (d_y & 0x100) packet[0] |= (1 << 5);
   if (d_x & 0x100) packet[0] |= (1 << 4);
   if (state.buttons[2] > 0) packet[0] |= (1 << 2);
